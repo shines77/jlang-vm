@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src\lang">
+      <UniqueIdentifier>{fcad0663-908d-42ff-b92f-70fc766d767c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\support">
+      <UniqueIdentifier>{f32a6b0c-ea08-4726-804c-235f77bb42d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\basic">
+      <UniqueIdentifier>{262a7da6-03cb-4046-9e5e-f8dfa10d6e71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\system">
+      <UniqueIdentifier>{f5cbdc5a-ae23-4bc2-afc4-7a62ab40414f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test">
+      <UniqueIdentifier>{77c25ad7-90ff-4a79-97a1-47596e243133}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\vm">
+      <UniqueIdentifier>{32f791e2-4437-44c5-8ae8-d47f38d540c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\NonCopyable.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\coredef.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\stddef.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\ValueType.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\support\StopWatch.h">
+      <Filter>src\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\support\StringUtils.h">
+      <Filter>src\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\system\System.h">
+      <Filter>src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\test\Assert.h">
+      <Filter>src\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\jlang.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v1.h">
+      <Filter>src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v2.h">
+      <Filter>src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\InterpreterCommon.h">
+      <Filter>src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v3.h">
+      <Filter>src\vm</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">
+      <Filter>src\lang</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
