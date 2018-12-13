@@ -2,7 +2,7 @@
 
 A fast virtual machine written by C++.
 
-## 说明
+## 简介
 
 一个还在测试中的用 `C++` 编写的简单虚拟机 (虚拟 CPU)。工程暂时只支持 `VS 2015` 及更高。`Linux` 版稍后再整理，目前只能在 `Windows` 上编译。
 
