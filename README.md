@@ -4,11 +4,11 @@ A fast virtual machine written by C++.
 
 ## 说明
 
-一个还在测试中的用 `C++` 编写的简单虚拟机 (虚拟 CPU)。工程暂时只支持 `VS 2015` 及更高。
+一个还在测试中的用 `C++` 编写的简单虚拟机 (虚拟 CPU)。工程暂时只支持 `VS 2015` 及更高。`Linux` 版稍后再整理，目前只能在 `Windows` 上编译。
 
 ## 测试数据
 
-1. `jlang-vm` 最快的 `v3` 版本计算 fibonacci(40) 用时 `3750` 毫秒；
+1. `jlang-vm (64bit)` 最快的 `v3` 版本计算 fibonacci(40) 用时 `3750` 毫秒；
 
 2. `Java 1.8 (64bit)` 关掉 `JIT`，计算 fibonacci(40) 用时 `4500` 毫秒；
 
