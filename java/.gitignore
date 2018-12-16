@@ -1,0 +1,21 @@
+### These files should get ignored no matter where they appear.
+
+# Ignore operating system files
+.#*
+*#
+\#*\#
+*~
+*.sw?
+*.DS_Store
+
+# Ignore thumbnails and icon cache files created by Windows
+Thumbs.db
+ehthumbs.db
+
+# Ignore some files on Windows
+.DS_Store*
+Icon?
+
+# Ignore Eclipse workspace folder files
+/.metadata
+/.recommenders
