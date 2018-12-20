@@ -175,7 +175,7 @@ void test_Interpreter_v2()
 void test_Interpreter_v3()
 {
     printf("--------------------------------------------\n");
-    printf("  test_Interpreter_3()\n");
+    printf("  test_Interpreter_v3()\n");
     printf("--------------------------------------------\n\n");
 
     uint32_t n;
