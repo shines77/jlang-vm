@@ -634,17 +634,29 @@ public:
     }
 
     void allocate(size_t imageSize) {
+#if defined(_WIN32)
         if (data_) {
             _aligned_free(data_);
         }
         // Binary image first address must be aligned for 256 bytes.
         data_ = (void *)_aligned_malloc(imageSize, 256);
+#else
+        if (data_) {
+            free(data_);
+        }
+        // Binary image first address must be aligned for 256 bytes.
+        int ret = posix_memalign((void **)&data_, 256, imageSize);
+#endif // _WIN32
         size_ = imageSize;
     }
 
     void deallocate() {
         if (data_) {
+#if defined(_WIN32)
             _aligned_free(data_);
+#else
+            free(data_);
+#endif
             data_ = nullptr;
         }
         size_ = 0;
@@ -2475,10 +2487,18 @@ public:
     unsigned char * last() const { return sp_last_; }
 
     inline void create(size_type capacity) {
+#if defined(_WIN32)
         if (sp_first_) {
             _aligned_free(sp_first_);
         }
         sp_first_ = (unsigned char *)_aligned_malloc(capacity, 64);
+#else
+        if (sp_first_) {
+            free(sp_first_);
+        }
+        int ret = posix_memalign((void **)&sp_first_, 64, capacity);
+#endif // _WIN32
+
 #ifndef NDEBUG
         memset((void *)sp_first_, 0, sizeof(char) * capacity);
 #endif

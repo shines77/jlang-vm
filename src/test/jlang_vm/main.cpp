@@ -115,7 +115,8 @@ void test_Interpreter_v1()
     if (ec >= 0) {
         sw.stop();
         if (retVal.isValid()) {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
             printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
 #else
             printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
@@ -158,7 +159,8 @@ void test_Interpreter_v2()
     if (ec >= 0) {
         sw.stop();
         if (retVal.isValid()) {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
             printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
 #else
             printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
@@ -201,7 +203,8 @@ void test_Interpreter_v3()
     if (ec >= 0) {
         sw.stop();
         if (retVal.isValid()) {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
             printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
 #else
             printf("  fibonacci(%u) = %u\n", n, retVal.getValue());

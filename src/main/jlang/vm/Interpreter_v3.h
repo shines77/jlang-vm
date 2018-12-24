@@ -586,14 +586,14 @@ public:
         return (index + FRAME_STACK_SIZEOF + 1);
     }
 
-    __forceinline void push_callstack(vmPointer & sp, vmPointer & fp, unsigned char * returnFP) {
+    JM_FORCEINLINE void push_callstack(vmPointer & sp, vmPointer & fp, unsigned char * returnFP) {
         sp.writePointer(fp.value());
         sp.writePointer(returnFP);
         fp.set(sp.value());
         assert(!sp_isOverflow(sp));
     }
 
-    __forceinline unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp) {
         sp.backPointer();
         unsigned char * returnIP = sp.getPointer();
         sp.backPointer();
@@ -602,14 +602,14 @@ public:
         return returnIP;
     }
 
-    __forceinline unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp, uint16_t localSize) {
+    JM_FORCEINLINE unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp, uint16_t localSize) {
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
         return pop_callstack(sp, fp);
     }
 
     template <typename U>
-    __forceinline static bool getCondition(U v1, U v2, uint8_t CmpType) {
+    JM_FORCEINLINE static bool getCondition(U v1, U v2, uint8_t CmpType) {
         switch (CmpType) {
         case OpCode::jz:
             return (v1 == 0 && v2 == 0);
@@ -655,7 +655,7 @@ public:
         }
     }
 
-    __forceinline static void skipCondJmp(vmPointer & ip, unsigned char jmpType) {
+    JM_FORCEINLINE static void skipCondJmp(vmPointer & ip, unsigned char jmpType) {
         switch (jmpType) {
         case OpCode::jmp_near:
         case OpCode::jl_near:
@@ -678,7 +678,7 @@ public:
         }
     }
 
-    __forceinline void op_error(vmPointer & ip) {
+    JM_FORCEINLINE void op_error(vmPointer & ip) {
         Debug.print("%08X:  error\n", getIpOffset(ip));
         ip.next();
     }
@@ -686,7 +686,7 @@ public:
     //
     // push arg0 (int32)
     //
-    __forceinline void op_push(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_push(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         int8_t index = ip.readValue<0, int8_t>();
         int32_t value = fp.getStackArgValue(index);
         sp.writeInt32(value);
@@ -699,7 +699,7 @@ public:
     //
     // push 0x00000008 (int32)
     //
-    __forceinline void op_push_i32(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i32(vmPointer & ip, vmPointer & sp) {
         int32_t value = ip.readValue<0, int32_t>();
         sp.writeInt32(value);
         Debug.print("%08X:  push_i32 0x%08X (int32)\n", getIpOffset(ip), value);
@@ -709,7 +709,7 @@ public:
     //
     // push 0x00000000 00000008 (int64)
     //
-    __forceinline void op_push_i64(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i64(vmPointer & ip, vmPointer & sp) {
         int64_t value = ip.readValue<0, int64_t>();
         sp.writeInt64(value);
         Debug.print("%08X:  push_i64 0x%016X (int64)\n", getIpOffset(ip), value);
@@ -719,7 +719,7 @@ public:
     //
     // push_0 (int32)
     //
-    __forceinline void op_push_i32_0(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i32_0(vmPointer & ip, vmPointer & sp) {
         int32_t value = 0;
         sp.writeInt32(value);
         Debug.print("%08X:  push_i32_0 (int32)\n", getIpOffset(ip));
@@ -729,7 +729,7 @@ public:
     //
     // push_0 (int64)
     //
-    __forceinline void op_push_i64_0(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i64_0(vmPointer & ip, vmPointer & sp) {
         int64_t value = 0;
         sp.writeInt64(value);
         Debug.print("%08X:  push_i64_0 (int64)\n", getIpOffset(ip));
@@ -739,7 +739,7 @@ public:
     //
     // pop uint32
     //
-    __forceinline void op_pop(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop(vmPointer & ip, vmPointer & sp) {
         sp.backUInt32();
         uint32_t value = sp.readUInt32();
         Debug.print("%08X:  pop  (0x%08X)\n", getIpOffset(ip), value);
@@ -749,7 +749,7 @@ public:
     //
     // pop int32
     //
-    __forceinline void op_pop_i32(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop_i32(vmPointer & ip, vmPointer & sp) {
         sp.backInt32();
         int32_t value = sp.readInt32();
         Debug.print("%08X:  pop_i32  (0x%08X)\n", getIpOffset(ip), value);
@@ -759,7 +759,7 @@ public:
     //
     // pop int64
     //
-    __forceinline void op_pop_i64(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop_i64(vmPointer & ip, vmPointer & sp) {
         sp.backInt64();
         int64_t value = sp.readInt64();
         Debug.print("%08X:  pop_i64  (0x%016X)\n", getIpOffset(ip), value);
@@ -769,7 +769,7 @@ public:
     //
     // add_sp 16
     //
-    __forceinline void op_add_sp(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_add_sp(vmPointer & ip, vmPointer & sp) {
         uint8_t localSize = ip.readValue<0, uint8_t>();
         sp.next(localSize);
 
@@ -780,7 +780,7 @@ public:
     //
     // add_sp_4
     //
-    __forceinline void op_add_sp_4(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_add_sp_4(vmPointer & ip, vmPointer & sp) {
         sp.next(sizeof(uint32_t));
         Debug.print("%08X:  add_sp_4\n", getIpOffset(ip));
         ip.next();
@@ -789,7 +789,7 @@ public:
     //
     // load arg0, 0x00000006
     //
-    __forceinline void op_load(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_load(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
         fp.setStackArgValue(index, value);
@@ -801,7 +801,7 @@ public:
     //
     // load eax, 0x00000006
     //
-    __forceinline void op_load_eax(vmPointer & ip, vmPointer & sp, Register & regs) {
+    JM_FORCEINLINE void op_load_eax(vmPointer & ip, vmPointer & sp, Register & regs) {
         uint32_t value = ip.readValue<0, uint32_t>();
         regs.eax.u32 = value;
         Debug.print("%08X:  load eax, 0x%08X\n", getIpOffset(ip), value);
@@ -811,7 +811,7 @@ public:
     //
     // move arg0, arg1
     //
-    __forceinline void op_move(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_move(vmPointer & ip, vmPointer & sp) {
         Debug.print("%08X:  move args[%d], args[%d]\n", getIpOffset(ip), 0, 1);
         ip.next();
     }
@@ -819,7 +819,7 @@ public:
     //
     // move eax, arg1
     //
-    __forceinline void op_move_eax(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_move_eax(vmPointer & ip, vmPointer & sp) {
         Debug.print("%08X:  move eax, args[%d]\n", getIpOffset(ip), 0);
         ip.next();
     }
@@ -827,7 +827,7 @@ public:
     //
     // copy arg0, eax
     //
-    __forceinline void op_copy_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_copy_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
         fp.setStackArgValue(index, value);
@@ -836,7 +836,7 @@ public:
         ip.next(1 + sizeof(int8_t));
     }
 
-    __forceinline void op_cmp(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_cmp(vmPointer & ip, vmPointer & sp) {
         Debug.print("%08X:  cmp\n", getIpOffset(ip));
         ip.next();
     }
@@ -844,7 +844,7 @@ public:
     //
     // cmp arg0, arg1 (int32)
     //
-    __forceinline bool op_cmp_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
@@ -869,7 +869,7 @@ public:
     //
     // cmp arg0, arg1 (uint32)
     //
-    __forceinline bool op_cmp_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
@@ -894,7 +894,7 @@ public:
     //
     // cmp arg0, 0x00000008 (int32)
     //
-    __forceinline bool op_cmp_imm_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         int32_t value1 = fp.getStackIArgValue(index);
@@ -917,7 +917,7 @@ public:
     //
     // cmp arg0, 0x00000008 (uint32)
     //
-    __forceinline bool op_cmp_imm_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value1 = fp.getStackArgValue(index);
@@ -937,7 +937,7 @@ public:
         return condition;
     }
 
-    __forceinline void op_jl(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl(vmPointer & ip) {
         Debug.print("%08X:  jl\n", getIpOffset(ip));
         ip.next();
     }
@@ -945,7 +945,7 @@ public:
     //
     // jl_near 0x06
     //
-    __forceinline void op_jl_near(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_near(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -962,7 +962,7 @@ public:
     //
     // jl_short 0x16, 0x00
     //
-    __forceinline void op_jl_short(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_short(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -979,7 +979,7 @@ public:
     //
     // jl_long 0x29, 0x00, 0x00, 0x00
     //
-    __forceinline void op_jl_long(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_long(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -996,7 +996,7 @@ public:
     //
     // jmp 0x00102030 (ptr32)
     //
-    __forceinline void op_jmp(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         uint32_t jmpEntry = ip.readValue<0, uint32_t>();
         ip.set(image_.getStart() + jmpEntry);
@@ -1006,7 +1006,7 @@ public:
     //
     // jmp_near 0x08
     //
-    __forceinline void op_jmp_near(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_near(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
         ip.next(1L + sizeof(int8_t) + jmpOffset);
@@ -1016,7 +1016,7 @@ public:
     //
     // jmp_short 0x08, 0x00
     //
-    __forceinline void op_jmp_short(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_short(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
         ip.next(1L + sizeof(int16_t) + jmpOffset);
@@ -1026,7 +1026,7 @@ public:
     //
     // jmp_long 0x18, 0x00, 0x00, 0x00
     //
-    __forceinline void op_jmp_long(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_long(vmPointer & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
         ip.next(1L + sizeof(int32_t) + jmpOffset);
@@ -1036,7 +1036,7 @@ public:
     //
     // call 0x00102030 (ptr32)
     //
-    __forceinline void op_call(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         uint32_t callEntry = ip.readValue<0, uint32_t>();
         ip.next(1 + sizeof(uint32_t));
@@ -1054,7 +1054,7 @@ public:
     //
     // call_near 0x08
     //
-    __forceinline void op_call_near(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_near(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t callOffset = ip.readValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
@@ -1072,7 +1072,7 @@ public:
     //
     // call_short 0x08, 0x00
     //
-    __forceinline void op_call_short(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_short(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.readValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
@@ -1090,7 +1090,7 @@ public:
     //
     // call_long 0x18, 0x00, 0x00, 0x00
     //
-    __forceinline void op_call_long(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_long(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.readValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
@@ -1109,7 +1109,7 @@ public:
     //
     // ret
     //
-    __forceinline bool op_ret(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         unsigned char * returnIP = pop_callstack(sp, fp);
         ip.set(returnIP);
@@ -1127,7 +1127,7 @@ public:
     //
     // ret_n_sm 0x08
     //
-    __forceinline bool op_ret_n_sm(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret_n_sm(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         uint8_t localSize = ip.readValue<0, uint8_t>();
         unsigned char * returnIP = pop_callstack(sp, fp, localSize);
@@ -1147,7 +1147,7 @@ public:
     //
     // ret_n 0x08, 0x00
     //
-    __forceinline bool op_ret_n(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret_n(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.readValue<0, uint16_t>();
         unsigned char * returnIP = pop_callstack(sp, fp, localSize);
@@ -1167,7 +1167,7 @@ public:
     //
     // ret_eax 0x00000001
     //
-    __forceinline bool op_ret_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t>();
         regs.eax.u32 = value;
@@ -1189,7 +1189,7 @@ public:
     //
     // ret_eax_n 0x08, 0x00, 0x00000001
     //
-    __forceinline bool op_ret_eax_n(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax_n(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.readValue<0, uint16_t>();
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
@@ -1213,7 +1213,7 @@ public:
     //
     // nop
     //
-    __forceinline void op_nop(vmPointer & ip) {
+    JM_FORCEINLINE void op_nop(vmPointer & ip) {
         Debug.print("%08X:  nop\n", getIpOffset(ip));
         ip.next();
     }
@@ -1221,7 +1221,7 @@ public:
     //
     // nop_n 0x08
     //
-    __forceinline void op_nop_n(vmPointer & ip) {
+    JM_FORCEINLINE void op_nop_n(vmPointer & ip) {
         uint8_t skip_n = ip.readValue<0, uint8_t>();
         Debug.print("%08X:  nop_n %u\n", getIpOffset(ip), (uint32_t)skip_n);
         ip.next(1 + sizeof(uint8_t) + skip_n);
@@ -1230,7 +1230,7 @@ public:
     //
     // inc arg0
     //
-    __forceinline void op_inc(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_inc(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = fp.getStackArgValue(index);
@@ -1245,7 +1245,7 @@ public:
     //
     // dec arg0
     //
-    __forceinline void op_dec(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_dec(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = fp.getStackArgValue(index);
@@ -1260,7 +1260,7 @@ public:
     //
     // add arg0, arg1
     //
-    __forceinline void op_add(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_add(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
@@ -1279,7 +1279,7 @@ public:
     //
     // add arg0, 0x00000006
     //
-    __forceinline void op_add_imm(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_add_imm(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
@@ -1296,7 +1296,7 @@ public:
     //
     // add eax, arg0
     //
-    __forceinline void op_add_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_add_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = fp.getStackArgValue(index);
@@ -1312,7 +1312,7 @@ public:
     //
     // add eax, 0x00000006
     //
-    __forceinline void op_add_eax_imm(vmPointer & ip, Register & regs) {
+    JM_FORCEINLINE void op_add_eax_imm(vmPointer & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t, uint32_t>();
 
@@ -1327,7 +1327,7 @@ public:
     //
     // sub arg0, arg1
     //
-    __forceinline void op_sub(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_sub(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
@@ -1345,7 +1345,7 @@ public:
     //
     // sub arg0, 0x00000006
     //
-    __forceinline void op_sub_imm(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_sub_imm(vmPointer & ip, vmPointer & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
@@ -1362,7 +1362,7 @@ public:
     //
     // sub eax, arg0
     //
-    __forceinline void op_sub_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_sub_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = fp.getStackArgValue(index);
@@ -1377,7 +1377,7 @@ public:
     //
     // add eax, 0x00000006
     //
-    __forceinline void op_sub_eax_imm(vmPointer & ip, Register & regs) {
+    JM_FORCEINLINE void op_sub_eax_imm(vmPointer & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t, uint32_t>();
 
@@ -1392,7 +1392,7 @@ public:
     //
     // Exit the program
     //
-    __forceinline void op_exit(vmPointer & ip, return_type & retValue) {
+    JM_FORCEINLINE void op_exit(vmPointer & ip, return_type & retValue) {
         Debug.print("%08X:  end\n\n", getIpOffset(ip));
         ip.next();
     }
@@ -1400,7 +1400,7 @@ public:
     //
     // Unknown opcode.
     //
-    __forceinline void op_unknown(vmPointer & ip, unsigned char opcode) {
+    JM_FORCEINLINE void op_unknown(vmPointer & ip, unsigned char opcode) {
         Debug.print("%08X:  Error: Unknown opcode: %u\n", getIpOffset(ip), (uint32_t)opcode);
         ip.next();
     }
