@@ -153,7 +153,7 @@
 
 #define JM_RESTRICT                         __restrict
 
-#elif defined(__GNUC__) || defined(__clang__) || defined(__MINGW32__) || || defined(__CYGWIN__) || defined(__linux__)
+#elif defined(__GNUC__) || defined(__clang__) || defined(__MINGW32__) || defined(__CYGWIN__) || defined(__linux__)
 
 #define JM_HAS_INLINE                       1
 
