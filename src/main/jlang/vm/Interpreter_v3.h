@@ -472,7 +472,7 @@ public:
 
     unsigned char * getIP() const { return ip_; }
     void setIP(void * ip) {
-        this->ip_ = (unsigned char *)fp;
+        this->ip_ = (unsigned char *)ip;
     }
 
     uint32_t getOffset() const { return (uint32_t)(ip_ - ip_start_); }
@@ -564,15 +564,15 @@ public:
     }
 
     unsigned char * getIP() const {
-        return ip.value();
+        return ip_.value();
     }
 
     unsigned char * getSP() const {
-        return sp.value();
+        return sp_.value();
     }
 
     unsigned char * getFP() const {
-        return fp.value();
+        return fp_.value();
     }
 
     uint32_t getIpOffset(vmPointer & ip) {

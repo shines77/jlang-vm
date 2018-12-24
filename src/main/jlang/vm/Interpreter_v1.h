@@ -14,6 +14,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#if !defined(_WIN32)
+#include <sys/types.h>
+#include <pthread.h>
+#endif
+
 #include <list>
 #include <memory>
 #include <atomic>
@@ -317,11 +322,23 @@ public:
     }
 };
 
+#if defined(_WIN32)
+
 typedef DWORD   ThreadId_t;
 typedef HANDLE  ThreadHandle_t;
 
 typedef DWORD   ProcessId_t;
 typedef HANDLE  ProcessHandle_t;
+
+#else
+
+typedef pid_t       ThreadId_t;
+typedef pthread_t   ThreadHandle_t;
+
+typedef pid_t       ProcessId_t;
+typedef pthread_t   ProcessHandle_t;
+
+#endif // _WIN32
 
 template <typename BasicType>
 class ExecutionEngine_v1;
@@ -366,11 +383,19 @@ public:
     }
 
     ThreadId_t getThreadId() const {
+#if defined(_WIN32)
         return ::GetCurrentThreadId();
+#else
+        return getpid();
+#endif
     }
 
     ThreadHandle_t getThreadHandle() const {
+#if defined(_WIN32)
         return ::GetCurrentThread();
+#else
+        return pthread_self();
+#endif
     }
 
     void setImageInfo(void * imageStart, size_t imageSize,
@@ -1104,11 +1129,19 @@ public:
     bool isMainThread() const { return true; }
 
     ProcessId_t getProcessId() const {
+#if defined(_WIN32)
         return ::GetCurrentProcessId();
+#else
+        return getpid();
+#endif
     }
 
     ProcessHandle_t getProcessHandle() const {
+#if defined(_WIN32)
         return ::GetCurrentProcess();
+#else
+        return pthread_self();
+#endif
     }
 
     vmThreadId create(size_type stackSize = kDefaultStackSize) {
