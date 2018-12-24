@@ -4,7 +4,61 @@ A fast virtual machine written by C++.
 
 ## 简介
 
-一个还在测试中的用 `C++` 编写的简单虚拟机 (虚拟 CPU)。工程暂时只支持 `VS 2015` 及更高。`Linux` 版稍后再整理，目前只能在 `Windows` 上编译。
+这是一个仍处于研究中的 `C++` 编写的虚拟机 (虚拟 `CPU`)。
+
+`Windows` 下的工程默认支持 `VS 2015` 及更高版本，如需创建比 `VS 2015` 更旧版本 `Visual Studio` 的工程，请自行使用 `CMake` 创建。项目已可以在 `Linux` 的 `GCC 4.8.4` 和 `GCC 6.4.0` 下测试，编译通过（2018年12月25日 更新）。
+
+## Linux下的编译
+
+1. 先切换到本仓库所在的根路径，例如：
+
+```shell
+cd /home/git/jlang_vm
+```
+
+2. 然后使用 `CMake` 生成 `makefile`，命令如下：
+
+```shell
+cmake -G "Unix Makefiles"
+```
+
+或者
+
+```shell
+cmake ./
+```
+
+3. 最后使用 `make` 命令编译工程：
+
+```shell
+make
+```
+
+## Java 版 Fibonacci
+
+1. 在 `Windows` 下编译并运行：
+
+    ```shell
+    cd .\java\Fibonacci
+    run.bat
+    ```
+
+2. 在 `Linux` 下编译并运行：
+
+    ```shell
+    cd ./java/Fibonacci
+    ./run.sh
+    ```
+
+    以上命令运行后的效果如下：
+
+    ```shell
+    Input a number (1-50): ? 40
+
+    fibonacci(40) = 102334155
+
+    elapsed time: 27154 ms.
+    ```
 
 ## 测试数据
 
