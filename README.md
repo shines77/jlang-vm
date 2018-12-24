@@ -6,9 +6,9 @@ A fast virtual machine written by C++.
 
 这是一个仍处于研究中的 `C++` 编写的虚拟机 (虚拟 `CPU`)。
 
-`Windows` 下的工程默认支持 `VS 2015` 及更高版本，如需创建比 `VS 2015` 更旧版本 `Visual Studio` 的工程，请自行使用 `CMake` 创建。项目已可以在 `Linux` 的 `GCC 4.8.4` 和 `GCC 6.4.0` 下测试，编译通过（2018年12月25日 更新）。
+`Windows` 下的工程默认支持 `VS 2015` 及更高版本，如需创建比 `VS 2015` 更旧版本的 `Visual Studio` 工程，请自行使用 `CMake` 创建。项目已在 `Linux` 的 `GCC 4.8.4` 和 `GCC 6.4.0` 下测试并编译通过（2018年12月25日 更新）。
 
-## Linux下的编译
+## 在 Linux 下编译
 
 1. 先切换到本仓库所在的根路径，例如：
 
