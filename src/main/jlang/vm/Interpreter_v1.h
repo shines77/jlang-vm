@@ -1034,7 +1034,7 @@ Execute_Finished:
 };
 
 template <typename BasicType>
-std::atomic<vmThreadId> vmThreadBase<BasicType>::thread_id_cnt = 0;
+std::atomic<vmThreadId> vmThreadBase<BasicType>::thread_id_cnt(0);
 
 template <typename BasicType = uintptr_t>
 class vmThread : public vmThreadBase<BasicType> {
