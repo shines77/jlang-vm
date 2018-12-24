@@ -113,8 +113,8 @@
 namespace jlang {
 
 #if !defined(_WIN32)
-typedef unsigned long   DWORD
-typedef void *          HANDLE
+typedef unsigned long   DWORD;
+typedef void *          HANDLE;
 #endif // !_WIN32
 
 class DebugOutput {
