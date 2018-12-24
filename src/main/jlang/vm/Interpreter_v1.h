@@ -10,6 +10,8 @@
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include <list>
@@ -1073,7 +1075,9 @@ public:
 
     void terminate(uint32_t exitCode) {
         this->destroy();
+#if defined(_WIN32)
         ::TerminateThread(getThreadHandle(), exitCode);
+#endif
     }
 };
 

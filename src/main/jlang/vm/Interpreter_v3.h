@@ -10,6 +10,7 @@
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
+#include <stddef.h>
 #include <assert.h>
 
 #include <list>

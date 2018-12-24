@@ -7,8 +7,11 @@
 #endif
 
 #include <stdint.h>
+#include <stddef.h>
 #include <assert.h>
+#include <string.h>
 
+#include <cstdint>
 #include <list>
 #include <memory>
 #include <atomic>
@@ -108,6 +111,11 @@
 //////////////////////////////////////////////////////////////
 
 namespace jlang {
+
+#if !defined(_WIN32)
+#define unsigned long   DWORD
+#define void *          HANDLE
+#endif // !_WIN32
 
 class DebugOutput {
 public:
@@ -868,7 +876,7 @@ public:
     }
 
     uint32_t getFPOffset() const { return (uint32_t)(fp_ - fp_start_); }
-    ptrdiff_t getFPOffset64() const { return (fp_ - fp_start_); }
+    ptrdiff_t getFPOffset64() const { return (ptrdiff_t)(fp_ - fp_start_); }
 
     unsigned char * getFPStart() const { return fp_start_; }
     unsigned char * getFPLimit() const { return fp_limit_; }
@@ -897,7 +905,7 @@ public:
         regs_[vmRegId::rfx].rax.u64 = ' rfx';
         regs_[vmRegId::rgx].rax.u64 = ' rgx';
         regs_[vmRegId::rhx].rax.u64 = ' rhx';
-#else
+#elif defined(_WIN32)
         regs_[vmRegId::esp].eax.u32 = ' rsp';
         regs_[vmRegId::ebp].eax.u32 = ' rbp';
         regs_[vmRegId::esi].eax.u32 = ' rsi';
@@ -1113,7 +1121,7 @@ public:
         *(uintptr_t *)fp_ = (uintptr_t)ptr;
     }
 
-    void setValue(uint32_t dateType, basic_type value) {
+    void setValue(uint32_t dataType, basic_type value) {
         switch (dataType) {
         case vmDataType::Int8:
             setInt8((int8_t)value);
@@ -1159,7 +1167,7 @@ public:
         }
     }
 
-    void setValue32(uint32_t dateType, uint32_t value) {
+    void setValue32(uint32_t dataType, uint32_t value) {
         switch (dataType) {
         case vmDataType::Int8:
             setInt8((int8_t)value);
@@ -1196,7 +1204,7 @@ public:
         }
     }
 
-    void setValue64(uint32_t dateType, uint64_t value) {
+    void setValue64(uint32_t dataType, uint64_t value) {
         switch (dataType) {
         case vmDataType::Int64:
             setInt64((int64_t)value);
@@ -2510,7 +2518,11 @@ public:
     inline void destroy() {
         sp_ = nullptr;
         if (sp_first_) {
+#if defined(_WIN32)
             _aligned_free(sp_first_);
+#else
+            free(sp_first_);
+#endif
             sp_first_ = nullptr;
         }
         sp_last_ = nullptr;
