@@ -256,7 +256,8 @@ static bool verifyRegType(uint32_t regType, uint32_t dataType) {
         return (regType == vmRegType::r64);
 
     case vmDataType::Pointer:
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         return (regType == vmRegType::r64);
 #else
         return (regType == vmRegType::r32);
@@ -656,7 +657,8 @@ public:
                             Integer value;
                             value.uval = frame_.getValue(dataType);
                             frame_.nextValue(dataType);
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                             if (dataType == vmDataType::Int64 || dataType == vmDataType::UInt64) {
                                 Debug.print("%08X:  cmp  [reg], [imm] (%u - 0x%016X)\n",
                                             offset, reg, value.uval);
@@ -742,7 +744,8 @@ JMP_START:
                                             offset, frame_.getFPOffset());
                                 break;
                             }
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                         case vmJumpType::Ptr64:
                             {
                                 // Get 64 byte absolute address.
@@ -800,7 +803,8 @@ JMP_START:
                                             offset, frame_.getFPOffset());
                                 break;
                             }
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                         case vmCallType::Ptr64:
                             {
                                 // Get 64 byte absolute address.

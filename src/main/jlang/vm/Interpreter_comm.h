@@ -102,7 +102,8 @@
 
 //////////////////////////////////////////////////////////////
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
 #define SKIP_JMP_TYPE   SKIP_JMP_TYPE64
 #else
 #define SKIP_JMP_TYPE   SKIP_JMP_TYPE32
@@ -176,7 +177,8 @@ struct Integer64 {
     };
 };
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
 typedef Integer64 Integer;
 #else
 typedef Integer32 Integer;
@@ -603,7 +605,8 @@ public:
     };
 };
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
 typedef Register64  Register;
 #else
 typedef Register32  Register;
@@ -1004,7 +1007,8 @@ public:
         case vmDataType::UInt32:
             return (basic_type)getUInt32();
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmDataType::Int64:
             return (basic_type)getInt64();
 
@@ -1075,7 +1079,8 @@ public:
         case vmRegType::r32:
             return (basic_type)getUInt32();
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)getUInt64();
 #endif
@@ -1147,7 +1152,8 @@ public:
             setUInt32((uint32_t)value);
             break;
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmDataType::Int64:
             setInt64((int64_t)value);
             break;
@@ -1400,7 +1406,8 @@ public:
         return regs_[regIndex].eax.u32;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t getRegValue64(uint64_t regIndex) {
         assert(regIndex >= 0 && regIndex < kMaxRegs);
         return regs_[regIndex].rax.u64;
@@ -1421,7 +1428,8 @@ public:
         case vmRegType::r32:
             return getRegValue32(regIndex);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return getRegValue64(regIndex);
 #endif
@@ -1453,7 +1461,8 @@ public:
         regs_[regIndex].eax.u32 = value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     void setRegValue64(uint32_t regIndex, uint64_t value) {
         regs_[regIndex].rax.u64 = value;
     }
@@ -1473,7 +1482,8 @@ public:
         case vmRegType::r32:
             setRegValue32((uint32_t)value);
             break;
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             setRegValue64((uint64_t)value);
             break;
@@ -1519,7 +1529,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     int64_t loadRegValue64(uint32_t regIndex) {
         int64_t value = getInt64();
         regs_[regIndex].rax.i64 = value;
@@ -1542,7 +1553,8 @@ public:
         case vmRegType::r32:
             return (basic_type)loadRegValue32(regIndex);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)loadRegValue64(regIndex);
 #endif
@@ -1583,7 +1595,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t moveRegValue64(uint32_t regIndex1, uint32_t regIndex2) {
         uint64_t value = getRegValue64(regIndex2);
         setRegValue64(regIndex1, value);
@@ -1606,7 +1619,8 @@ public:
         case vmRegType::r32:
             return (basic_type)moveRegValue32(regIndex1, regIndex2);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)moveRegValue64(regIndex1, regIndex2);
 #endif
@@ -1653,7 +1667,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t incRegValue64(uint32_t regIndex) {
         uint64_t value = getRegValue64(regIndex);
         value++;
@@ -1676,7 +1691,8 @@ public:
         case vmRegType::r32:
             return (basic_type)incRegValue32(regIndex);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)incRegValue64(regIndex);
 #endif
@@ -1721,7 +1737,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t decRegValue64(uint32_t regIndex) {
         uint64_t value = getRegValue64(regIndex);
         value--;
@@ -1744,7 +1761,8 @@ public:
         case vmRegType::r32:
             return (basic_type)decRegValue32(regIndex);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)decRegValue64(regIndex);
 #endif
@@ -1793,7 +1811,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t addRegValue64(uint32_t regIndex1, uint32_t regIndex2) {
         uint64_t value2 = getRegValue64(regIndex2);
         uint64_t value1 = getRegValue64(regIndex1);
@@ -1818,7 +1837,8 @@ public:
         case vmRegType::r32:
             return (basic_type)addRegValue32(regIndex1, regIndex2);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)addRegValue64(regIndex1, regIndex2);
 #endif
@@ -1865,7 +1885,8 @@ public:
         return newValue;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t addRegValue64_ri(uint32_t regIndex, uint64_t value) {
         uint64_t oldValue = getRegValue64(regIndex);
         uint64_t newValue = oldValue + value;
@@ -1889,7 +1910,8 @@ public:
         case vmRegType::r32:
             return (basic_type)addRegValue32_ri(regIndex, (uint32_t)value);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)addRegValue64_ri(regIndex, (uint64_t)value);
 #endif
@@ -1938,7 +1960,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t subRegValue64(uint32_t regIndex1, uint32_t regIndex2) {
         uint64_t value2 = getRegValue64(regIndex2);
         uint64_t value1 = getRegValue64(regIndex1);
@@ -1963,7 +1986,8 @@ public:
         case vmRegType::r32:
             return (basic_type)subRegValue32(regIndex1, regIndex2);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)subRegValue64(regIndex1, regIndex2);
 #endif
@@ -2010,7 +2034,8 @@ public:
         return newValue;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t subRegValue64_ri(uint32_t regIndex, uint64_t value) {
         uint64_t oldValue = getRegValue64(regIndex);
         uint64_t newValue = oldValue - value;
@@ -2034,7 +2059,8 @@ public:
         case vmRegType::r32:
             return (basic_type)subRegValue32_ri(regIndex, (uint32_t)value);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)subRegValue64_ri(regIndex, (uint64_t)value);
 #endif
@@ -2083,7 +2109,8 @@ public:
         return value;
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     uint64_t mulRegValue64(uint32_t regIndex1, uint32_t regIndex2) {
         uint64_t value2 = getRegValue64(regIndex2);
         uint64_t value1 = getRegValue64(regIndex1);
@@ -2108,7 +2135,8 @@ public:
         case vmRegType::r32:
             return (basic_type)mulRegValue32(regIndex1, regIndex2);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             return (basic_type)mulRegValue64(regIndex1, regIndex2);
 #endif
@@ -2172,7 +2200,8 @@ public:
         unsigned char * returnFP = callFP + offset;
         pushCallStack(returnFP);
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         void * newFP = (void *)(uint64_t)callEntry;
 #else
         void * newFP = (void *)callEntry;
@@ -2182,7 +2211,8 @@ public:
         setFP(newFP);
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     void callPtr64(unsigned char * callFP, size_t offset,
                    uint64_t callEntry) {
         unsigned char * returnFP = callFP + offset;
@@ -2217,7 +2247,8 @@ public:
     }
 
     void jumpPtr32(unsigned char * baseFP, uint32_t address) {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         void * jumpFP = (void *)(uint64_t)address;
 #else
         void * jumpFP = (void *)address;
@@ -2225,7 +2256,8 @@ public:
         setFP(jumpFP);
     }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     void jumpPtr64(unsigned char * baseFP, uint64_t address) {
         void * jumpFP = (void *)address;
         setFP(jumpFP);
@@ -2313,7 +2345,8 @@ public:
                 return vmFrame::getCondition<uint32_t>(v1, v2, condType);
             }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmDataType::Int64:
             {
                 int64_t v1 = regs_[regIndex1].rax.i64;
@@ -2331,7 +2364,8 @@ public:
 
         case vmDataType::Pointer:
             {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                 void * v1 = (void *)regs_[regIndex1].rax.u64;
                 void * v2 = (void *)regs_[regIndex2].rax.u64;
                 return vmFrame::getCondition<void *>(v1, v2, condType);
@@ -2394,7 +2428,8 @@ public:
                 return vmFrame::getCondition<uint32_t>(v1, v2, condType);
             }
 
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmDataType::Int64:
             {
                 int64_t v1 = regs_[regIndex].rax.i64;
@@ -2411,7 +2446,8 @@ public:
 #endif
         case vmDataType::Pointer:
             {
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                 void * v1 = (void *)regs_[regIndex].rax.u64;
                 void * v2 = (void *)immValue;
                 return vmFrame::getCondition<void *>(v1, v2, condType);
@@ -2736,7 +2772,8 @@ public:
                 value = (basic_type)value32;
                 break;
             }
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             {
                 uint64_t value64 = frame_->getRegValue64(regIndex);
@@ -2790,7 +2827,8 @@ public:
                 value = (basic_type)value32;
                 break;
             }
-#if defined(_WIN64)
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
         case vmRegType::r64:
             {
                 backUInt64();
