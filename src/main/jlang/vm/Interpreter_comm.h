@@ -2854,6 +2854,70 @@ public:
     ~vmHeap() {}
 };
 
+template <typename BasicType = uintptr_t>
+class vmReturn {
+public:
+    typedef BasicType basic_type;
+
+    enum DataType {
+        Basic,
+        Float,
+        Double,
+        Pointer,
+        Struct,
+        Last
+    };
+
+private:
+    basic_type  retValue_;
+    uint32_t    dataType_;
+    uint32_t    dataLen_;
+
+public:
+    vmReturn() : retValue_(0), dataType_(DataType::Basic), dataLen_(0) {}
+    ~vmReturn() {}
+
+    bool isValid() const {
+        return (dataType_ >= DataType::Basic && dataType_ <= DataType::Struct);
+    }
+
+    basic_type getValue() const { return retValue_; }
+    void setValue(basic_type value) { retValue_ = value; }
+
+    uint32_t getDataType() const { return dataType_; }
+    uint32_t getDataLength() const { return dataLen_; }
+
+    void setDataType(uint32_t dataType, uint32_t dataLen = 0) {
+        dataType_ = dataType;
+        switch (dataType) {
+        case DataType::Basic:
+            dataLen_ = sizeof(basic_type);
+            break;
+
+        case DataType::Float:
+            dataLen_ = sizeof(float);
+            break;
+
+        case DataType::Double:
+            dataLen_ = sizeof(double);
+            break;
+
+        case DataType::Pointer:
+            dataLen_ = sizeof(void *);
+            break;
+
+        case DataType::Struct:
+            dataLen_ = dataLen;
+            break;
+
+        default:
+            assert(false);
+            dataLen_ = (uint32_t)-1;
+            break;
+        }
+    }
+};
+
 } // namespace jlang
 
 #endif // JLANG_VM_INTERPRETER_COMMON_H

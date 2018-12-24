@@ -6,8 +6,8 @@
 #pragma once
 #endif
 
-#include "jlang/vm/InterpreterCommon.h"
-#include "jlang/vm/Interpreter_v1.h"
+#include "jlang/vm/Interpreter_comm.h"
+#include "jlang/vm/Interpreter_v3.h"
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>

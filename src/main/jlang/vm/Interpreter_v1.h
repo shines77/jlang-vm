@@ -6,8 +6,7 @@
 #pragma once
 #endif
 
-#include "jlang/vm/InterpreterCommon.h"
-#include "jlang/vm/Interpreter_v3.h"
+#include "jlang/vm/Interpreter_comm.h"
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
@@ -236,6 +235,41 @@ static const unsigned char s_factorialBinary32[] = {
     OpCode::exit
 };
 
+static bool verifyRegType(uint32_t regType, uint32_t dataType) {
+    switch (dataType) {
+    case vmDataType::Int8:
+    case vmDataType::UInt8:
+        return (regType == vmRegType::r8);
+
+    case vmDataType::Int16:
+    case vmDataType::UInt16:
+        return (regType == vmRegType::r16);
+
+    case vmDataType::Int32:
+    case vmDataType::UInt32:
+        return (regType == vmRegType::r32);
+
+    case vmDataType::Int64:
+    case vmDataType::UInt64:
+        return (regType == vmRegType::r64);
+
+    case vmDataType::Pointer:
+#if defined(_WIN64)
+        return (regType == vmRegType::r64);
+#else
+        return (regType == vmRegType::r32);
+#endif
+
+    default:
+        return false;
+    }
+}
+
+static bool verifyRegById(reg_t reg, uint32_t dataType) {
+    uint32_t regType = vmReg::getType(reg);
+    return verifyRegType(regType, dataType);
+}
+
 class vmBinaryFile_v1 {
 private:
     vmBinImage image_;
@@ -287,13 +321,16 @@ typedef DWORD   ProcessId_t;
 typedef HANDLE  ProcessHandle_t;
 
 template <typename BasicType>
+class ExecutionEngine_v1;
+
+template <typename BasicType>
 class vmThreadBase {
 public:
-    typedef BasicType                   basic_type;
-    typedef size_t                      size_type;
-    typedef ExecutionEngine<basic_type>   engine_type;
-    typedef vmReturn<basic_type>        return_type;
-    typedef vmThreadBase<basic_type>    this_type;
+    typedef BasicType                       basic_type;
+    typedef size_t                          size_type;
+    typedef ExecutionEngine_v1<basic_type>  engine_type;
+    typedef vmReturn<basic_type>            return_type;
+    typedef vmThreadBase<basic_type>        this_type;
 
 private:
     vmThreadId              id_;
@@ -305,7 +342,7 @@ private:
     static std::atomic<vmThreadId> thread_id_cnt;
 
 public:
-    vmThreadBase() : id_(0), engine_(nullptr) {
+    vmThreadBase(engine_type * engine = nullptr) : id_(0), engine_(engine) {
         frame_.setStack(&stack_);
         stack_.setFrame(&frame_);
     }

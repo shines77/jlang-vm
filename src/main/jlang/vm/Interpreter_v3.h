@@ -6,7 +6,7 @@
 #pragma once
 #endif
 
-#include "jlang/vm/InterpreterCommon.h"
+#include "jlang/vm/Interpreter_comm.h"
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
@@ -446,105 +446,6 @@ public:
     }
 };
 
-template <typename BasicType = uintptr_t>
-class vmReturn {
-public:
-    typedef BasicType basic_type;
-
-    enum DataType {
-        Basic,
-        Float,
-        Double,
-        Pointer,
-        Struct,
-        Last
-    };
-
-private:
-    basic_type  retValue_;
-    uint32_t    dataType_;
-    uint32_t    dataLen_;
-
-public:
-    vmReturn() : retValue_(0), dataType_(DataType::Basic), dataLen_(0) {}
-    ~vmReturn() {}
-
-    bool isValid() const {
-        return (dataType_ >= DataType::Basic && dataType_ <= DataType::Struct);
-    }
-
-    basic_type getValue() const { return retValue_; }
-    void setValue(basic_type value) { retValue_ = value; }
-
-    uint32_t getDataType() const { return dataType_; }
-    uint32_t getDataLength() const { return dataLen_; }
-
-    void setDataType(uint32_t dataType, uint32_t dataLen = 0) {
-        dataType_ = dataType;
-        switch (dataType) {
-        case DataType::Basic:
-            dataLen_ = sizeof(basic_type);
-            break;
-
-        case DataType::Float:
-            dataLen_ = sizeof(float);
-            break;
-
-        case DataType::Double:
-            dataLen_ = sizeof(double);
-            break;
-
-        case DataType::Pointer:
-            dataLen_ = sizeof(void *);
-            break;
-
-        case DataType::Struct:
-            dataLen_ = dataLen;
-            break;
-
-        default:
-            assert(false);
-            dataLen_ = (uint32_t)-1;
-            break;
-        }
-    }
-};
-
-static bool verifyRegType(uint32_t regType, uint32_t dataType) {
-    switch (dataType) {
-    case vmDataType::Int8:
-    case vmDataType::UInt8:
-        return (regType == vmRegType::r8);
-
-    case vmDataType::Int16:
-    case vmDataType::UInt16:
-        return (regType == vmRegType::r16);
-
-    case vmDataType::Int32:
-    case vmDataType::UInt32:
-        return (regType == vmRegType::r32);
-
-    case vmDataType::Int64:
-    case vmDataType::UInt64:
-        return (regType == vmRegType::r64);
-
-    case vmDataType::Pointer:
-#if defined(_WIN64)
-        return (regType == vmRegType::r64);
-#else
-        return (regType == vmRegType::r32);
-#endif
-
-    default:
-        return false;
-    }
-}
-
-static bool verifyRegById(reg_t reg, uint32_t dataType) {
-    uint32_t regType = vmReg::getType(reg);
-    return verifyRegType(regType, dataType);
-}
-
 template <typename BasicType>
 class vmImageInfo {
 public:
@@ -601,7 +502,7 @@ public:
 };
 
 template <typename BasicType>
-class ExecutionEngine;
+class ExecutionEngine_v3;
 
 // Base interface class
 template <typename BasicType>
@@ -615,7 +516,7 @@ public:
     typedef BasicType                       basic_type;
     typedef IExecutionContext<basic_type>   base_type;
     typedef size_t                          size_type;
-    typedef ExecutionEngine<basic_type>     engine_type;
+    typedef ExecutionEngine_v3<basic_type>  engine_type;
     typedef vmReturn<basic_type>            return_type;
     typedef vmContextRegs                   ctx_reg_type;
     typedef ExecutionContext<basic_type>    this_type;
@@ -629,7 +530,7 @@ private:
     engine_type *           engine_;
 
 public:
-    ExecutionContext() : engine_(nullptr) {}
+    ExecutionContext(engine_type * engine = nullptr) : engine_(engine) {}
     virtual ~ExecutionContext() {
         destroy();
     }
