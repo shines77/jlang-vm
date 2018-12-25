@@ -185,18 +185,18 @@ static const unsigned char s_fibonacciBinary32_fast2[] = {
     OpCode::exit
 };
 
-class vmPointer {
+class ForwardPtr {
 private:
     unsigned char * ptr_;
 
 public:
-    vmPointer(unsigned char * ptr = nullptr) : ptr_(ptr) {}
-    ~vmPointer() {}
+    ForwardPtr(unsigned char * ptr = nullptr) : ptr_(ptr) {}
+    ~ForwardPtr() {}
 
     void clear() { ptr_ = nullptr; }
 
-    unsigned char * value() { return ptr_; }
-    const unsigned char * value() const { return ptr_; }
+    unsigned char * ptr() { return ptr_; }
+    const unsigned char * ptr() const { return ptr_; }
 
     template <typename U = unsigned char>
     void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
@@ -239,6 +239,9 @@ public:
     void back() { ptr_--; }
     void back(int offset) { ptr_ -= offset; }
 
+    template <typename U>
+    void back() { ptr_ -= sizeof(U); }
+
     void backInt8()    { ptr_ -= sizeof(int8_t);   }
     void backUInt8()   { ptr_ -= sizeof(uint8_t);  }
     void backInt16()   { ptr_ -= sizeof(int16_t);  }
@@ -251,6 +254,9 @@ public:
 
     void next() { ptr_++; }
     void next(int offset) { ptr_ += offset; }
+
+    template <typename U>
+    void next() { ptr_ += sizeof(U); }
 
     void nextInt8()    { ptr_ += sizeof(int8_t);   }
     void nextUInt8()   { ptr_ += sizeof(uint8_t);  }
@@ -285,7 +291,7 @@ public:
     void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
     void writePointer(void * val)  { setPointer(val); nextPointer(); }
 
-    void writePointer(unsigned char * val)  {
+    void writePointer(unsigned char * val) {
         setPointer(val);
         nextPointer();
     }
@@ -351,16 +357,27 @@ public:
     void setArgValue(U value) { (*(U *)(ptr_ + Offset + sizeof(U) * Index)) = value; }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    U readValue() const { return *(U *)(ptr_ + Offset + sizeof(V) * Index); }
+    U getValue() const { return *(U *)(ptr_ + Offset - sizeof(V) * Index); }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    void writeValue(U value) { (*(U *)(ptr_ + Offset + sizeof(V) * Index)) = value; }
+    U readValue() const { return getValue<Index, U, V, Offset>(); }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    void setValue(U value) {
+        (*(U *)(ptr_ + Offset - sizeof(V) * Index)) = value;
+    }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    void writeValue(U value) {
+        setValue<Index, U, V, Offset>(value);
+        next<U>();
+    }
 
     int32_t * getStackIArgPtr(int32_t index) const {
         return (((int32_t *)ptr_) + index);
     }
 
-    uint32_t * getStackArgPtr(int32_t index) const {
+    uint32_t * getStackUArgPtr(int32_t index) const {
         return (((uint32_t *)ptr_) + index);
     }
 
@@ -368,7 +385,7 @@ public:
         return *(((int32_t *)ptr_) + index);
     }
 
-    uint32_t getStackArgValue(int32_t index) const {
+    uint32_t getStackUArgValue(int32_t index) const {
         return *(((uint32_t *)ptr_) + index);
     }
 
@@ -376,17 +393,234 @@ public:
         *(((int32_t *)ptr_) + index) = value;
     }
 
-    void setStackArgValue(int32_t index, uint32_t value) {
+    void setStackUArgValue(int32_t index, uint32_t value) {
         *(((uint32_t *)ptr_) + index) = value;
     }
 };
 
+class BackwardPtr {
+private:
+    unsigned char * ptr_;
+
+public:
+    BackwardPtr(unsigned char * ptr = nullptr) : ptr_(ptr) {}
+    ~BackwardPtr() {}
+
+    void clear() { ptr_ = nullptr; }
+
+    unsigned char * ptr() { return ptr_; }
+    const unsigned char * ptr() const { return ptr_; }
+
+    template <typename U = unsigned char>
+    void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
+
+    uint8_t get() { return *ptr_; }
+
+    int8_t   getInt8()    const { return *(int8_t *)  ptr_; }
+    uint8_t  getUInt8()   const { return *(uint8_t *) ptr_; }
+    int16_t  getInt16()   const { return *(int16_t *) ptr_; }
+    uint16_t getUInt16()  const { return *(uint16_t *)ptr_; }
+    int32_t  getInt32()   const { return *(int32_t *) ptr_; }
+    uint32_t getUInt32()  const { return *(uint32_t *)ptr_; }
+    int64_t  getInt64()   const { return *(int64_t *) ptr_; }
+    uint64_t getUInt64()  const { return *(uint64_t *)ptr_; }
+
+    unsigned char * getPointer() const {
+        return *(unsigned char **)ptr_;
+    }
+
+    template <typename U = int>
+    U getValue() const { return *(U *)ptr_; }
+
+    void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
+    void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
+    void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
+    void setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
+    void setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
+    void setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
+    void setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
+    void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
+    void setPointer(void * val)  { *(void **)   ptr_ = val; }
+
+    void setPointer(unsigned char * val)  {
+        *(unsigned char **)ptr_ = val;
+    }
+
+    template <typename U = int>
+    void setValue(U value) const { *(U *)ptr_ = value; }
+
+    void back() { ptr_++; }
+    void back(int offset) { ptr_ += offset; }
+
+    template <typename U>
+    void back() { ptr_ += sizeof(U); }
+
+    void backInt8()    { ptr_ += sizeof(int8_t);   }
+    void backUInt8()   { ptr_ += sizeof(uint8_t);  }
+    void backInt16()   { ptr_ += sizeof(int16_t);  }
+    void backUInt16()  { ptr_ += sizeof(uint16_t); }
+    void backInt32()   { ptr_ += sizeof(int32_t);  }
+    void backUInt32()  { ptr_ += sizeof(uint32_t); }
+    void backInt64()   { ptr_ += sizeof(int64_t);  }
+    void backUInt64()  { ptr_ += sizeof(uint64_t); }
+    void backPointer() { ptr_ += sizeof(void *);   }
+
+    void next() { ptr_--; }
+    void next(int offset) { ptr_ -= offset; }
+
+    template <typename U>
+    void next() { ptr_ -= sizeof(U); }
+
+    void nextInt8()    { ptr_ -= sizeof(int8_t);   }
+    void nextUInt8()   { ptr_ -= sizeof(uint8_t);  }
+    void nextInt16()   { ptr_ -= sizeof(int16_t);  }
+    void nextUInt16()  { ptr_ -= sizeof(uint16_t); }
+    void nextInt32()   { ptr_ -= sizeof(int32_t);  }
+    void nextUInt32()  { ptr_ -= sizeof(uint32_t); }
+    void nextInt64()   { ptr_ -= sizeof(int64_t);  }
+    void nextUInt64()  { ptr_ -= sizeof(uint64_t); }
+    void nextPointer() { ptr_ -= sizeof(void *);   }
+
+    int8_t   readInt8()    const { return *(int8_t *)  ptr_; }
+    uint8_t  readUInt8()   const { return *(uint8_t *) ptr_; }
+    int16_t  readInt16()   const { return *(int16_t *) ptr_; }
+    uint16_t readUInt16()  const { return *(uint16_t *)ptr_; }
+    int32_t  readInt32()   const { return *(int32_t *) ptr_; }
+    uint32_t readUInt32()  const { return *(uint32_t *)ptr_; }
+    int64_t  readInt64()   const { return *(int64_t *) ptr_; }
+    uint64_t readUInt64()  const { return *(uint64_t *)ptr_; }
+
+    unsigned char * readPointer() const {
+        return *(unsigned char **)ptr_;
+    }
+
+    void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
+    void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
+    void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
+    void writeUInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
+    void writeInt32(int32_t val)   { setInt32(val);   nextInt32();   }
+    void writeUInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
+    void writeInt64(int64_t val)   { setInt64(val);   nextInt64();   }
+    void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
+    void writePointer(void * val)  { setPointer(val); nextPointer(); }
+
+    void writePointer(unsigned char * val) {
+        setPointer(val);
+        nextPointer();
+    }
+
+    int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
+    uint8_t  getArg0UInt8()  const { return *(uint8_t *) (ptr_ + 1); }
+    int16_t  getArg0Int16()  const { return *(int16_t *) (ptr_ + 1); }
+    uint16_t getArg0UInt16() const { return *(uint16_t *)(ptr_ + 1); }
+    int32_t  getArg0Int32()  const { return *(int32_t *) (ptr_ + 1); }
+    uint32_t getArg0UInt32() const { return *(uint32_t *)(ptr_ + 1); }
+    int64_t  getArg0Int64()  const { return *(int64_t *) (ptr_ + 1); }
+    uint64_t getArg0UInt64() const { return *(uint64_t *)(ptr_ + 1); }
+
+    int8_t   getArg1Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t));   }
+    uint8_t  getArg1UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t));  }
+    int16_t  getArg1Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t));  }
+    uint16_t getArg1UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t)); }
+    int32_t  getArg1Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t));  }
+    uint32_t getArg1UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t)); }
+    int64_t  getArg1Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t));  }
+    uint64_t getArg1UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t)); }
+
+    int8_t   getArg2Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 2); }
+    uint8_t  getArg2UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 2); }
+    int16_t  getArg2Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 2); }
+    uint16_t getArg2UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 2); }
+    int32_t  getArg2Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 2); }
+    uint32_t getArg2UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 2); }
+    int64_t  getArg2Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 2); }
+    uint64_t getArg2UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 2); }
+
+    int8_t   getArg3Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 3); }
+    uint8_t  getArg3UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 3); }
+    int16_t  getArg3Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 3); }
+    uint16_t getArg3UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 3); }
+    int32_t  getArg3Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 3); }
+    uint32_t getArg3UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 3); }
+    int64_t  getArg3Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 3); }
+    uint64_t getArg3UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 3); }
+
+    int8_t   getArg4Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 4); }
+    uint8_t  getArg4UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 4); }
+    int16_t  getArg4Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 4); }
+    uint16_t getArg4UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 4); }
+    int32_t  getArg4Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 4); }
+    uint32_t getArg4UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 4); }
+    int64_t  getArg4Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 4); }
+    uint64_t getArg4UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 4); }
+
+    int8_t   getArg5Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 5); }
+    uint8_t  getArg5UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 5); }
+    int16_t  getArg5Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 5); }
+    uint16_t getArg5UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 5); }
+    int32_t  getArg5Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 5); }
+    uint32_t getArg5UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 5); }
+    int64_t  getArg5Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 5); }
+    uint64_t getArg5UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 5); }
+
+    template <int Index, typename U = int, int Offset = 1>
+    U getArgValue() const { return *(U *)(ptr_ + Offset - sizeof(U) * Index); }
+
+    template <int Index, typename U = int, int Offset = 1>
+    void setArgValue(U value) { (*(U *)(ptr_ + Offset - sizeof(U) * Index)) = value; }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    U getValue() const { return *(U *)(ptr_ + Offset - sizeof(V) * Index); }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    U readValue() const { return getValue<Index, U, V, Offset>(); }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    void setValue(U value) {
+        (*(U *)(ptr_ + Offset - sizeof(V) * Index)) = value;
+    }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    void writeValue(U value) {
+        setValue<Index, U, V, Offset>(value);
+        next<U>();
+    }
+
+    int32_t * getStackIArgPtr(int32_t index) const {
+        return (((int32_t *)ptr_) - index);
+    }
+
+    uint32_t * getStackUArgPtr(int32_t index) const {
+        return (((uint32_t *)ptr_) - index);
+    }
+
+    int32_t getStackIArgValue(int32_t index) const {
+        return *(((int32_t *)ptr_) - index);
+    }
+
+    uint32_t getStackUArgValue(int32_t index) const {
+        return *(((uint32_t *)ptr_) - index);
+    }
+
+    void setStackIArgValue(int32_t index, int32_t value) {
+        *(((int32_t *)ptr_) - index) = value;
+    }
+
+    void setStackUArgValue(int32_t index, uint32_t value) {
+        *(((uint32_t *)ptr_) - index) = value;
+    }
+};
+
+typedef ForwardPtr  vmImagePtr;
+typedef BackwardPtr vmStackPtr;
+typedef BackwardPtr vmFramePtr;
+
 struct vmContextRegs {
-    vmPointer ip_;
-    vmPointer sp_;
-    vmPointer fp_;
-    Register  regs_;
-    Integer   flags;
+    vmImagePtr  ip_;
+    vmStackPtr  sp_;
+    vmFramePtr  fp_;
+    Register    regs_;
+    Integer     flags;
 
     vmContextRegs() : ip_(nullptr), sp_(nullptr), fp_(nullptr) {
         regs_.uval = 0;
@@ -564,37 +798,37 @@ public:
     }
 
     unsigned char * getIP() const {
-        return ip_.value();
+        return ip_.ptr();
     }
 
     unsigned char * getSP() const {
-        return sp_.value();
+        return sp_.ptr();
     }
 
     unsigned char * getFP() const {
-        return fp_.value();
+        return fp_.ptr();
     }
 
-    uint32_t getIpOffset(vmPointer & ip) {
-        return (uint32_t)(ptrdiff_t)(ip.value() - image_.getStart());
+    uint32_t getIpOffset(vmImagePtr & ip) {
+        return (uint32_t)(ptrdiff_t)(ip.ptr() - image_.getStart());
     }
 
-    bool sp_isOverflow(vmPointer & sp) const {
-        return (sp.value() >= stack_.last());
+    bool sp_isOverflow(vmStackPtr & sp) const {
+        return (sp.ptr() >= stack_.last());
     }
 
     int32_t getArgIndex(int8_t index) {
         return (index + FRAME_STACK_SIZEOF + 1);
     }
 
-    JM_FORCEINLINE void push_callstack(vmPointer & sp, vmPointer & fp, unsigned char * returnFP) {
-        sp.writePointer(fp.value());
+    JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, unsigned char * returnFP) {
+        sp.writePointer(fp.ptr());
         sp.writePointer(returnFP);
-        fp.set(sp.value());
+        fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
 
-    JM_FORCEINLINE unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE unsigned char * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
         sp.backPointer();
         unsigned char * returnIP = sp.getPointer();
         sp.backPointer();
@@ -603,7 +837,7 @@ public:
         return returnIP;
     }
 
-    JM_FORCEINLINE unsigned char * pop_callstack(vmPointer & sp, vmPointer & fp, uint16_t localSize) {
+    JM_FORCEINLINE unsigned char * pop_callstack(vmStackPtr & sp, vmFramePtr & fp, uint16_t localSize) {
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
         return pop_callstack(sp, fp);
@@ -656,7 +890,7 @@ public:
         }
     }
 
-    JM_FORCEINLINE static void skipCondJmp(vmPointer & ip, unsigned char jmpType) {
+    JM_FORCEINLINE static void skipCondJmp(vmImagePtr & ip, unsigned char jmpType) {
         switch (jmpType) {
         case OpCode::jmp_near:
         case OpCode::jl_near:
@@ -679,7 +913,10 @@ public:
         }
     }
 
-    JM_FORCEINLINE void op_error(vmPointer & ip) {
+    //
+    // error inst.
+    //
+    JM_FORCEINLINE void op_error(vmImagePtr & ip) {
         Debug.print("%08X:  error\n", getIpOffset(ip));
         ip.next();
     }
@@ -687,9 +924,9 @@ public:
     //
     // push arg0 (int32)
     //
-    JM_FORCEINLINE void op_push(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_push(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         int8_t index = ip.readValue<0, int8_t>();
-        int32_t value = fp.getStackArgValue(index);
+        int32_t value = fp.getStackUArgValue(index);
         sp.writeInt32(value);
 
         Debug.print("%08X:  push args[%d]  (0x%08X, int32)\n",
@@ -700,7 +937,7 @@ public:
     //
     // push 0x00000008 (int32)
     //
-    JM_FORCEINLINE void op_push_i32(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i32(vmImagePtr & ip, vmStackPtr & sp) {
         int32_t value = ip.readValue<0, int32_t>();
         sp.writeInt32(value);
         Debug.print("%08X:  push_i32 0x%08X (int32)\n", getIpOffset(ip), value);
@@ -710,7 +947,7 @@ public:
     //
     // push 0x00000000 00000008 (int64)
     //
-    JM_FORCEINLINE void op_push_i64(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i64(vmImagePtr & ip, vmStackPtr & sp) {
         int64_t value = ip.readValue<0, int64_t>();
         sp.writeInt64(value);
         Debug.print("%08X:  push_i64 0x%016X (int64)\n", getIpOffset(ip), value);
@@ -720,7 +957,7 @@ public:
     //
     // push_0 (int32)
     //
-    JM_FORCEINLINE void op_push_i32_0(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i32_0(vmImagePtr & ip, vmStackPtr & sp) {
         int32_t value = 0;
         sp.writeInt32(value);
         Debug.print("%08X:  push_i32_0 (int32)\n", getIpOffset(ip));
@@ -730,7 +967,7 @@ public:
     //
     // push_0 (int64)
     //
-    JM_FORCEINLINE void op_push_i64_0(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_push_i64_0(vmImagePtr & ip, vmStackPtr & sp) {
         int64_t value = 0;
         sp.writeInt64(value);
         Debug.print("%08X:  push_i64_0 (int64)\n", getIpOffset(ip));
@@ -740,7 +977,7 @@ public:
     //
     // pop uint32
     //
-    JM_FORCEINLINE void op_pop(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backUInt32();
         uint32_t value = sp.readUInt32();
         Debug.print("%08X:  pop  (0x%08X)\n", getIpOffset(ip), value);
@@ -750,7 +987,7 @@ public:
     //
     // pop int32
     //
-    JM_FORCEINLINE void op_pop_i32(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop_i32(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt32();
         int32_t value = sp.readInt32();
         Debug.print("%08X:  pop_i32  (0x%08X)\n", getIpOffset(ip), value);
@@ -760,7 +997,7 @@ public:
     //
     // pop int64
     //
-    JM_FORCEINLINE void op_pop_i64(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_pop_i64(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt64();
         int64_t value = sp.readInt64();
         Debug.print("%08X:  pop_i64  (0x%016X)\n", getIpOffset(ip), value);
@@ -770,7 +1007,7 @@ public:
     //
     // add_sp 16
     //
-    JM_FORCEINLINE void op_add_sp(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_add_sp(vmImagePtr & ip, vmStackPtr & sp) {
         uint8_t localSize = ip.readValue<0, uint8_t>();
         sp.next(localSize);
 
@@ -781,7 +1018,7 @@ public:
     //
     // add_sp_4
     //
-    JM_FORCEINLINE void op_add_sp_4(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_add_sp_4(vmImagePtr & ip, vmStackPtr & sp) {
         sp.next(sizeof(uint32_t));
         Debug.print("%08X:  add_sp_4\n", getIpOffset(ip));
         ip.next();
@@ -790,10 +1027,10 @@ public:
     //
     // load arg0, 0x00000006
     //
-    JM_FORCEINLINE void op_load(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_load(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
-        fp.setStackArgValue(index, value);
+        fp.setStackUArgValue(index, value);
         Debug.print("%08X:  load args[%d], 0x%08X\n",
                     getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
@@ -802,7 +1039,7 @@ public:
     //
     // load eax, 0x00000006
     //
-    JM_FORCEINLINE void op_load_eax(vmPointer & ip, vmPointer & sp, Register & regs) {
+    JM_FORCEINLINE void op_load_eax(vmImagePtr & ip, vmStackPtr & sp, Register & regs) {
         uint32_t value = ip.readValue<0, uint32_t>();
         regs.eax.u32 = value;
         Debug.print("%08X:  load eax, 0x%08X\n", getIpOffset(ip), value);
@@ -812,7 +1049,7 @@ public:
     //
     // move arg0, arg1
     //
-    JM_FORCEINLINE void op_move(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_move(vmImagePtr & ip, vmStackPtr & sp) {
         Debug.print("%08X:  move args[%d], args[%d]\n", getIpOffset(ip), 0, 1);
         ip.next();
     }
@@ -820,7 +1057,7 @@ public:
     //
     // move eax, arg1
     //
-    JM_FORCEINLINE void op_move_eax(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_move_eax(vmImagePtr & ip, vmStackPtr & sp) {
         Debug.print("%08X:  move eax, args[%d]\n", getIpOffset(ip), 0);
         ip.next();
     }
@@ -828,16 +1065,16 @@ public:
     //
     // copy arg0, eax
     //
-    JM_FORCEINLINE void op_copy_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_copy_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
-        fp.setStackArgValue(index, value);
+        fp.setStackUArgValue(index, value);
         Debug.print("%08X:  copy args[%d], eax = (0x%08X)\n",
                     getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
     }
 
-    JM_FORCEINLINE void op_cmp(vmPointer & ip, vmPointer & sp) {
+    JM_FORCEINLINE void op_cmp(vmImagePtr & ip, vmStackPtr & sp) {
         Debug.print("%08X:  cmp\n", getIpOffset(ip));
         ip.next();
     }
@@ -845,7 +1082,7 @@ public:
     //
     // cmp arg0, arg1 (int32)
     //
-    JM_FORCEINLINE bool op_cmp_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_i32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
@@ -870,12 +1107,12 @@ public:
     //
     // cmp arg0, arg1 (uint32)
     //
-    JM_FORCEINLINE bool op_cmp_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_u32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackArgValue(index1);
-        uint32_t value2 = fp.getStackArgValue(index2);
+        uint32_t value1 = fp.getStackUArgValue(index1);
+        uint32_t value2 = fp.getStackUArgValue(index2);
         ip.next(1 + sizeof(int8_t) * 2);
 
         Debug.print("%08X:  cmp  args[%d], args[%d] - (%u, %u) (uint32)\n",
@@ -895,7 +1132,7 @@ public:
     //
     // cmp arg0, 0x00000008 (int32)
     //
-    JM_FORCEINLINE bool op_cmp_imm_i32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_i32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         int32_t value1 = fp.getStackIArgValue(index);
@@ -918,10 +1155,10 @@ public:
     //
     // cmp arg0, 0x00000008 (uint32)
     //
-    JM_FORCEINLINE bool op_cmp_imm_u32(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_u32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackArgValue(index);
+        uint32_t value1 = fp.getStackUArgValue(index);
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
 
@@ -938,7 +1175,7 @@ public:
         return condition;
     }
 
-    JM_FORCEINLINE void op_jl(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl(vmImagePtr & ip) {
         Debug.print("%08X:  jl\n", getIpOffset(ip));
         ip.next();
     }
@@ -946,7 +1183,7 @@ public:
     //
     // jl_near 0x06
     //
-    JM_FORCEINLINE void op_jl_near(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_near(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -963,7 +1200,7 @@ public:
     //
     // jl_short 0x16, 0x00
     //
-    JM_FORCEINLINE void op_jl_short(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_short(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -980,7 +1217,7 @@ public:
     //
     // jl_long 0x29, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_jl_long(vmPointer & ip) {
+    JM_FORCEINLINE void op_jl_long(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
         if (flags.u32.low != (uint32_t)true) {
@@ -997,7 +1234,7 @@ public:
     //
     // jmp 0x00102030 (ptr32)
     //
-    JM_FORCEINLINE void op_jmp(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         uint32_t jmpEntry = ip.readValue<0, uint32_t>();
         ip.set(image_.getStart() + jmpEntry);
@@ -1007,7 +1244,7 @@ public:
     //
     // jmp_near 0x08
     //
-    JM_FORCEINLINE void op_jmp_near(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_near(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
         ip.next(1L + sizeof(int8_t) + jmpOffset);
@@ -1017,7 +1254,7 @@ public:
     //
     // jmp_short 0x08, 0x00
     //
-    JM_FORCEINLINE void op_jmp_short(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_short(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
         ip.next(1L + sizeof(int16_t) + jmpOffset);
@@ -1027,7 +1264,7 @@ public:
     //
     // jmp_long 0x18, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_jmp_long(vmPointer & ip) {
+    JM_FORCEINLINE void op_jmp_long(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
         ip.next(1L + sizeof(int32_t) + jmpOffset);
@@ -1037,12 +1274,12 @@ public:
     //
     // call 0x00102030 (ptr32)
     //
-    JM_FORCEINLINE void op_call(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint32_t callEntry = ip.readValue<0, uint32_t>();
         ip.next(1 + sizeof(uint32_t));
 
-        unsigned char * returnIP = ip.value();
+        unsigned char * returnIP = ip.ptr();
         push_callstack(sp, fp, returnIP);
 
         unsigned char * newIP = image_.getStart() + callEntry;
@@ -1055,12 +1292,12 @@ public:
     //
     // call_near 0x08
     //
-    JM_FORCEINLINE void op_call_near(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_near(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t callOffset = ip.readValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
 
-        unsigned char * returnIP = ip.value();
+        unsigned char * returnIP = ip.ptr();
         push_callstack(sp, fp, returnIP);
 
         unsigned char * newIP = returnIP + callOffset;
@@ -1073,12 +1310,12 @@ public:
     //
     // call_short 0x08, 0x00
     //
-    JM_FORCEINLINE void op_call_short(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_short(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.readValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
 
-        unsigned char * returnIP = ip.value();
+        unsigned char * returnIP = ip.ptr();
         push_callstack(sp, fp, returnIP);
 
         unsigned char * newIP = returnIP + callOffset;
@@ -1091,12 +1328,12 @@ public:
     //
     // call_long 0x18, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_call_long(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE void op_call_long(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.readValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
 
-        unsigned char * returnIP = ip.value();
+        unsigned char * returnIP = ip.ptr();
         push_callstack(sp, fp, returnIP);
 
         unsigned char * newIP = returnIP + callOffset;
@@ -1110,7 +1347,7 @@ public:
     //
     // ret
     //
-    JM_FORCEINLINE bool op_ret(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         unsigned char * returnIP = pop_callstack(sp, fp);
         ip.set(returnIP);
@@ -1128,7 +1365,7 @@ public:
     //
     // ret_n_sm 0x08
     //
-    JM_FORCEINLINE bool op_ret_n_sm(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret_n_sm(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint8_t localSize = ip.readValue<0, uint8_t>();
         unsigned char * returnIP = pop_callstack(sp, fp, localSize);
@@ -1148,7 +1385,7 @@ public:
     //
     // ret_n 0x08, 0x00
     //
-    JM_FORCEINLINE bool op_ret_n(vmPointer & ip, vmPointer & sp, vmPointer & fp) {
+    JM_FORCEINLINE bool op_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.readValue<0, uint16_t>();
         unsigned char * returnIP = pop_callstack(sp, fp, localSize);
@@ -1168,7 +1405,7 @@ public:
     //
     // ret_eax 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t>();
         regs.eax.u32 = value;
@@ -1190,7 +1427,7 @@ public:
     //
     // ret_eax_n 0x08, 0x00, 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax_n(vmPointer & ip, vmPointer & sp, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.readValue<0, uint16_t>();
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
@@ -1214,7 +1451,7 @@ public:
     //
     // nop
     //
-    JM_FORCEINLINE void op_nop(vmPointer & ip) {
+    JM_FORCEINLINE void op_nop(vmImagePtr & ip) {
         Debug.print("%08X:  nop\n", getIpOffset(ip));
         ip.next();
     }
@@ -1222,7 +1459,7 @@ public:
     //
     // nop_n 0x08
     //
-    JM_FORCEINLINE void op_nop_n(vmPointer & ip) {
+    JM_FORCEINLINE void op_nop_n(vmImagePtr & ip) {
         uint8_t skip_n = ip.readValue<0, uint8_t>();
         Debug.print("%08X:  nop_n %u\n", getIpOffset(ip), (uint32_t)skip_n);
         ip.next(1 + sizeof(uint8_t) + skip_n);
@@ -1231,12 +1468,12 @@ public:
     //
     // inc arg0
     //
-    JM_FORCEINLINE void op_inc(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_inc(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackArgValue(index);
+        uint32_t value = fp.getStackUArgValue(index);
         value++;
-        fp.setStackArgValue(index, value);
+        fp.setStackUArgValue(index, value);
 
         Debug.print("%08X:  inc  arg[%d]  (0x%08X)\n",
                     offset, getArgIndex(index), value);
@@ -1246,12 +1483,12 @@ public:
     //
     // dec arg0
     //
-    JM_FORCEINLINE void op_dec(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_dec(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackArgValue(index);
+        uint32_t value = fp.getStackUArgValue(index);
         value--;
-        fp.setStackArgValue(index, value);
+        fp.setStackUArgValue(index, value);
 
         Debug.print("%08X:  dec  args[%d]  (0x%08X)\n",
                     offset, getArgIndex(index), value);
@@ -1261,15 +1498,15 @@ public:
     //
     // add arg0, arg1
     //
-    JM_FORCEINLINE void op_add(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_add(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackArgValue(index1);
-        uint32_t value2 = fp.getStackArgValue(index2);
+        uint32_t value1 = fp.getStackUArgValue(index1);
+        uint32_t value2 = fp.getStackUArgValue(index2);
 
         uint32_t newValue = value1 + value2;
-        fp.setStackArgValue(index1, newValue);
+        fp.setStackUArgValue(index1, newValue);
 
         Debug.print("%08X:  add  args[%d], args[%d] = (0x%08X)\n",
                     offset, getArgIndex(index1), getArgIndex(index2),
@@ -1280,14 +1517,14 @@ public:
     //
     // add arg0, 0x00000006
     //
-    JM_FORCEINLINE void op_add_imm(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_add_imm(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
-        uint32_t value1 = fp.getStackArgValue(index);
+        uint32_t value1 = fp.getStackUArgValue(index);
 
         uint32_t newValue = value1 + value2;
-        fp.setStackArgValue(index, newValue);
+        fp.setStackUArgValue(index, newValue);
 
         Debug.print("%08X:  add  args[%d], 0x%08X = (0x%08X)\n",
                     offset, getArgIndex(index), value2, newValue);
@@ -1297,10 +1534,10 @@ public:
     //
     // add eax, arg0
     //
-    JM_FORCEINLINE void op_add_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_add_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackArgValue(index);
+        uint32_t value = fp.getStackUArgValue(index);
 
         uint32_t newValue = regs.eax.u32 + value;
         regs.eax.u32 = newValue;
@@ -1313,7 +1550,7 @@ public:
     //
     // add eax, 0x00000006
     //
-    JM_FORCEINLINE void op_add_eax_imm(vmPointer & ip, Register & regs) {
+    JM_FORCEINLINE void op_add_eax_imm(vmImagePtr & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t, uint32_t>();
 
@@ -1328,14 +1565,14 @@ public:
     //
     // sub arg0, arg1
     //
-    JM_FORCEINLINE void op_sub(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_sub(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackArgValue(index1);
-        uint32_t value2 = fp.getStackArgValue(index2);
+        uint32_t value1 = fp.getStackUArgValue(index1);
+        uint32_t value2 = fp.getStackUArgValue(index2);
         uint32_t newValue = value1 - value2;
-        fp.setStackArgValue(index1, newValue);
+        fp.setStackUArgValue(index1, newValue);
 
         Debug.print("%08X:  sub  args[%d], args[%d] = (0x%08X)\n",
                     offset, getArgIndex(index1), getArgIndex(index2),
@@ -1346,14 +1583,14 @@ public:
     //
     // sub arg0, 0x00000006
     //
-    JM_FORCEINLINE void op_sub_imm(vmPointer & ip, vmPointer & fp) {
+    JM_FORCEINLINE void op_sub_imm(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
-        uint32_t value1 = fp.getStackArgValue(index);
+        uint32_t value1 = fp.getStackUArgValue(index);
 
         uint32_t newValue = value1 - value2;
-        fp.setStackArgValue(index, newValue);
+        fp.setStackUArgValue(index, newValue);
 
         Debug.print("%08X:  sub  args[%d], 0x%08X = (0x%08X)\n",
                     offset, getArgIndex(index), value2, newValue);
@@ -1363,10 +1600,10 @@ public:
     //
     // sub eax, arg0
     //
-    JM_FORCEINLINE void op_sub_eax(vmPointer & ip, vmPointer & fp, Register & regs) {
+    JM_FORCEINLINE void op_sub_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackArgValue(index);
+        uint32_t value = fp.getStackUArgValue(index);
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;
 
@@ -1378,7 +1615,7 @@ public:
     //
     // add eax, 0x00000006
     //
-    JM_FORCEINLINE void op_sub_eax_imm(vmPointer & ip, Register & regs) {
+    JM_FORCEINLINE void op_sub_eax_imm(vmImagePtr & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.readValue<0, uint32_t, uint32_t>();
 
@@ -1393,7 +1630,7 @@ public:
     //
     // Exit the program
     //
-    JM_FORCEINLINE void op_exit(vmPointer & ip, return_type & retValue) {
+    JM_FORCEINLINE void op_exit(vmImagePtr & ip, return_type & retValue) {
         Debug.print("%08X:  end\n\n", getIpOffset(ip));
         ip.next();
     }
@@ -1401,7 +1638,7 @@ public:
     //
     // Unknown opcode.
     //
-    JM_FORCEINLINE void op_unknown(vmPointer & ip, unsigned char opcode) {
+    JM_FORCEINLINE void op_unknown(vmImagePtr & ip, unsigned char opcode) {
         Debug.print("%08X:  Error: Unknown opcode: %u\n", getIpOffset(ip), (uint32_t)opcode);
         ip.next();
     }
@@ -1412,10 +1649,10 @@ public:
     int execute(return_type & retVal) {
         int ec = 0;
         if (isInited()) {
-            register vmPointer ip;
-            register vmPointer sp;
-            register vmPointer fp;
-            register Register  regs;
+            register vmImagePtr ip;
+            register vmStackPtr sp;
+            register vmFramePtr fp;
+            register Register   regs;
 
             // Init environment
             ip.set(image_.getIP());
@@ -1427,7 +1664,7 @@ public:
             push_callstack(sp, fp, nullptr);
 
             // Main loop
-            while (ip.value() < image_.getLimit()) {
+            while (ip.ptr() < image_.getLimit()) {
                 unsigned char opcode = ip.get();
                 switch (opcode) {
                 case OpCode::error:
