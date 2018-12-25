@@ -18,7 +18,7 @@
 #include <atomic>
 
 /* If is backward stack pointer ? */
-#define BACKWARD_STACK_PTR  1
+#define BACKWARD_STACK_PTR  0
 
 //////////////////////////////////////////////////////////////
 
@@ -295,17 +295,19 @@ public:
     void nextUInt64()  { ptr_ += sizeof(uint64_t); }
     void nextPointer() { ptr_ += sizeof(void *);   }
 
-    int8_t   readInt8()    const { return *(int8_t *)  ptr_; }
-    uint8_t  readUInt8()   const { return *(uint8_t *) ptr_; }
-    int16_t  readInt16()   const { return *(int16_t *) ptr_; }
-    uint16_t readUInt16()  const { return *(uint16_t *)ptr_; }
-    int32_t  readInt32()   const { return *(int32_t *) ptr_; }
-    uint32_t readUInt32()  const { return *(uint32_t *)ptr_; }
-    int64_t  readInt64()   const { return *(int64_t *) ptr_; }
-    uint64_t readUInt64()  const { return *(uint64_t *)ptr_; }
+    int8_t   readInt8()   { int8_t   value = getInt8();   nextInt8();   return value; }
+    uint8_t  readUInt8()  { uint8_t  value = getUInt8();  nextUInt8();  return value; }
+    int16_t  readInt16()  { int16_t  value = getInt16();  nextInt16();  return value; }
+    uint16_t readUInt16() { uint16_t value = getUInt16(); nextUInt16(); return value; }
+    int32_t  readInt32()  { int32_t  value = getInt32();  nextInt32();  return value; }
+    uint32_t readUInt32() { uint32_t value = getUInt32(); nextUInt32(); return value; }
+    int64_t  readInt64()  { int64_t  value = getInt64();  nextInt64();  return value; }
+    uint64_t readUInt64() { uint64_t value = getUInt64(); nextUInt64(); return value; }
 
-    unsigned char * readPointer() const {
-        return *(unsigned char **)ptr_;
+    unsigned char * readPointer() {
+        unsigned char * value = getPointer();
+        nextPointer();
+        return value;
     }
 
     void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
@@ -391,7 +393,7 @@ public:
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void setValue(U value) {
-        (*(U *)(ptr_ + Offset - sizeof(V) * Index)) = value;
+        (*(U *)(ptr_ + Offset + sizeof(V) * Index)) = value;
     }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
@@ -441,33 +443,68 @@ public:
     template <typename U = unsigned char>
     void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
 
-    uint8_t get() { return *ptr_; }
+private:
+    int8_t   _getInt8()    const { return *(int8_t *)  ptr_; }
+    uint8_t  _getUInt8()   const { return *(uint8_t *) ptr_; }
+    int16_t  _getInt16()   const { return *(int16_t *) ptr_; }
+    uint16_t _getUInt16()  const { return *(uint16_t *)ptr_; }
+    int32_t  _getInt32()   const { return *(int32_t *) ptr_; }
+    uint32_t _getUInt32()  const { return *(uint32_t *)ptr_; }
+    int64_t  _getInt64()   const { return *(int64_t *) ptr_; }
+    uint64_t _getUInt64()  const { return *(uint64_t *)ptr_; }
 
-    int8_t   getInt8()    const { return *(int8_t *)  ptr_; }
-    uint8_t  getUInt8()   const { return *(uint8_t *) ptr_; }
-    int16_t  getInt16()   const { return *(int16_t *) ptr_; }
-    uint16_t getUInt16()  const { return *(uint16_t *)ptr_; }
-    int32_t  getInt32()   const { return *(int32_t *) ptr_; }
-    uint32_t getUInt32()  const { return *(uint32_t *)ptr_; }
-    int64_t  getInt64()   const { return *(int64_t *) ptr_; }
-    uint64_t getUInt64()  const { return *(uint64_t *)ptr_; }
+    unsigned char * _getPointer() const {
+        return *(unsigned char **)ptr_;
+    }
+
+    template <typename U = int>
+    U _getValue() const { return *(U *)ptr_; }
+
+    void _setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
+    void _setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
+    void _setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
+    void _setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
+    void _setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
+    void _setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
+    void _setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
+    void _setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
+    void _setPointer(void * val)  { *(void **)   ptr_ = val; }
+
+    void _setPointer(unsigned char * val)  {
+        *(unsigned char **)ptr_ = val;
+    }
+
+    template <typename U = int>
+    void _setValue(U value) const { *(U *)ptr_ = value; }
+
+public:
+    uint8_t get() { return *(int8_t *)(ptr_ - sizeof(uint8_t)); }
+
+    int8_t   getInt8()    const { return *(int8_t *)  (ptr_ - sizeof(int8_t));   }
+    uint8_t  getUInt8()   const { return *(uint8_t *) (ptr_ - sizeof(uint8_t));  }
+    int16_t  getInt16()   const { return *(int16_t *) (ptr_ - sizeof(int16_t));  }
+    uint16_t getUInt16()  const { return *(uint16_t *)(ptr_ - sizeof(uint16_t)); }
+    int32_t  getInt32()   const { return *(int32_t *) (ptr_ - sizeof(int32_t));  }
+    uint32_t getUInt32()  const { return *(uint32_t *)(ptr_ - sizeof(uint32_t)); }
+    int64_t  getInt64()   const { return *(int64_t *) (ptr_ - sizeof(int64_t));  }
+    uint64_t getUInt64()  const { return *(uint64_t *)(ptr_ - sizeof(uint64_t)); }
 
     unsigned char * getPointer() const {
-        return *(unsigned char **)ptr_;
+        return *(unsigned char **)(ptr_ - sizeof(void *));
     }
 
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
 
-    void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
-    void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
-    void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
-    void setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
-    void setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
-    void setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
-    void setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
-    void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
-    void setPointer(void * val)  { *(void **)   ptr_ = val; }
+    void setInt8(int8_t val)     { *(int8_t *)  (ptr_ - sizeof(int8_t))   = val; }
+    void setUInt8(uint8_t val)   { *(uint8_t *) (ptr_ - sizeof(uint8_t))  = val; }
+    void setInt16(int16_t val)   { *(int16_t *) (ptr_ - sizeof(int16_t))  = val; }
+    void setUInt16(uint16_t val) { *(uint16_t *)(ptr_ - sizeof(uint16_t)) = val; }
+    void setInt32(int32_t val)   { *(int32_t *) (ptr_ - sizeof(int32_t))  = val; }
+    void setUInt32(uint32_t val) { *(uint32_t *)(ptr_ - sizeof(uint32_t)) = val; }
+    void setInt64(int64_t val)   { *(int64_t *) (ptr_ - sizeof(int64_t))  = val; }
+    void setUInt64(uint64_t val) { *(uint64_t *)(ptr_ - sizeof(uint64_t)) = val; }
+    void setPointer(void * val)  { *(void **)   (ptr_ - sizeof(void *))   = val; }
 
     void setPointer(unsigned char * val)  {
         *(unsigned char **)ptr_ = val;
@@ -508,32 +545,33 @@ public:
     void nextUInt64()  { ptr_ -= sizeof(uint64_t); }
     void nextPointer() { ptr_ -= sizeof(void *);   }
 
-    int8_t   readInt8()    const { return *(int8_t *)  ptr_; }
-    uint8_t  readUInt8()   const { return *(uint8_t *) ptr_; }
-    int16_t  readInt16()   const { return *(int16_t *) ptr_; }
-    uint16_t readUInt16()  const { return *(uint16_t *)ptr_; }
-    int32_t  readInt32()   const { return *(int32_t *) ptr_; }
-    uint32_t readUInt32()  const { return *(uint32_t *)ptr_; }
-    int64_t  readInt64()   const { return *(int64_t *) ptr_; }
-    uint64_t readUInt64()  const { return *(uint64_t *)ptr_; }
-
-    unsigned char * readPointer() const {
-        return *(unsigned char **)ptr_;
+    int8_t   readInt8()   { nextInt8();   return _getInt8();   }
+    uint8_t  readUInt8()  { nextUInt8();  return _getUInt8();  }
+    int16_t  readInt16()  { nextInt16();  return _getInt16();  }
+    uint16_t readUInt16() { nextUInt16(); return _getUInt16(); }
+    int32_t  readInt32()  { nextInt32();  return _getInt32();  }
+    uint32_t readUInt32() { nextUInt32(); return _getUInt32(); }
+    int64_t  readInt64()  { nextInt64();  return _getInt64();  }
+    uint64_t readUInt64() { nextUInt64(); return _getUInt64(); }
+                                   
+    unsigned char * readPointer() {
+        nextPointer();
+        return _getPointer();
     }
 
-    void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
-    void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
-    void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
-    void writeUInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
-    void writeInt32(int32_t val)   { setInt32(val);   nextInt32();   }
-    void writeUInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
-    void writeInt64(int64_t val)   { setInt64(val);   nextInt64();   }
-    void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
-    void writePointer(void * val)  { setPointer(val); nextPointer(); }
+    void writeInt8(int8_t val)     { nextInt8();    _setInt8(val);    }
+    void writeUInt8(uint8_t val)   { nextUInt8();   _setUInt8(val);   }
+    void writeInt16(int16_t val)   { nextInt16();   _setInt16(val);   }
+    void writeUInt16(uint16_t val) { nextUInt16();  _setUInt16(val);  }
+    void writeInt32(int32_t val)   { nextInt32();   _setInt32(val);   }
+    void writeUInt32(uint32_t val) { nextUInt32();  _setUInt32(val);  }
+    void writeInt64(int64_t val)   { nextInt64();   _setInt64(val);   }
+    void writeUInt64(uint64_t val) { nextUInt64();  _setUInt64(val);  }
+    void writePointer(void * val)  { nextPointer(); _setPointer(val); }
 
     void writePointer(unsigned char * val) {
-        setPointer(val);
         nextPointer();
+        _setPointer(val);
     }
 
     int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
@@ -614,27 +652,27 @@ public:
     }
 
     int32_t * getStackIArgPtr(int32_t index) const {
-        return (((int32_t *)ptr_) - index);
+        return (((int32_t *)(ptr_ - sizeof(int32_t))) + index);
     }
 
     uint32_t * getStackUArgPtr(int32_t index) const {
-        return (((uint32_t *)ptr_) - index);
+        return (((uint32_t *)(ptr_ - sizeof(uint32_t))) + index);
     }
 
     int32_t getStackIArgValue(int32_t index) const {
-        return *(((int32_t *)ptr_) - index);
+        return *(((int32_t *)(ptr_ - sizeof(int32_t))) + index);
     }
 
     uint32_t getStackUArgValue(int32_t index) const {
-        return *(((uint32_t *)ptr_) - index);
+        return *(((uint32_t *)(ptr_ - sizeof(uint32_t))) + index);
     }
 
     void setStackIArgValue(int32_t index, int32_t value) {
-        *(((int32_t *)ptr_) - index) = value;
+        *(((int32_t *)(ptr_ - sizeof(uint32_t))) + index) = value;
     }
 
     void setStackUArgValue(int32_t index, uint32_t value) {
-        *(((uint32_t *)ptr_) - index) = value;
+        *(((uint32_t *)(ptr_ - sizeof(uint32_t))) + index) = value;
     }
 };
 
@@ -855,7 +893,11 @@ public:
     }
 
     int32_t getArgIndex(int8_t index) {
-        return (index + FRAME_STACK_SIZEOF + 1);
+#if BACKWARD_STACK_PTR
+        return (index - (FRAME_STACK_SIZEOF + 1));
+#else
+        return (index + (FRAME_STACK_SIZEOF + 1));
+#endif
     }
 
     JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, unsigned char * returnFP) {
@@ -1016,7 +1058,7 @@ public:
     //
     JM_FORCEINLINE void op_pop(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backUInt32();
-        uint32_t value = sp.readUInt32();
+        uint32_t value = sp.getUInt32();
         Debug.print("%08X:  pop  (0x%08X)\n", getIpOffset(ip), value);
         ip.next();
     }
@@ -1026,7 +1068,7 @@ public:
     //
     JM_FORCEINLINE void op_pop_i32(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt32();
-        int32_t value = sp.readInt32();
+        int32_t value = sp.getInt32();
         Debug.print("%08X:  pop_i32  (0x%08X)\n", getIpOffset(ip), value);
         ip.next();
     }
@@ -1036,7 +1078,7 @@ public:
     //
     JM_FORCEINLINE void op_pop_i64(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt64();
-        int64_t value = sp.readInt64();
+        int64_t value = sp.getInt64();
         Debug.print("%08X:  pop_i64  (0x%016X)\n", getIpOffset(ip), value);
         ip.next();
     }
@@ -1131,10 +1173,10 @@ public:
                     offset, getArgIndex(index1), getArgIndex(index2),
                     value1, value2);
 
-        unsigned char jmpType = ip.readUInt8();
+        unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
-        if (!condition)
+        if (likely(!condition))
             Debug.print("%08X:  cmp  condition [false]\n", offset);
         else
             Debug.print("%08X:  cmp  condition [true]\n", offset);
@@ -1156,10 +1198,10 @@ public:
                     offset, getArgIndex(index1), getArgIndex(index2),
                     value1, value2);
 
-        unsigned char jmpType = ip.readUInt8();
+        unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
-        if (!condition)
+        if (likely(!condition))
             Debug.print("%08X:  cmp  condition [false]\n", offset);
         else
             Debug.print("%08X:  cmp  condition [true]\n", offset);
@@ -1179,10 +1221,10 @@ public:
         Debug.print("%08X:  cmp  args[%d], 0x%08X (int32)\n",
                     offset, getArgIndex(index), value2);
 
-        unsigned char jmpType = ip.readUInt8();
+        unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
-        if (!condition)
+        if (likely(!condition))
             Debug.print("%08X:  cmp  condition [false]\n", offset);
         else
             Debug.print("%08X:  cmp  condition [true]\n", offset);
@@ -1202,10 +1244,10 @@ public:
         Debug.print("%08X:  cmp  args[%d], 0x%08X (uint32)\n",
                     offset, getArgIndex(index), value2);
 
-        unsigned char jmpType = ip.readUInt8();
+        unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
-        if (!condition)
+        if (likely(!condition))
             Debug.print("%08X:  cmp  condition [false]\n", offset);
         else
             Debug.print("%08X:  cmp  condition [true]\n", offset);
@@ -1223,7 +1265,7 @@ public:
     JM_FORCEINLINE void op_jl_near(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
-        if (flags.u32.low != (uint32_t)true) {
+        if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int8_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (near)\n", offset, jmpEntry);
@@ -1240,7 +1282,7 @@ public:
     JM_FORCEINLINE void op_jl_short(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
-        if (flags.u32.low != (uint32_t)true) {
+        if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int16_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (short)\n", offset, jmpEntry);
@@ -1257,7 +1299,7 @@ public:
     JM_FORCEINLINE void op_jl_long(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
-        if (flags.u32.low != (uint32_t)true) {
+        if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int32_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (long)\n", offset, jmpEntry);
