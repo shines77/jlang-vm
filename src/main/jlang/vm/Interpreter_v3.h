@@ -17,9 +17,34 @@
 #include <memory>
 #include <atomic>
 
+/* If is backward stack pointer ? */
+#define BACKWARD_STACK_PTR  1
+
 //////////////////////////////////////////////////////////////
 
 #define FRAME_STACK_SIZEOF  ((sizeof(void *) * 2) / sizeof(uint32_t))
+
+#if BACKWARD_STACK_PTR
+
+#define __arg0  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 1))
+#define __arg1  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 2))
+#define __arg2  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 3))
+#define __arg3  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 4))
+#define __arg4  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 5))
+#define __arg5  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 6))
+#define __arg6  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 7))
+#define __arg7  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 8))
+
+#define __var0  ((uint8_t)(0))
+#define __var1  ((uint8_t)(1))
+#define __var2  ((uint8_t)(2))
+#define __var3  ((uint8_t)(3))
+#define __var4  ((uint8_t)(4))
+#define __var5  ((uint8_t)(5))
+#define __var6  ((uint8_t)(6))
+#define __var7  ((uint8_t)(7))
+
+#else
 
 #define __arg0  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 1))
 #define __arg1  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 2))
@@ -38,6 +63,8 @@
 #define __var5  ((uint8_t)(5))
 #define __var6  ((uint8_t)(6))
 #define __var7  ((uint8_t)(7))
+
+#endif // BACKWARD_STACK_PTR
 
 //////////////////////////////////////////////////////////////
 
@@ -612,8 +639,14 @@ public:
 };
 
 typedef ForwardPtr  vmImagePtr;
+
+#if BACKWARD_STACK_PTR
 typedef BackwardPtr vmStackPtr;
 typedef BackwardPtr vmFramePtr;
+#else
+typedef ForwardPtr  vmStackPtr;
+typedef ForwardPtr  vmFramePtr;
+#endif
 
 struct vmContextRegs {
     vmImagePtr  ip_;
@@ -704,8 +737,8 @@ public:
     bool isOverflow() const { return (ip_ >= ip_limit_); }
     bool isUnderflow() const { return (ip_ < ip_start_); }
 
-    unsigned char * getIP() const { return ip_; }
-    void setIP(void * ip) {
+    unsigned char * getPtr() const { return ip_; }
+    void setPtr(void * ip) {
         this->ip_ = (unsigned char *)ip;
     }
 
@@ -759,7 +792,11 @@ public:
     static const size_type kDefaultStackSize = 8 * 1048576U;
 
 private:
-    vmStack<basic_type>     stack_;
+#if BACKWARD_STACK_PTR
+    vmStack<basic_type, true>  stack_;
+#else
+    vmStack<basic_type, false> stack_;
+#endif
     vmImageInfo<basic_type> image_;
     vmHeap<basic_type>      heap_;
     engine_type *           engine_;
@@ -1655,9 +1692,9 @@ public:
             register Register   regs;
 
             // Init environment
-            ip.set(image_.getIP());
-            sp.set(stack_.top());
-            fp.set(stack_.top());
+            ip.set(image_.getPtr());
+            sp.set(stack_.current());
+            fp.set(stack_.current());
             regs.uval = 0;
 
             // Push call program entry.
@@ -1909,9 +1946,9 @@ Execute_Finished:
     }
 
     int run(return_type & retVal) {
-        ip_.set(image_.getIP());
-        sp_.set(stack_.top());
-        fp_.set(stack_.top());
+        ip_.set(image_.getPtr());
+        sp_.set(stack_.current());
+        fp_.set(stack_.current());
         return execute(retVal);
     }
 };

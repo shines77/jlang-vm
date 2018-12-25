@@ -832,14 +832,14 @@ public:
 typedef unsigned int vmThreadId;
 typedef unsigned int vmProcessId;
 
-template <typename BasicType>
+template <typename BasicType, bool IsBackwardPtr>
 class vmStack;
 
 template <typename BasicType>
 class vmFrame {
 public:
-    typedef BasicType           basic_type;
-    typedef vmStack<basic_type> stack_type;
+    typedef BasicType                   basic_type;
+    typedef vmStack<basic_type, false>  stack_type;
 
     static const size_t kMaxRegs = vmReg::kMaxRegs;
 
@@ -2482,7 +2482,7 @@ public:
     }
 };
 
-template <typename BasicType>
+template <typename BasicType, bool IsBackwardPtr = false>
 class vmStack {
 public:
     typedef BasicType           basic_type;
@@ -2495,6 +2495,8 @@ private:
     unsigned char * sp_last_;
     frame_type *    frame_;
     size_type       capacity_;
+
+    static const bool kIsBackwardPtr = IsBackwardPtr;
 
 public:
     vmStack(size_type capacity = 0)
@@ -2509,15 +2511,49 @@ public:
         destroy();
     }
 
+    bool isBackwardPtr() const { return kIsBackwardPtr; }
+    int direction() const {
+        if (isBackwardPtr())
+            return -1;
+        else
+            return 1;
+    }
+
     bool isInited() const { return (sp_first_ != nullptr); }
 
-    bool isEof() const { return (sp_ == sp_last_); }
-    bool isOverflow() const { return (sp_ >= sp_last_); }
-    bool isUnderflow() const { return (sp_ < sp_first_); }
-    bool isReachBegin() const { return (sp_ <= sp_first_); }
+    bool isEof() const {
+        if (isBackwardPtr())
+            return (sp_ == sp_first_);
+        else
+            return (sp_ == sp_last_);
+    }
+
+    bool isOverflow() const {
+        if (isBackwardPtr())
+            return (sp_ <= sp_first_);
+        else
+            return (sp_ >= sp_last_);
+    }
+
+    bool isUnderflow() const {
+        if (isBackwardPtr())
+            return (sp_ > sp_last_);
+        else
+            return (sp_ < sp_first_);
+    }
+
+    bool isReachBegin() const {
+        if (isBackwardPtr())
+            return (sp_ >= sp_last_);
+        else
+            return (sp_ <= sp_first_);
+    }
 
     size_type size() const {
-        return (size_type)((uintptr_t)sp_ - (uintptr_t)sp_first_);
+        if (isBackwardPtr())
+            return (size_type)((uintptr_t)sp_last_ - (uintptr_t)sp_);
+        else
+            return (size_type)((uintptr_t)sp_ - (uintptr_t)sp_first_);
     }
     size_type capacity() const { return capacity_; }
 
@@ -2526,7 +2562,7 @@ public:
         this->frame_ = frame;
     }
 
-    unsigned char * top() const { return sp_; }
+    unsigned char * current() const { return sp_; }
     unsigned char * first() const { return sp_first_; }
     unsigned char * last() const { return sp_last_; }
 
@@ -2546,8 +2582,11 @@ public:
 #ifndef NDEBUG
         memset((void *)sp_first_, 0, sizeof(char) * capacity);
 #endif
-        sp_ = sp_first_;
         sp_last_ = sp_first_ + capacity;
+        if (isBackwardPtr())
+            sp_ = sp_last_;
+        else
+            sp_ = sp_first_;
         capacity_ = capacity;
     }
 
@@ -2567,91 +2606,91 @@ public:
     }
 
     void back() {
-        this->sp_--;
+        this->sp_ -= direction() * 1;
     }
 
     void back(int offset) {
-        this->sp_ -= offset;
+        this->sp_ -= direction() * offset;
     }
 
     void backInt8() {
-        this->sp_ -= sizeof(int8_t);
+        this->sp_ -= direction() * sizeof(int8_t);
     }
 
     void backUInt8() {
-        this->sp_ -= sizeof(uint8_t);
+        this->sp_ -= direction() * sizeof(uint8_t);
     }
 
     void backInt16() {
-        this->sp_ -= sizeof(int16_t);
+        this->sp_ -= direction() * sizeof(int16_t);
     }
 
     void backUInt16() {
-        this->sp_ += sizeof(uint16_t);
+        this->sp_ += direction() * sizeof(uint16_t);
     }
 
     void backInt32() {
-        this->sp_ -= sizeof(int32_t);
+        this->sp_ -= direction() * sizeof(int32_t);
     }
 
     void backUInt32() {
-        this->sp_ -= sizeof(uint32_t);
+        this->sp_ -= direction() * sizeof(uint32_t);
     }
 
     void backInt64() {
-        this->sp_ -= sizeof(int64_t);
+        this->sp_ -= direction() * sizeof(int64_t);
     }
 
     void backUInt64() {
-        this->sp_ -= sizeof(uint64_t);
+        this->sp_ -= direction() * sizeof(uint64_t);
     }
 
     void backPointer() {
-        this->sp_ -= sizeof(void *);
+        this->sp_ -= direction() * sizeof(void *);
     }
 
     void next() {
-        this->sp_++;
+        this->sp_ += direction() * 1;
     }
 
     void next(int offset) {
-        this->sp_ += offset;
+        this->sp_ += direction() * offset;
     }
 
     void nextInt8() {
-        this->sp_ += sizeof(int8_t);
+        this->sp_ += direction() * sizeof(int8_t);
     }
 
     void nextUInt8() {
-        this->sp_ += sizeof(uint8_t);
+        this->sp_ += direction() * sizeof(uint8_t);
     }
 
     void nextInt16() {
-        this->sp_ += sizeof(int16_t);
+        this->sp_ += direction() * sizeof(int16_t);
     }
 
     void nextUInt16() {
-        this->sp_ += sizeof(uint16_t);
+        this->sp_ += direction() * sizeof(uint16_t);
     }
 
     void nextInt32() {
-        this->sp_ += sizeof(int32_t);
+        this->sp_ += direction() * sizeof(int32_t);
     }
 
     void nextUInt32() {
-        this->sp_ += sizeof(uint32_t);
+        this->sp_ += direction() * sizeof(uint32_t);
     }
 
     void nextInt64() {
-        this->sp_ += sizeof(int64_t);
+        this->sp_ += direction() * sizeof(int64_t);
     }
 
     void nextUInt64() {
-        this->sp_ += sizeof(uint64_t);
+        this->sp_ += direction() * sizeof(uint64_t);
     }
 
     void nextPointer() {
-        this->sp_ += sizeof(void *);
+        this->sp_ += direction() * sizeof(void *);
     }
 
     unsigned char get() const {
