@@ -33,7 +33,7 @@ uint64_t fibonacci64(uint32_t n)
 void test_Fibonacci32()
 {
     printf("--------------------------------------------\n");
-    printf("  test_Fibonacci32()\n");
+    printf("  test_Fibonacci32()-[native]\n");
     printf("--------------------------------------------\n\n");
 
     uint32_t n;
@@ -61,7 +61,7 @@ void test_Fibonacci32()
 void test_Fibonacci64()
 {
     printf("--------------------------------------------\n");
-    printf("  test_Fibonacci64()\n");
+    printf("  test_Fibonacci64()-[native]\n");
     printf("--------------------------------------------\n\n");
 
     uint32_t n;
@@ -274,8 +274,12 @@ int main(int argc, char * argv[])
     print_version();
 
 #ifdef NDEBUG
-    test_Fibonacci32();
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     test_Fibonacci64();
+#else
+    test_Fibonacci64();
+#endif
 #endif
     test_Interpreter_v3();
     test_Interpreter_v3_inline();
