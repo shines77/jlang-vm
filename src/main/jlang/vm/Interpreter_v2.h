@@ -85,7 +85,7 @@ static const unsigned char s_fibonacciBinary32_new_old[] = {
     OpCode::call_short, 0xEF, 0xFF,
 
     // 00000021:    copy_eax var0, eax
-    OpCode::copy_eax, __var0,
+    OpCode::copy_to_eax, __var0,
     // 00000023:    dec var1
     OpCode::dec,  __var1,
     // 00000025:    call 0x00000010 (short offset 0xFFE8)
@@ -177,7 +177,7 @@ static const unsigned char s_fibonacciBinary32_new[] = {
     OpCode::call_short, 0xEF, 0xFF,
 
     // 00000021:    copy_eax var0, eax
-    OpCode::copy_eax, __var0,
+    OpCode::copy_to_eax, __var0,
     // 00000023:    dec var1
     OpCode::dec,  __var1,
     // 00000025:    call 0x00000010 (short offset 0xFFE8)

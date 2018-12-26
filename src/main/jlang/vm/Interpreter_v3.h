@@ -88,7 +88,7 @@ namespace jlang {
 // 0000001A:    dec var1
 // 0000001E:    call 0x00000010 (short offset 0xFFEF)
 
-// 00000021:    copy_eax var0, eax
+// 00000021:    copy_to_eax var0, eax
 // 00000023:    dec var1
 // 00000025:    call 0x00000010 (short offset 0xFFE8)
 
@@ -129,8 +129,8 @@ static const unsigned char s_fibonacciBinary32_fast1[] = {
     // 0000001D:    call 0x00000010 (near offset 0xF1)
     OpCode::call_near, 0xF1,
 
-    // 0000001F:    copy_eax var0, eax
-    OpCode::copy_eax, __var0,
+    // 0000001F:    copy_to_eax var0, eax
+    OpCode::copy_to_eax, __var0,
     // 00000021:    dec var1
     OpCode::dec,  __var1,
     // 00000023:    call 0x00000010 (near offset 0xEB)
@@ -186,8 +186,8 @@ static const unsigned char s_fibonacciBinary32_fast2[] = {
     // 00000021:    call 0x00000010 (near offset 0xED)
     OpCode::call_near, 0xED,
 
-    // 00000023:    copy_eax var0, eax
-    OpCode::copy_eax, __var0,
+    // 00000023:    copy_to_eax var0, eax
+    OpCode::copy_to_eax, __var0,
     // 00000025:    dec var1
     OpCode::inc,  __var1,
     // 00000027:    call 0x00000010 (near offset 0xE7)
@@ -798,8 +798,10 @@ public:
 private:
 #if USE_BACKWARD_STACK_PTR
     vmStack<basic_type, true>  stack_;
+    vmStack<basic_type, true>  callstack_;
 #else
     vmStack<basic_type, false> stack_;
+    vmStack<basic_type, false> callstack_;
 #endif
     vmImageInfo<basic_type> image_;
     vmHeap<basic_type>      heap_;
@@ -831,9 +833,11 @@ public:
 
     void create(size_type stackSize = kDefaultStackSize) {
         stack_.create(stackSize);
+        callstack_.create(stackSize);
     }
 
     void destroy() {
+        callstack_.destroy();
         stack_.destroy();
         image_.clear();
     }
@@ -886,6 +890,34 @@ public:
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
         return pop_callstack(sp, fp);
+    }
+
+    JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+                                              unsigned char * returnFP, int retType) {
+        sp.writePointer(fp.ptr());
+        sp.writePointer(returnFP);
+        cp.writeInt32(retType);
+        fp.set(sp.ptr());
+        assert(!sp_isOverflow(sp));
+    }
+
+    JM_FORCEINLINE unsigned char * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
+                                                        vmFramePtr & fp, int & retType) {
+        sp.backPointer();
+        unsigned char * returnIP = sp.getPointer();
+        sp.backPointer();
+        unsigned char * framePointer = sp.getPointer();
+        cp.backInt32();
+        retType = cp.getInt32();
+        fp.set(framePointer);
+        return returnIP;
+    }
+
+    JM_FORCEINLINE unsigned char * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+                                                        uint16_t localSize, int & retType) {
+        sp.back(localSize);
+        assert((localSize & 0x03) == 0);
+        return inline_pop_callstack(sp, cp, fp, retType);
     }
 
     template <typename U>
@@ -1102,7 +1134,7 @@ public:
     //
     // move eax, arg1
     //
-    JM_FORCEINLINE void op_move_eax(vmImagePtr & ip, vmStackPtr & sp) {
+    JM_FORCEINLINE void op_move_to_eax(vmImagePtr & ip, vmStackPtr & sp) {
         Debug.print("%08X:  move eax, args[%d]\n", getIpOffset(ip), 0);
         ip.next();
     }
@@ -1110,7 +1142,7 @@ public:
     //
     // copy arg0, eax
     //
-    JM_FORCEINLINE void op_copy_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE void op_copy_to_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
         fp.setUArgValue(index, value);
@@ -1228,51 +1260,57 @@ public:
     //
     // jl_near 0x06
     //
-    JM_FORCEINLINE void op_jl_near(vmImagePtr & ip) {
+    JM_FORCEINLINE bool op_jl_near(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.readValue<0, int8_t>();
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int8_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (near)\n", offset, jmpEntry);
+            return false;
         }
         else {
             ip.next(1L + sizeof(int8_t) + jmpOffset);
             Debug.print("%08X:  jl   0x%08X (near)\n\n", offset, getIpOffset(ip));
+            return true;
         }
     }
 
     //
     // jl_short 0x16, 0x00
     //
-    JM_FORCEINLINE void op_jl_short(vmImagePtr & ip) {
+    JM_FORCEINLINE bool op_jl_short(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.readValue<0, int16_t>();
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int16_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (short)\n", offset, jmpEntry);
+            return false;
         }
         else {
             ip.next(1L + sizeof(int16_t) + jmpOffset);
             Debug.print("%08X:  jl   0x%08X (short)\n\n", offset, getIpOffset(ip));
+            return true;
         }
     }
 
     //
     // jl_long 0x29, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_jl_long(vmImagePtr & ip) {
+    JM_FORCEINLINE bool op_jl_long(vmImagePtr & ip) {
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.readValue<0, int32_t>();
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int32_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
             Debug.print("%08X:  jl   0x%08X (long)\n", offset, jmpEntry);
+            return false;
         }
         else {
             ip.next(1L + sizeof(int8_t) + jmpOffset);
             Debug.print("%08X:  jl   0x%08X (long)\n\n", offset, getIpOffset(ip));
+            return true;
         }
     }
 
@@ -1491,6 +1529,138 @@ public:
                         offset, (uint32_t)localSize, value);
             return true;
         }
+    }
+
+    //
+    // inline_call_near 0x08
+    //
+    JM_FORCEINLINE void op_inline_call_near(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                            vmFramePtr & fp, int retType) {
+        uint32_t offset = getIpOffset(ip);
+        int8_t callOffset = ip.readValue<0, int8_t>();
+        ip.next(1 + sizeof(int8_t));
+
+        unsigned char * returnIP = ip.ptr();
+        inline_push_callstack(sp, cp, fp, returnIP, retType);
+
+        unsigned char * newIP = returnIP + callOffset;
+        assert(CHECK_ADDR_ALIGNMENT(newIP));
+        ip.set(newIP);
+
+        Debug.print("%08X:  call 0x%08X (near)\n\n", offset, getIpOffset(ip));
+    }
+
+    //
+    // inline_call_short 0x08, 0x00
+    //
+    JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                             vmFramePtr & fp, int retType) {
+        uint32_t offset = getIpOffset(ip);
+        int16_t callOffset = ip.readValue<0, int16_t>();
+        ip.next(1 + sizeof(int16_t));
+
+        unsigned char * returnIP = ip.ptr();
+        inline_push_callstack(sp, cp, fp, returnIP, retType);
+
+        unsigned char * newIP = returnIP + callOffset;
+        assert(CHECK_ADDR_ALIGNMENT(newIP));
+        ip.set(newIP);
+
+        Debug.print("%08X:  call 0x%08X (short)\n\n", offset, getIpOffset(ip));
+    }
+
+    //
+    // inline_call_long 0x18, 0x00, 0x00, 0x00
+    //
+    JM_FORCEINLINE void op_inline_call_long(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                            vmFramePtr & fp, int retType) {
+        uint32_t offset = getIpOffset(ip);
+        int32_t callOffset = ip.readValue<0, int32_t>();
+        ip.next(1 + sizeof(int32_t));
+
+        unsigned char * returnIP = ip.ptr();
+        inline_push_callstack(sp, cp, fp, returnIP, retType);
+
+        unsigned char * newIP = returnIP + callOffset;
+        assert(CHECK_ADDR_ALIGNMENT(newIP));
+        ip.set(newIP);
+
+        Debug.print("%08X:  call 0x%08X (long)\n\n",
+                    offset, getIpOffset(ip));
+    }
+
+    //
+    // ret
+    //
+    JM_FORCEINLINE int op_inline_ret(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                     vmFramePtr & fp, bool & done) {
+        uint32_t offset = getIpOffset(ip);
+
+        int retType;
+        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        ip.set(returnIP);
+
+        if (returnIP != nullptr) {
+            Debug.print("%08X:  ret  0x%08X\n\n", offset, getIpOffset(ip));
+            done = false;
+        }
+        else {
+            Debug.print("%08X:  ret  (done)\n\n", offset);
+            done = true;
+        }
+
+        return retType;
+    }
+
+    //
+    // ret_n 0x08, 0x00
+    //
+    JM_FORCEINLINE int op_inline_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                       vmFramePtr & fp, bool & done) {
+        uint32_t offset = getIpOffset(ip);
+        uint16_t localSize = ip.readValue<0, uint16_t>();
+
+        int retType;
+        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, localSize, retType);
+        ip.set(returnIP);
+
+        if (returnIP != nullptr) {
+            Debug.print("%08X:  ret_n [%u] 0x%08X\n\n",
+                        offset, (uint32_t)localSize, getIpOffset(ip));
+            done = false;
+        }
+        else {
+            Debug.print("%08X:  ret_n [%u] (done)\n\n", offset, (uint32_t)localSize);
+            done = true;
+        }
+
+        return retType;
+    }
+
+    //
+    // ret_eax 0x00000001
+    //
+    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
+                                         vmFramePtr & fp, Register & regs, bool & done) {
+        uint32_t offset = getIpOffset(ip);
+        uint32_t value = ip.readValue<0, uint32_t>();
+        regs.eax.u32 = value;
+
+        int retType;
+        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        ip.set(returnIP);
+
+        if (returnIP != nullptr) {
+            Debug.print("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n\n",
+                        offset, getIpOffset(ip), value);
+            done = false;
+        }
+        else {
+            Debug.print("%08X:  ret_eax (done) (eax = 0x%08X)\n\n", offset, value);
+            done = true;
+        }
+
+        return retType;
     }
 
     //
@@ -1768,12 +1938,12 @@ public:
                     op_move(ip, sp);
                     break;
 
-                case OpCode::move_eax:
-                    op_move_eax(ip, sp);
+                case OpCode::move_to_eax:
+                    op_move_to_eax(ip, sp);
                     break;
 
-                case OpCode::copy_eax:
-                    op_copy_eax(ip, sp, fp, regs);
+                case OpCode::copy_to_eax:
+                    op_copy_to_eax(ip, sp, fp, regs);
                     break;
 
                 case OpCode::cmp:
@@ -1953,11 +2123,103 @@ Execute_Finished:
         return ec;
     }
 
+    enum {
+        ret_first,
+        ret_00,
+        ret_01,
+        ret_02,
+        ret_last
+    };
+
+    int execute_inline(return_type & retVal) {
+        int ec = 0;
+        if (isInited()) {
+            register vmImagePtr ip;
+            register vmStackPtr sp;
+            register vmFramePtr fp;
+            register vmStackPtr cp;
+            register Register   regs;
+
+            // Init environment
+            ip.set(image_.getPtr());
+            sp.set(stack_.current());
+            fp.set(stack_.current());
+            cp.set(callstack_.current());
+            regs.uval = 0;
+
+            // Push call program entry.
+            inline_push_callstack(sp, cp, fp, nullptr, ret_first);
+
+            // Main loop
+            bool done;
+            do {
+                op_push_i32(ip, sp);
+                op_inline_call_short(ip, sp, cp, fp, ret_00);
+                goto fibonacci_n;
+fibonacci_ret_00:
+                op_pop_i32(ip, sp);
+                int retType = op_inline_ret(ip, sp, cp, fp, done);
+                if (likely(done)) {
+                    retVal.setDataType(return_type::Basic);
+                    retVal.setValue(regs.eax.u32);
+                    break;
+                }
+                else {
+                    Debug.print("Error: Unknown error.\n");
+                }
+                goto Execute_Finished;
+fibonacci_n:
+                op_cmp_imm_i32(ip, sp, fp);
+                bool is_large = op_jl_near(ip);
+                if (likely(!is_large)) {
+                    op_add_sp_4(ip, sp);
+                    op_push(ip, sp, fp);
+                    op_dec(ip, fp);
+                    op_inline_call_near(ip, sp, cp, fp, ret_01);
+                    goto fibonacci_n;
+fibonacci_ret_01:
+                    op_copy_to_eax(ip, sp, fp, regs);
+                    op_dec(ip, fp);
+                    op_inline_call_near(ip, sp, cp, fp, ret_02);
+                    goto fibonacci_n;
+fibonacci_ret_02:
+                    op_add_eax(ip, fp, regs);
+                    int retType = op_inline_ret_n(ip, sp, cp, fp, done);
+                    if (retType == ret_01)
+                        goto fibonacci_ret_01;
+                    else if (retType == ret_02)
+                        goto fibonacci_ret_02;
+                    else
+                        goto fibonacci_ret_00;
+                }
+                else {
+                    int retType = op_inline_ret_eax(ip, sp, cp, fp, regs, done);
+                    if (retType == ret_01)
+                        goto fibonacci_ret_01;
+                    else if (retType == ret_02)
+                        goto fibonacci_ret_02;
+                    else
+                        goto fibonacci_ret_00;
+                }
+            } while (1);
+        }
+
+Execute_Finished:
+        return ec;
+    }
+
     int run(return_type & retVal) {
         ip_.set(image_.getPtr());
         sp_.set(stack_.current());
         fp_.set(stack_.current());
         return execute(retVal);
+    }
+
+    int run_inline(return_type & retVal) {
+        ip_.set(image_.getPtr());
+        sp_.set(stack_.current());
+        fp_.set(stack_.current());
+        return execute_inline(retVal);
     }
 };
 
@@ -2022,6 +2284,12 @@ public:
         int ec = context_.run(ret);
         return ec;
     }
+
+    int run_inline(return_type & ret) {
+        binary_.setInput(ret.getValue());
+        int ec = context_.run_inline(ret);
+        return ec;
+    }
 };
 
 template <typename BasicType = uintptr_t>
@@ -2046,6 +2314,11 @@ public:
 
     int run(return_type & ret) {
         int ec = engine_.run(ret);
+        return ec;
+    }
+
+    int run_inline(return_type & ret) {
+        int ec = engine_.run_inline(ret);
         return ec;
     }
 };

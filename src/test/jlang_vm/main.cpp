@@ -54,7 +54,7 @@ void test_Fibonacci32()
     printf("  fibonacci(%u) = %u\n\n", n, fib_n);
 
     double elapsed_time = sw.getElapsedMillisec();
-    printf("  Elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
 }
 
@@ -82,7 +82,7 @@ void test_Fibonacci64()
     printf("  fibonacci(%u) = %llu\n\n", n, fib_n);
 
     double elapsed_time = sw.getElapsedMillisec();
-    printf("  Elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
 }
 
@@ -126,7 +126,7 @@ void test_Interpreter_v1()
     printf("\n");
 
     double elapsed_time = sw.getElapsedMillisec();
-    printf("  Elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
 }
 
@@ -170,7 +170,7 @@ void test_Interpreter_v2()
     printf("\n");
 
     double elapsed_time = sw.getElapsedMillisec();
-    printf("  Elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
 }
 
@@ -214,7 +214,51 @@ void test_Interpreter_v3()
     printf("\n");
 
     double elapsed_time = sw.getElapsedMillisec();
-    printf("  Elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("\n");
+}
+
+void test_Interpreter_v3_inline()
+{
+    printf("--------------------------------------------\n");
+    printf("  test_Interpreter_v3_inline()\n");
+    printf("--------------------------------------------\n\n");
+
+    uint32_t n;
+    printf("n = ? ");
+#if defined(_WIN32)
+    int r = scanf_s("%u", &n);
+#else
+    int r = scanf("%u", &n);
+#endif
+    printf("\n");
+
+    StopWatch sw;
+
+    Interpreter_v3<> it;
+    vmReturn<> retVal;
+    retVal.setDataType(vmReturn<>::Basic);
+    retVal.setValue(n);
+    
+    int ec = it.create();
+
+    sw.start();
+    ec = it.run_inline(retVal);
+    if (ec >= 0) {
+        sw.stop();
+        if (retVal.isValid()) {
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
+#else
+            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
+#endif
+        }
+    }
+    printf("\n");
+
+    double elapsed_time = sw.getElapsedMillisec();
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
 }
 
@@ -234,6 +278,7 @@ int main(int argc, char * argv[])
     test_Fibonacci64();
 #endif
     test_Interpreter_v3();
+    test_Interpreter_v3_inline();
     test_Interpreter_v2();
     test_Interpreter_v1();
 
