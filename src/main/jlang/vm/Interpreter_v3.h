@@ -18,7 +18,7 @@
 #include <atomic>
 
 /* If is backward stack pointer ? */
-#define USE_BACKWARD_STACK_PTR  1
+#define USE_BACKWARD_STACK_PTR  0
 
 //////////////////////////////////////////////////////////////
 
