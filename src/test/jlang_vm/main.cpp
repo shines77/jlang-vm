@@ -278,11 +278,11 @@ int main(int argc, char * argv[])
  || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
     test_Fibonacci64();
 #else
-    test_Fibonacci64();
+    test_Fibonacci32();
 #endif
 #endif
-    test_Interpreter_v3();
     test_Interpreter_v3_inline();
+    test_Interpreter_v3();
     test_Interpreter_v2();
     test_Interpreter_v1();
 
