@@ -18,31 +18,31 @@
 #include <atomic>
 
 /* If is backward stack pointer ? */
-#define BACKWARD_STACK_PTR  0
+#define USE_BACKWARD_STACK_PTR  1
 
 //////////////////////////////////////////////////////////////
 
 #define FRAME_STACK_SIZEOF  ((sizeof(void *) * 2) / sizeof(uint32_t))
 
-#if BACKWARD_STACK_PTR
+#if USE_BACKWARD_STACK_PTR
 
-#define __arg0  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 1))
-#define __arg1  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 2))
-#define __arg2  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 3))
-#define __arg3  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 4))
-#define __arg4  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 5))
-#define __arg5  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 6))
-#define __arg6  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 7))
-#define __arg7  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 8))
+#define __arg0  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 0))
+#define __arg1  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 1))
+#define __arg2  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 2))
+#define __arg3  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 3))
+#define __arg4  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 4))
+#define __arg5  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 5))
+#define __arg6  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 6))
+#define __arg7  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 7))
 
-#define __var0  ((uint8_t)(0))
-#define __var1  ((uint8_t)(1))
-#define __var2  ((uint8_t)(2))
-#define __var3  ((uint8_t)(3))
-#define __var4  ((uint8_t)(4))
-#define __var5  ((uint8_t)(5))
-#define __var6  ((uint8_t)(6))
-#define __var7  ((uint8_t)(7))
+#define __var0  ((uint8_t)(0 - 1))
+#define __var1  ((uint8_t)(0 - 2))
+#define __var2  ((uint8_t)(0 - 3))
+#define __var3  ((uint8_t)(0 - 4))
+#define __var4  ((uint8_t)(0 - 5))
+#define __var5  ((uint8_t)(0 - 6))
+#define __var6  ((uint8_t)(0 - 7))
+#define __var7  ((uint8_t)(0 - 8))
 
 #else
 
@@ -64,7 +64,7 @@
 #define __var6  ((uint8_t)(6))
 #define __var7  ((uint8_t)(7))
 
-#endif // BACKWARD_STACK_PTR
+#endif // USE_BACKWARD_STACK_PTR
 
 //////////////////////////////////////////////////////////////
 
@@ -230,6 +230,7 @@ public:
 
     uint8_t get() { return *ptr_; }
 
+    // ForwardPtr
     int8_t   getInt8()    const { return *(int8_t *)  ptr_; }
     uint8_t  getUInt8()   const { return *(uint8_t *) ptr_; }
     int16_t  getInt16()   const { return *(int16_t *) ptr_; }
@@ -246,6 +247,7 @@ public:
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
 
+    // ForwardPtr
     void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
     void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
     void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
@@ -263,6 +265,7 @@ public:
     template <typename U = int>
     void setValue(U value) const { *(U *)ptr_ = value; }
 
+    // ForwardPtr
     void back() { ptr_--; }
     void back(int offset) { ptr_ -= offset; }
 
@@ -279,6 +282,7 @@ public:
     void backUInt64()  { ptr_ -= sizeof(uint64_t); }
     void backPointer() { ptr_ -= sizeof(void *);   }
 
+    // ForwardPtr
     void next() { ptr_++; }
     void next(int offset) { ptr_ += offset; }
 
@@ -295,6 +299,7 @@ public:
     void nextUInt64()  { ptr_ += sizeof(uint64_t); }
     void nextPointer() { ptr_ += sizeof(void *);   }
 
+    // ForwardPtr
     int8_t   readInt8()   { int8_t   value = getInt8();   nextInt8();   return value; }
     uint8_t  readUInt8()  { uint8_t  value = getUInt8();  nextUInt8();  return value; }
     int16_t  readInt16()  { int16_t  value = getInt16();  nextInt16();  return value; }
@@ -310,6 +315,7 @@ public:
         return value;
     }
 
+    // ForwardPtr
     void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
     void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
     void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
@@ -325,6 +331,7 @@ public:
         nextPointer();
     }
 
+    // ForwardPtr
     int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
     uint8_t  getArg0UInt8()  const { return *(uint8_t *) (ptr_ + 1); }
     int16_t  getArg0Int16()  const { return *(int16_t *) (ptr_ + 1); }
@@ -352,33 +359,7 @@ public:
     int64_t  getArg2Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t)  * 2); }
     uint64_t getArg2UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t) * 2); }
 
-    int8_t   getArg3Int8()   const { return *(int8_t *)  (ptr_ + 1 + sizeof(int8_t)   * 3); }
-    uint8_t  getArg3UInt8()  const { return *(uint8_t *) (ptr_ + 1 + sizeof(uint8_t)  * 3); }
-    int16_t  getArg3Int16()  const { return *(int16_t *) (ptr_ + 1 + sizeof(int16_t)  * 3); }
-    uint16_t getArg3UInt16() const { return *(uint16_t *)(ptr_ + 1 + sizeof(uint16_t) * 3); }
-    int32_t  getArg3Int32()  const { return *(int32_t *) (ptr_ + 1 + sizeof(int32_t)  * 3); }
-    uint32_t getArg3UInt32() const { return *(uint32_t *)(ptr_ + 1 + sizeof(uint32_t) * 3); }
-    int64_t  getArg3Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t)  * 3); }
-    uint64_t getArg3UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t) * 3); }
-
-    int8_t   getArg4Int8()   const { return *(int8_t *)  (ptr_ + 1 + sizeof(int8_t)   * 4); }
-    uint8_t  getArg4UInt8()  const { return *(uint8_t *) (ptr_ + 1 + sizeof(uint8_t)  * 4); }
-    int16_t  getArg4Int16()  const { return *(int16_t *) (ptr_ + 1 + sizeof(int16_t)  * 4); }
-    uint16_t getArg4UInt16() const { return *(uint16_t *)(ptr_ + 1 + sizeof(uint16_t) * 4); }
-    int32_t  getArg4Int32()  const { return *(int32_t *) (ptr_ + 1 + sizeof(int32_t)  * 4); }
-    uint32_t getArg4UInt32() const { return *(uint32_t *)(ptr_ + 1 + sizeof(uint32_t) * 4); }
-    int64_t  getArg4Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t)  * 4); }
-    uint64_t getArg4UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t) * 4); }
-
-    int8_t   getArg5Int8()   const { return *(int8_t *)  (ptr_ + 1 + sizeof(int8_t)   * 5); }
-    uint8_t  getArg5UInt8()  const { return *(uint8_t *) (ptr_ + 1 + sizeof(uint8_t)  * 5); }
-    int16_t  getArg5Int16()  const { return *(int16_t *) (ptr_ + 1 + sizeof(int16_t)  * 5); }
-    uint16_t getArg5UInt16() const { return *(uint16_t *)(ptr_ + 1 + sizeof(uint16_t) * 5); }
-    int32_t  getArg5Int32()  const { return *(int32_t *) (ptr_ + 1 + sizeof(int32_t)  * 5); }
-    uint32_t getArg5UInt32() const { return *(uint32_t *)(ptr_ + 1 + sizeof(uint32_t) * 5); }
-    int64_t  getArg5Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t)  * 5); }
-    uint64_t getArg5UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t) * 5); }
-
+    // ForwardPtr
     template <int Index, typename U = int, int Offset = 1>
     U getArgValue() const { return *(U *)(ptr_ + Offset + sizeof(U) * Index); }
 
@@ -386,10 +367,7 @@ public:
     void setArgValue(U value) { (*(U *)(ptr_ + Offset + sizeof(U) * Index)) = value; }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    U getValue() const { return *(U *)(ptr_ + Offset - sizeof(V) * Index); }
-
-    template <int Index, typename U = int, typename V = int, int Offset = 1>
-    U readValue() const { return getValue<Index, U, V, Offset>(); }
+    U getValue() const { return *(U *)(ptr_ + Offset + sizeof(V) * Index); }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void setValue(U value) {
@@ -397,32 +375,36 @@ public:
     }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
+    U readValue() const { return getValue<Index, U, V, Offset>(); }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
     void writeValue(U value) {
         setValue<Index, U, V, Offset>(value);
         next<U>();
     }
 
-    int32_t * getStackIArgPtr(int32_t index) const {
+    // ForwardPtr::Arg ##
+    int32_t * getIArgPtr(int32_t index) const {
         return (((int32_t *)ptr_) + index);
     }
 
-    uint32_t * getStackUArgPtr(int32_t index) const {
+    uint32_t * getUArgPtr(int32_t index) const {
         return (((uint32_t *)ptr_) + index);
     }
 
-    int32_t getStackIArgValue(int32_t index) const {
+    int32_t getIArgValue(int32_t index) const {
         return *(((int32_t *)ptr_) + index);
     }
 
-    uint32_t getStackUArgValue(int32_t index) const {
+    uint32_t getUArgValue(int32_t index) const {
         return *(((uint32_t *)ptr_) + index);
     }
 
-    void setStackIArgValue(int32_t index, int32_t value) {
+    void setIArgValue(int32_t index, int32_t value) {
         *(((int32_t *)ptr_) + index) = value;
     }
 
-    void setStackUArgValue(int32_t index, uint32_t value) {
+    void setUArgValue(int32_t index, uint32_t value) {
         *(((uint32_t *)ptr_) + index) = value;
     }
 };
@@ -444,6 +426,7 @@ public:
     void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
 
 private:
+    // BackwardPtr
     int8_t   _getInt8()    const { return *(int8_t *)  ptr_; }
     uint8_t  _getUInt8()   const { return *(uint8_t *) ptr_; }
     int16_t  _getInt16()   const { return *(int16_t *) ptr_; }
@@ -460,6 +443,7 @@ private:
     template <typename U = int>
     U _getValue() const { return *(U *)ptr_; }
 
+    // BackwardPtr
     void _setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
     void _setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
     void _setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
@@ -480,6 +464,7 @@ private:
 public:
     uint8_t get() { return *(int8_t *)(ptr_ - sizeof(uint8_t)); }
 
+    // BackwardPtr
     int8_t   getInt8()    const { return *(int8_t *)  (ptr_ - sizeof(int8_t));   }
     uint8_t  getUInt8()   const { return *(uint8_t *) (ptr_ - sizeof(uint8_t));  }
     int16_t  getInt16()   const { return *(int16_t *) (ptr_ - sizeof(int16_t));  }
@@ -496,6 +481,7 @@ public:
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
 
+    // BackwardPtr
     void setInt8(int8_t val)     { *(int8_t *)  (ptr_ - sizeof(int8_t))   = val; }
     void setUInt8(uint8_t val)   { *(uint8_t *) (ptr_ - sizeof(uint8_t))  = val; }
     void setInt16(int16_t val)   { *(int16_t *) (ptr_ - sizeof(int16_t))  = val; }
@@ -513,6 +499,7 @@ public:
     template <typename U = int>
     void setValue(U value) const { *(U *)ptr_ = value; }
 
+    // BackwardPtr
     void back() { ptr_++; }
     void back(int offset) { ptr_ += offset; }
 
@@ -529,6 +516,7 @@ public:
     void backUInt64()  { ptr_ += sizeof(uint64_t); }
     void backPointer() { ptr_ += sizeof(void *);   }
 
+    // BackwardPtr
     void next() { ptr_--; }
     void next(int offset) { ptr_ -= offset; }
 
@@ -545,6 +533,7 @@ public:
     void nextUInt64()  { ptr_ -= sizeof(uint64_t); }
     void nextPointer() { ptr_ -= sizeof(void *);   }
 
+    // BackwardPtr
     int8_t   readInt8()   { nextInt8();   return _getInt8();   }
     uint8_t  readUInt8()  { nextUInt8();  return _getUInt8();  }
     int16_t  readInt16()  { nextInt16();  return _getInt16();  }
@@ -559,6 +548,7 @@ public:
         return _getPointer();
     }
 
+    // BackwardPtr
     void writeInt8(int8_t val)     { nextInt8();    _setInt8(val);    }
     void writeUInt8(uint8_t val)   { nextUInt8();   _setUInt8(val);   }
     void writeInt16(int16_t val)   { nextInt16();   _setInt16(val);   }
@@ -574,6 +564,7 @@ public:
         _setPointer(val);
     }
 
+    // BackwardPtr
     int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
     uint8_t  getArg0UInt8()  const { return *(uint8_t *) (ptr_ + 1); }
     int16_t  getArg0Int16()  const { return *(int16_t *) (ptr_ + 1); }
@@ -601,33 +592,7 @@ public:
     int64_t  getArg2Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 2); }
     uint64_t getArg2UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 2); }
 
-    int8_t   getArg3Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 3); }
-    uint8_t  getArg3UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 3); }
-    int16_t  getArg3Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 3); }
-    uint16_t getArg3UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 3); }
-    int32_t  getArg3Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 3); }
-    uint32_t getArg3UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 3); }
-    int64_t  getArg3Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 3); }
-    uint64_t getArg3UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 3); }
-
-    int8_t   getArg4Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 4); }
-    uint8_t  getArg4UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 4); }
-    int16_t  getArg4Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 4); }
-    uint16_t getArg4UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 4); }
-    int32_t  getArg4Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 4); }
-    uint32_t getArg4UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 4); }
-    int64_t  getArg4Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 4); }
-    uint64_t getArg4UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 4); }
-
-    int8_t   getArg5Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 5); }
-    uint8_t  getArg5UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 5); }
-    int16_t  getArg5Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 5); }
-    uint16_t getArg5UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 5); }
-    int32_t  getArg5Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 5); }
-    uint32_t getArg5UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 5); }
-    int64_t  getArg5Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 5); }
-    uint64_t getArg5UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 5); }
-
+    // BackwardPtr
     template <int Index, typename U = int, int Offset = 1>
     U getArgValue() const { return *(U *)(ptr_ + Offset - sizeof(U) * Index); }
 
@@ -638,12 +603,12 @@ public:
     U getValue() const { return *(U *)(ptr_ + Offset - sizeof(V) * Index); }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    U readValue() const { return getValue<Index, U, V, Offset>(); }
-
-    template <int Index, typename U = int, typename V = int, int Offset = 1>
     void setValue(U value) {
         (*(U *)(ptr_ + Offset - sizeof(V) * Index)) = value;
     }
+
+    template <int Index, typename U = int, typename V = int, int Offset = 1>
+    U readValue() const { return getValue<Index, U, V, Offset>(); }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void writeValue(U value) {
@@ -651,34 +616,35 @@ public:
         next<U>();
     }
 
-    int32_t * getStackIArgPtr(int32_t index) const {
-        return (((int32_t *)(ptr_ - sizeof(int32_t))) + index);
+    // BackwardPtr::Arg ##
+    int32_t * getIArgPtr(int32_t index) const {
+        return (((int32_t *)ptr_) + index);
     }
 
-    uint32_t * getStackUArgPtr(int32_t index) const {
-        return (((uint32_t *)(ptr_ - sizeof(uint32_t))) + index);
+    uint32_t * getUArgPtr(int32_t index) const {
+        return (((uint32_t *)ptr_) + index);
     }
 
-    int32_t getStackIArgValue(int32_t index) const {
-        return *(((int32_t *)(ptr_ - sizeof(int32_t))) + index);
+    int32_t getIArgValue(int32_t index) const {
+        return *(((int32_t *)ptr_) + index);
     }
 
-    uint32_t getStackUArgValue(int32_t index) const {
-        return *(((uint32_t *)(ptr_ - sizeof(uint32_t))) + index);
+    uint32_t getUArgValue(int32_t index) const {
+        return *(((uint32_t *)ptr_) + index);
     }
 
-    void setStackIArgValue(int32_t index, int32_t value) {
-        *(((int32_t *)(ptr_ - sizeof(uint32_t))) + index) = value;
+    void setIArgValue(int32_t index, int32_t value) {
+        *(((int32_t *)ptr_) + index) = value;
     }
 
-    void setStackUArgValue(int32_t index, uint32_t value) {
-        *(((uint32_t *)(ptr_ - sizeof(uint32_t))) + index) = value;
+    void setUArgValue(int32_t index, uint32_t value) {
+        *(((uint32_t *)ptr_) + index) = value;
     }
 };
 
 typedef ForwardPtr  vmImagePtr;
 
-#if BACKWARD_STACK_PTR
+#if USE_BACKWARD_STACK_PTR
 typedef BackwardPtr vmStackPtr;
 typedef BackwardPtr vmFramePtr;
 #else
@@ -830,7 +796,7 @@ public:
     static const size_type kDefaultStackSize = 8 * 1048576U;
 
 private:
-#if BACKWARD_STACK_PTR
+#if USE_BACKWARD_STACK_PTR
     vmStack<basic_type, true>  stack_;
 #else
     vmStack<basic_type, false> stack_;
@@ -893,8 +859,8 @@ public:
     }
 
     int32_t getArgIndex(int8_t index) {
-#if BACKWARD_STACK_PTR
-        return (index - (FRAME_STACK_SIZEOF + 1));
+#if USE_BACKWARD_STACK_PTR
+        return (index - FRAME_STACK_SIZEOF);
 #else
         return (index + (FRAME_STACK_SIZEOF + 1));
 #endif
@@ -1005,7 +971,7 @@ public:
     //
     JM_FORCEINLINE void op_push(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         int8_t index = ip.readValue<0, int8_t>();
-        int32_t value = fp.getStackUArgValue(index);
+        int32_t value = fp.getUArgValue(index);
         sp.writeInt32(value);
 
         Debug.print("%08X:  push args[%d]  (0x%08X, int32)\n",
@@ -1109,7 +1075,7 @@ public:
     JM_FORCEINLINE void op_load(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
-        fp.setStackUArgValue(index, value);
+        fp.setUArgValue(index, value);
         Debug.print("%08X:  load args[%d], 0x%08X\n",
                     getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
@@ -1147,7 +1113,7 @@ public:
     JM_FORCEINLINE void op_copy_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
-        fp.setStackUArgValue(index, value);
+        fp.setUArgValue(index, value);
         Debug.print("%08X:  copy args[%d], eax = (0x%08X)\n",
                     getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
@@ -1165,8 +1131,8 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        int32_t value1 = fp.getStackIArgValue(index1);
-        int32_t value2 = fp.getStackIArgValue(index2);
+        int32_t value1 = fp.getIArgValue(index1);
+        int32_t value2 = fp.getIArgValue(index2);
         ip.next(1 + sizeof(int8_t) * 2);
 
         Debug.print("%08X:  cmp  args[%d], args[%d] - (%d, %d) (int32)\n",
@@ -1190,8 +1156,8 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackUArgValue(index1);
-        uint32_t value2 = fp.getStackUArgValue(index2);
+        uint32_t value1 = fp.getUArgValue(index1);
+        uint32_t value2 = fp.getUArgValue(index2);
         ip.next(1 + sizeof(int8_t) * 2);
 
         Debug.print("%08X:  cmp  args[%d], args[%d] - (%u, %u) (uint32)\n",
@@ -1214,7 +1180,7 @@ public:
     JM_FORCEINLINE bool op_cmp_imm_i32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        int32_t value1 = fp.getStackIArgValue(index);
+        int32_t value1 = fp.getIArgValue(index);
         int32_t value2 = ip.readValue<0, int32_t, int32_t, 2>();
         ip.next(1 + sizeof(int8_t) + sizeof(int32_t));
 
@@ -1237,7 +1203,7 @@ public:
     JM_FORCEINLINE bool op_cmp_imm_u32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackUArgValue(index);
+        uint32_t value1 = fp.getUArgValue(index);
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
 
@@ -1550,9 +1516,9 @@ public:
     JM_FORCEINLINE void op_inc(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackUArgValue(index);
+        uint32_t value = fp.getUArgValue(index);
         value++;
-        fp.setStackUArgValue(index, value);
+        fp.setUArgValue(index, value);
 
         Debug.print("%08X:  inc  arg[%d]  (0x%08X)\n",
                     offset, getArgIndex(index), value);
@@ -1565,9 +1531,9 @@ public:
     JM_FORCEINLINE void op_dec(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackUArgValue(index);
+        uint32_t value = fp.getUArgValue(index);
         value--;
-        fp.setStackUArgValue(index, value);
+        fp.setUArgValue(index, value);
 
         Debug.print("%08X:  dec  args[%d]  (0x%08X)\n",
                     offset, getArgIndex(index), value);
@@ -1581,11 +1547,11 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackUArgValue(index1);
-        uint32_t value2 = fp.getStackUArgValue(index2);
+        uint32_t value1 = fp.getUArgValue(index1);
+        uint32_t value2 = fp.getUArgValue(index2);
 
         uint32_t newValue = value1 + value2;
-        fp.setStackUArgValue(index1, newValue);
+        fp.setUArgValue(index1, newValue);
 
         Debug.print("%08X:  add  args[%d], args[%d] = (0x%08X)\n",
                     offset, getArgIndex(index1), getArgIndex(index2),
@@ -1600,10 +1566,10 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
-        uint32_t value1 = fp.getStackUArgValue(index);
+        uint32_t value1 = fp.getUArgValue(index);
 
         uint32_t newValue = value1 + value2;
-        fp.setStackUArgValue(index, newValue);
+        fp.setUArgValue(index, newValue);
 
         Debug.print("%08X:  add  args[%d], 0x%08X = (0x%08X)\n",
                     offset, getArgIndex(index), value2, newValue);
@@ -1616,7 +1582,7 @@ public:
     JM_FORCEINLINE void op_add_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackUArgValue(index);
+        uint32_t value = fp.getUArgValue(index);
 
         uint32_t newValue = regs.eax.u32 + value;
         regs.eax.u32 = newValue;
@@ -1648,10 +1614,10 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.readValue<0, int8_t>();
         int8_t index2 = ip.readValue<0, int8_t>();
-        uint32_t value1 = fp.getStackUArgValue(index1);
-        uint32_t value2 = fp.getStackUArgValue(index2);
+        uint32_t value1 = fp.getUArgValue(index1);
+        uint32_t value2 = fp.getUArgValue(index2);
         uint32_t newValue = value1 - value2;
-        fp.setStackUArgValue(index1, newValue);
+        fp.setUArgValue(index1, newValue);
 
         Debug.print("%08X:  sub  args[%d], args[%d] = (0x%08X)\n",
                     offset, getArgIndex(index1), getArgIndex(index2),
@@ -1666,10 +1632,10 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
         uint32_t value2 = ip.readValue<0, uint32_t, uint32_t, 2>();
-        uint32_t value1 = fp.getStackUArgValue(index);
+        uint32_t value1 = fp.getUArgValue(index);
 
         uint32_t newValue = value1 - value2;
-        fp.setStackUArgValue(index, newValue);
+        fp.setUArgValue(index, newValue);
 
         Debug.print("%08X:  sub  args[%d], 0x%08X = (0x%08X)\n",
                     offset, getArgIndex(index), value2, newValue);
@@ -1682,7 +1648,7 @@ public:
     JM_FORCEINLINE void op_sub_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.readValue<0, int8_t>();
-        uint32_t value = fp.getStackUArgValue(index);
+        uint32_t value = fp.getUArgValue(index);
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;
 
