@@ -2157,17 +2157,19 @@ Execute_Finished:
                 op_inline_call_short(ip, sp, cp, fp, ret_00);
                 goto fibonacci_n;
 fibonacci_ret_00:
-                op_pop_i32(ip, sp);
-                int retType0 = op_inline_ret(ip, sp, cp, fp, done);
-                if (likely(done)) {
-                    retVal.setDataType(return_type::Basic);
-                    retVal.setValue(regs.eax.u32);
-                    break;
+                {
+                    op_pop_i32(ip, sp);
+                    int retType = op_inline_ret(ip, sp, cp, fp, done);
+                    if (likely(done)) {
+                        retVal.setDataType(return_type::Basic);
+                        retVal.setValue(regs.eax.u32);
+                        break;
+                    }
+                    else {
+                        Debug.print("Error: Unknown error.\n");
+                    }
+                    goto Execute_Finished;
                 }
-                else {
-                    Debug.print("Error: Unknown error.\n");
-                }
-                goto Execute_Finished;
 fibonacci_n:
                 op_cmp_imm_i32(ip, sp, fp);
                 bool is_large = op_jl_near(ip);
