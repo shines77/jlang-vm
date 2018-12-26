@@ -2158,7 +2158,7 @@ Execute_Finished:
                 goto fibonacci_n;
 fibonacci_ret_00:
                 op_pop_i32(ip, sp);
-                int retType = op_inline_ret(ip, sp, cp, fp, done);
+                int retType0 = op_inline_ret(ip, sp, cp, fp, done);
                 if (likely(done)) {
                     retVal.setDataType(return_type::Basic);
                     retVal.setValue(regs.eax.u32);
