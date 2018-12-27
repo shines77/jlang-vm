@@ -14,6 +14,36 @@
 
 using namespace jlang;
 
+static const int kWarmupMillsecs = 600;
+
+void cpu_warmup(int delayTime)
+{
+#if defined(NDEBUG)
+    double startTime, stopTime;
+    double delayTimeLimit = (double)delayTime / 1000.0;
+    volatile int sum = 0;
+
+    printf("CPU warm-up begin ...\n");
+    fflush(stdout);
+    startTime = StopWatch::timestamp();
+    double elapsedTime;
+    do {
+        for (int i = 0; i < 500; ++i) {
+            sum += i;
+            for (int j = 5000; j >= 0; --j) {
+                sum -= j;
+            }
+        }
+        stopTime = StopWatch::timestamp();
+        elapsedTime = stopTime - startTime;
+    } while (elapsedTime < delayTimeLimit);
+
+    printf("sum = %u, time: %0.3f ms\n", sum, elapsedTime * 1000.0);
+    printf("CPU warm-up end   ... \n\n");
+    fflush(stdout);
+#endif // !_DEBUG
+}
+
 uint32_t fibonacci32(uint32_t n)
 {
     if (n >= 3)
@@ -33,7 +63,7 @@ uint64_t fibonacci64(uint32_t n)
 void test_Fibonacci32()
 {
     printf("--------------------------------------------\n");
-    printf("  test_Fibonacci32()-[native]\n");
+    printf("  test_Fibonacci32()  [native]\n");
     printf("--------------------------------------------\n\n");
 
     uint32_t n;
@@ -44,6 +74,9 @@ void test_Fibonacci32()
     int r = scanf("%u", &n);
 #endif
     printf("\n");
+
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
 
@@ -61,7 +94,7 @@ void test_Fibonacci32()
 void test_Fibonacci64()
 {
     printf("--------------------------------------------\n");
-    printf("  test_Fibonacci64()-[native]\n");
+    printf("  test_Fibonacci64()  [native]\n");
     printf("--------------------------------------------\n\n");
 
     uint32_t n;
@@ -72,6 +105,9 @@ void test_Fibonacci64()
     int r = scanf("%u", &n);
 #endif
     printf("\n");
+
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
 
@@ -100,6 +136,9 @@ void test_Interpreter_v1()
     int r = scanf("%u", &n);
 #endif
     printf("\n");
+
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
 
@@ -145,6 +184,9 @@ void test_Interpreter_v2()
 #endif
     printf("\n");
 
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
+
     StopWatch sw;
 
     Interpreter_v2<> it;
@@ -189,6 +231,9 @@ void test_Interpreter_v3()
 #endif
     printf("\n");
 
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
+
     StopWatch sw;
 
     Interpreter_v3<> it;
@@ -232,6 +277,9 @@ void test_Interpreter_v3_inline()
     int r = scanf("%u", &n);
 #endif
     printf("\n");
+
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
 
