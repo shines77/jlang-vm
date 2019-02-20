@@ -6,7 +6,7 @@
 #pragma once
 #endif
 
-#include "jlang/vm/Interpreter_comm.h"
+#include "jlang/vm/Interpreter.h"
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
@@ -26,6 +26,7 @@
 using namespace std;
 
 namespace jlang {
+namespace v1 {
 
 //
 // 00000000:    push ecx
@@ -278,13 +279,13 @@ static bool verifyRegById(reg_t reg, uint32_t dataType) {
     return verifyRegType(regType, dataType);
 }
 
-class vmBinaryFile_v1 {
+class vmBinaryFile {
 private:
     vmBinImage image_;
 
 public:
-    vmBinaryFile_v1() {}
-    ~vmBinaryFile_v1() {}
+    vmBinaryFile() {}
+    ~vmBinaryFile() {}
 
     int loadFromFile(const char * filename) {
         static const size_t kImageSize = sizeof(s_fibonacciBinary32);
@@ -341,14 +342,14 @@ typedef pthread_t   ProcessHandle_t;
 #endif // _WIN32
 
 template <typename BasicType>
-class ExecutionEngine_v1;
+class ExecutionEngine;
 
 template <typename BasicType>
 class vmThreadBase {
 public:
     typedef BasicType                       basic_type;
     typedef size_t                          size_type;
-    typedef ExecutionEngine_v1<basic_type>  engine_type;
+    typedef ExecutionEngine<basic_type>  engine_type;
     typedef vmReturn<basic_type>            return_type;
     typedef vmThreadBase<basic_type>        this_type;
 
@@ -1155,21 +1156,21 @@ public:
 };
 
 template <typename BasicType = uintptr_t>
-class ExecutionEngine_v1 {
+class ExecutionEngine {
 public:
-    typedef BasicType                       basic_type;
-    typedef size_t                          size_type;
-    typedef vmProcess<basic_type>           context_type;
-    typedef vmReturn<basic_type>            return_type;
-    typedef ExecutionEngine_v1<basic_type>  this_type;
+    typedef BasicType                   basic_type;
+    typedef size_t                      size_type;
+    typedef vmProcess<basic_type>       context_type;
+    typedef vmReturn<basic_type>        return_type;
+    typedef ExecutionEngine<basic_type> this_type;
 
 private:
-    vmBinaryFile_v1 binary_;
+    vmBinaryFile binary_;
     context_type    context_;
 
 public:
-    ExecutionEngine_v1() {}
-    virtual ~ExecutionEngine_v1() {
+    ExecutionEngine() {}
+    virtual ~ExecutionEngine() {
         destroy();
     }
 
@@ -1218,19 +1219,19 @@ public:
 };
 
 template <typename BasicType = uintptr_t>
-class Interpreter_v1 {
+class Interpreter {
 public:
-    typedef BasicType                       basic_type;
-    typedef ExecutionEngine_v1<basic_type>  engine_type;
-    typedef vmReturn<basic_type>            return_type;
-    typedef Interpreter_v1<basic_type>      this_type;
+    typedef BasicType                   basic_type;
+    typedef ExecutionEngine<basic_type> engine_type;
+    typedef vmReturn<basic_type>        return_type;
+    typedef Interpreter<basic_type>     this_type;
 
 private:
     engine_type engine_;
 
 public:
-    Interpreter_v1() {}
-    ~Interpreter_v1() {}
+    Interpreter() {}
+    ~Interpreter() {}
 
     int create() {
         int ec = engine_.create();
@@ -1243,6 +1244,7 @@ public:
     }
 };
 
+} // namespace v1
 } // namespace jlang
 
 #endif // JLANG_VM_INTERPRETER_V1_H

@@ -1,6 +1,6 @@
 
-#ifndef JLANG_VM_INTERPRETER_COMMON_H
-#define JLANG_VM_INTERPRETER_COMMON_H
+#ifndef JLANG_VM_INTERPRETER_H
+#define JLANG_VM_INTERPRETER_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -3029,4 +3029,4 @@ public:
 
 } // namespace jlang
 
-#endif // JLANG_VM_INTERPRETER_COMMON_H
+#endif // JLANG_VM_INTERPRETER_H

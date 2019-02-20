@@ -14,6 +14,7 @@
 #include "jlang//vm/Interpreter_v1.h"
 #include "jlang//vm/Interpreter_v3.h"
 #include "jlang//vm/Interpreter_v2.h"
+#include "jlang//vm/Interpreter_v4.h"
 #include "jlang/support/StopWatch.h"
 
 #include "jlang/test/Assert.h"

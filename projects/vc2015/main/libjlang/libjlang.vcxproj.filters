@@ -67,7 +67,10 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v3.h">
       <Filter>src\vm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_comm.h">
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter.h">
+      <Filter>src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v4.h">
       <Filter>src\vm</Filter>
     </ClInclude>
   </ItemGroup>

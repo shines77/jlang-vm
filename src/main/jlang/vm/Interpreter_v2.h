@@ -6,7 +6,7 @@
 #pragma once
 #endif
 
-#include "jlang/vm/Interpreter_comm.h"
+#include "jlang/vm/Interpreter.h"
 #include "jlang/vm/Interpreter_v3.h"
 #include "jlang/lang/ErrorCode.h"
 
@@ -21,6 +21,7 @@
 using namespace std;
 
 namespace jlang {
+namespace v2 {
 
 //
 // 00000000:    push_u32 0x00000014 (int32)
@@ -55,7 +56,7 @@ namespace jlang {
 // 00000036:    ret
 //
 
-static const unsigned char s_fibonacciBinary32_new_old[] = {
+static const unsigned char s_fibonacciBinary32_old[] = {
     // 00000000:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
     // 00000005:    call 0x00000010 (short offset 0x0008)
@@ -147,7 +148,7 @@ static const unsigned char s_fibonacciBinary32_new_old[] = {
 // 00000035:    ret
 //
 
-static const unsigned char s_fibonacciBinary32_new[] = {
+static const unsigned char s_fibonacciBinary32[] = {
     // 00000000:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
     // 00000005:    call 0x00000010 (short offset 0x0008)
@@ -208,20 +209,20 @@ static const unsigned char s_fibonacciBinary32_new[] = {
     OpCode::exit
 };
 
-class vmBinaryFile_v2 {
+class vmBinaryFile {
 private:
     vmBinImage image_;
 
 public:
-    vmBinaryFile_v2() {}
-    ~vmBinaryFile_v2() {}
+    vmBinaryFile() {}
+    ~vmBinaryFile() {}
 
     int loadFromFile(const char * filename) {
-        static const size_t kImageSize = sizeof(s_fibonacciBinary32_new);
+        static const size_t kImageSize = sizeof(s_fibonacciBinary32);
         image_.allocate(kImageSize);
         void * imageData = image_.data();
         if (imageData) {
-            memcpy(imageData, (const void *)&s_fibonacciBinary32_new[0], kImageSize);
+            memcpy(imageData, (const void *)&s_fibonacciBinary32[0], kImageSize);
         }
         image_.setEntryOffset(0);
         return 1;
@@ -253,21 +254,21 @@ public:
 };
 
 template <typename BasicType = uintptr_t>
-class ExecutionEngine_v2 {
+class ExecutionEngine {
 public:
-    typedef BasicType                       basic_type;
-    typedef size_t                          size_type;
-    typedef ExecutionContext<basic_type>    context_type;
-    typedef vmReturn<basic_type>            return_type;
-    typedef ExecutionEngine_v2<basic_type>  this_type;
+    typedef BasicType                           basic_type;
+    typedef size_t                              size_type;
+    typedef v3::ExecutionContext<basic_type>    context_type;
+    typedef vmReturn<basic_type>                return_type;
+    typedef ExecutionEngine<basic_type>         this_type;
 
 private:
-    vmBinaryFile_v2 binary_;
+    vmBinaryFile    binary_;
     context_type    context_;
 
 public:
-    ExecutionEngine_v2() {}
-    virtual ~ExecutionEngine_v2() {
+    ExecutionEngine() {}
+    virtual ~ExecutionEngine() {
         destroy();
     }
 
@@ -316,19 +317,19 @@ public:
 };
 
 template <typename BasicType = uintptr_t>
-class Interpreter_v2 {
+class Interpreter {
 public:
     typedef BasicType                       basic_type;
-    typedef ExecutionEngine_v2<basic_type>  engine_type;
+    typedef ExecutionEngine<basic_type>  engine_type;
     typedef vmReturn<basic_type>            return_type;
-    typedef Interpreter_v2<basic_type>      this_type;
+    typedef Interpreter<basic_type>      this_type;
 
 private:
     engine_type engine_;
 
 public:
-    Interpreter_v2() {}
-    ~Interpreter_v2() {}
+    Interpreter() {}
+    ~Interpreter() {}
 
     int create() {
         int ec = engine_.create();
@@ -341,6 +342,7 @@ public:
     }
 };
 
+} // namespace v2
 } // namespace jlang
 
 #endif // JLANG_VM_INTERPRETER_V2_H

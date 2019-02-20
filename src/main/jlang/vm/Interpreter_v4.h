@@ -1,12 +1,13 @@
 
-#ifndef JLANG_VM_INTERPRETER_V3_H
-#define JLANG_VM_INTERPRETER_V3_H
+#ifndef JLANG_VM_INTERPRETER_V4_H
+#define JLANG_VM_INTERPRETER_V4_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
 #endif
 
 #include "jlang/vm/Interpreter.h"
+#include "jlang/vm/Interpreter_v3.h"
 #include "jlang/lang/ErrorCode.h"
 
 #include <stdint.h>
@@ -71,7 +72,7 @@
 using namespace std;
 
 namespace jlang {
-namespace v3 {
+namespace v4 {
 
 //
 // 00000000:    push_u32 0x00000014 (int32)
@@ -2326,7 +2327,7 @@ public:
     }
 };
 
-} // namespace v3
+} // namespace v4
 } // namespace jlang
 
-#endif // JLANG_VM_INTERPRETER_V3_H
+#endif // JLANG_VM_INTERPRETER_V4_H
