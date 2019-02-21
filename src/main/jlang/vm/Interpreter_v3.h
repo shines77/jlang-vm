@@ -243,11 +243,11 @@ public:
     uint64_t getUInt64()  const { return *(uint64_t *)ptr_; }
     void *   getPointer() const { return *(void **)   ptr_; }
 
-    char * getInt8Pointer() const { return *(char **)ptr_; }
-    unsigned char * getUInt8Pointer() const { return *(unsigned char **)ptr_; }
-
     template <typename U = void *>
     U getPointer() const { return *(U *)ptr_; }
+
+    int8_t *  getInt8Pointer()  const { return getPointer<int8_t *>();  }
+    uint8_t * getUInt8Pointer() const { return getPointer<uint8_t *>(); }
 
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
@@ -263,11 +263,11 @@ public:
     void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
     void setPointer(void * val)  { *(void **)   ptr_ = val; }
 
-    void setInt8Pointer(char * val) { *(char **)ptr_ = val; }
-    void setUInt8Pointer(unsigned char * val) { *(unsigned char **)ptr_ = val; }
-
     template <typename U = void *>
-    void setPointer(U val)  { ptr_ = (unsigned char *)val; }
+    void setPointer(U val)  { *(U *)ptr_ = val; }
+
+    void setInt8Pointer(int8_t * val)   { setPointer<int8_t *>(val);  }
+    void setUInt8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
 
     template <typename U = int>
     void setValue(U value) { *(U *)ptr_ = value; }
@@ -292,6 +292,9 @@ public:
     template <typename U = void *>
     void backPointer() { ptr_ -= sizeof(void *);   }
 
+    void backInt8Pointer()  { backPointer<int8_t *>();  }
+    void backUInt8Pointer() { backPointer<uint8_t *>(); }
+
     // ForwardPtr
     void next() { ptr_++; }
     void next(int offset) { ptr_ += offset; }
@@ -312,6 +315,9 @@ public:
     template <typename U = void *>
     void nextPointer() { ptr_ += sizeof(void *);   }
 
+    void nextInt8Pointer()  { nextPointer<int8_t *>();  }
+    void nextUInt8Pointer() { nextPointer<uint8_t *>(); }
+
     // ForwardPtr
     int8_t   readInt8()    { int8_t   value = getInt8();    nextInt8();    return value; }
     uint8_t  readUInt8()   { uint8_t  value = getUInt8();   nextUInt8();   return value; }
@@ -330,6 +336,9 @@ public:
         return value;
     }
 
+    int8_t *  readInt8Pointer(int8_t * val)   { return readPointer<int8_t *>();  }
+    uint8_t * readUInt8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
+
     // ForwardPtr
     void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
     void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
@@ -346,6 +355,9 @@ public:
         setPointer<U>(val);
         nextPointer<U>();
     }
+
+    void writeInt8Pointer(int8_t * val)    { writePointer<int8_t *>(val);  }
+    void writeUInt8Pointer(uint8_t * val)  { writePointer<uint8_t *>(val); }
 
     // ForwardPtr
     int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
@@ -890,16 +902,16 @@ public:
     }
 
     JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, unsigned char * returnFP) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.writeUInt8Pointer(fp.ptr());
+        sp.writeUInt8Pointer(returnFP);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
 
     JM_FORCEINLINE unsigned char * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
-        sp.backPointer();
+        sp.backUInt8Pointer();
         unsigned char * returnIP = sp.getUInt8Pointer();
-        sp.backPointer();
+        sp.backUInt8Pointer();
         unsigned char * framePointer = sp.getUInt8Pointer();
         fp.set(framePointer);
         return returnIP;
@@ -913,8 +925,8 @@ public:
 
     JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
                                               unsigned char * returnFP, int retType) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.writeUInt8Pointer(fp.ptr());
+        sp.writeUInt8Pointer(returnFP);
         cp.writeInt32(retType);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
@@ -922,9 +934,9 @@ public:
 
     JM_FORCEINLINE unsigned char * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
                                                         vmFramePtr & fp, int & retType) {
-        sp.backPointer();
+        sp.backUInt8Pointer();
         unsigned char * returnIP = sp.getUInt8Pointer();
-        sp.backPointer();
+        sp.backUInt8Pointer();
         unsigned char * framePointer = sp.getUInt8Pointer();
         cp.backInt32();
         retType = cp.getInt32();
