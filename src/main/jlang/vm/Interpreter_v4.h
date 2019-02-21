@@ -300,11 +300,6 @@ public:
 template <typename BasicType>
 class ExecutionEngine;
 
-// Base interface class
-template <typename BasicType>
-struct IExecutionContext {
-};
-
 template <typename BasicType = uintptr_t>
 class ExecutionContext : public IExecutionContext<BasicType>,
                          public vmContextRegs {

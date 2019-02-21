@@ -218,7 +218,8 @@ private:
     unsigned char * ptr_;
 
 public:
-    ForwardPtr(unsigned char * ptr = nullptr) : ptr_(ptr) {}
+    ForwardPtr(void * ptr = nullptr) : ptr_((unsigned char *)ptr) {}
+    ForwardPtr(std::nullptr_t) : ptr_(nullptr) {}
     ~ForwardPtr() {}
 
     void clear() { ptr_ = nullptr; }
@@ -226,11 +227,11 @@ public:
     unsigned char * ptr() { return ptr_; }
     const unsigned char * ptr() const { return ptr_; }
 
-    template <typename U = unsigned char>
-    U * get() const { return (U *)ptr_; }
+    template <typename U = void *>
+    U get() const { return (U)ptr_; }
 
-    template <typename U = unsigned char>
-    void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
+    template <typename U = void *>
+    void set(U ptr) { ptr_ = (unsigned char *)ptr; }
 
     // ForwardPtr
     int8_t   getInt8()    const { return *(int8_t *)  ptr_; }
@@ -359,34 +360,6 @@ public:
     void writeInt8Pointer(int8_t * val)    { writePointer<int8_t *>(val);  }
     void writeUInt8Pointer(uint8_t * val)  { writePointer<uint8_t *>(val); }
 
-    // ForwardPtr
-    int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
-    uint8_t  getArg0UInt8()  const { return *(uint8_t *) (ptr_ + 1); }
-    int16_t  getArg0Int16()  const { return *(int16_t *) (ptr_ + 1); }
-    uint16_t getArg0UInt16() const { return *(uint16_t *)(ptr_ + 1); }
-    int32_t  getArg0Int32()  const { return *(int32_t *) (ptr_ + 1); }
-    uint32_t getArg0UInt32() const { return *(uint32_t *)(ptr_ + 1); }
-    int64_t  getArg0Int64()  const { return *(int64_t *) (ptr_ + 1); }
-    uint64_t getArg0UInt64() const { return *(uint64_t *)(ptr_ + 1); }
-
-    int8_t   getArg1Int8()   const { return *(int8_t *)  (ptr_ + 1 + sizeof(int8_t));   }
-    uint8_t  getArg1UInt8()  const { return *(uint8_t *) (ptr_ + 1 + sizeof(uint8_t));  }
-    int16_t  getArg1Int16()  const { return *(int16_t *) (ptr_ + 1 + sizeof(int16_t));  }
-    uint16_t getArg1UInt16() const { return *(uint16_t *)(ptr_ + 1 + sizeof(uint16_t)); }
-    int32_t  getArg1Int32()  const { return *(int32_t *) (ptr_ + 1 + sizeof(int32_t));  }
-    uint32_t getArg1UInt32() const { return *(uint32_t *)(ptr_ + 1 + sizeof(uint32_t)); }
-    int64_t  getArg1Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t));  }
-    uint64_t getArg1UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t)); }
-
-    int8_t   getArg2Int8()   const { return *(int8_t *)  (ptr_ + 1 + sizeof(int8_t)   * 2); }
-    uint8_t  getArg2UInt8()  const { return *(uint8_t *) (ptr_ + 1 + sizeof(uint8_t)  * 2); }
-    int16_t  getArg2Int16()  const { return *(int16_t *) (ptr_ + 1 + sizeof(int16_t)  * 2); }
-    uint16_t getArg2UInt16() const { return *(uint16_t *)(ptr_ + 1 + sizeof(uint16_t) * 2); }
-    int32_t  getArg2Int32()  const { return *(int32_t *) (ptr_ + 1 + sizeof(int32_t)  * 2); }
-    uint32_t getArg2UInt32() const { return *(uint32_t *)(ptr_ + 1 + sizeof(uint32_t) * 2); }
-    int64_t  getArg2Int64()  const { return *(int64_t *) (ptr_ + 1 + sizeof(int64_t)  * 2); }
-    uint64_t getArg2UInt64() const { return *(uint64_t *)(ptr_ + 1 + sizeof(uint64_t) * 2); }
-
     // ForwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
         return (((int32_t *)ptr_) + index);
@@ -445,7 +418,8 @@ private:
     unsigned char * ptr_;
 
 public:
-    BackwardPtr(unsigned char * ptr = nullptr) : ptr_(ptr) {}
+    BackwardPtr(void * ptr = nullptr) : ptr_((unsigned char *)ptr) {}
+    BackwardPtr(std::nullptr_t) : ptr_(nullptr) {}
     ~BackwardPtr() {}
 
     void clear() { ptr_ = nullptr; }
@@ -453,8 +427,11 @@ public:
     unsigned char * ptr() { return ptr_; }
     const unsigned char * ptr() const { return ptr_; }
 
-    template <typename U = unsigned char>
-    void set(U * ptr) { ptr_ = (unsigned char *)ptr; }
+    template <typename U = void *>
+    U get() const { return (U)ptr_; }
+
+    template <typename U = void *>
+    void set(U ptr) { ptr_ = (unsigned char *)ptr; }
 
 private:
     // BackwardPtr
@@ -496,39 +473,44 @@ public:
     uint8_t get() { return *(int8_t *)(ptr_ - sizeof(uint8_t)); }
 
     // BackwardPtr
-    int8_t   getInt8()    const { return *(int8_t *)  (ptr_ - sizeof(int8_t));   }
-    uint8_t  getUInt8()   const { return *(uint8_t *) (ptr_ - sizeof(uint8_t));  }
-    int16_t  getInt16()   const { return *(int16_t *) (ptr_ - sizeof(int16_t));  }
-    uint16_t getUInt16()  const { return *(uint16_t *)(ptr_ - sizeof(uint16_t)); }
-    int32_t  getInt32()   const { return *(int32_t *) (ptr_ - sizeof(int32_t));  }
-    uint32_t getUInt32()  const { return *(uint32_t *)(ptr_ - sizeof(uint32_t)); }
-    int64_t  getInt64()   const { return *(int64_t *) (ptr_ - sizeof(int64_t));  }
-    uint64_t getUInt64()  const { return *(uint64_t *)(ptr_ - sizeof(uint64_t)); }
+    int8_t   getInt8()    const { return *(int8_t *)  ptr_; }
+    uint8_t  getUInt8()   const { return *(uint8_t *) ptr_; }
+    int16_t  getInt16()   const { return *(int16_t *) ptr_; }
+    uint16_t getUInt16()  const { return *(uint16_t *)ptr_; }
+    int32_t  getInt32()   const { return *(int32_t *) ptr_; }
+    uint32_t getUInt32()  const { return *(uint32_t *)ptr_; }
+    int64_t  getInt64()   const { return *(int64_t *) ptr_; }
+    uint64_t getUInt64()  const { return *(uint64_t *)ptr_; }
+    void *   getPointer() const { return *(void **)   ptr_; }
 
-    unsigned char * getPointer() const {
-        return *(unsigned char **)(ptr_ - sizeof(void *));
-    }
+    template <typename U = void *>
+    U getPointer() const { return *(U *)ptr_; }
+
+    int8_t *  getInt8Pointer()  const { return getPointer<int8_t *>();  }
+    uint8_t * getUInt8Pointer() const { return getPointer<uint8_t *>(); }
 
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
 
     // BackwardPtr
-    void setInt8(int8_t val)     { *(int8_t *)  (ptr_ - sizeof(int8_t))   = val; }
-    void setUInt8(uint8_t val)   { *(uint8_t *) (ptr_ - sizeof(uint8_t))  = val; }
-    void setInt16(int16_t val)   { *(int16_t *) (ptr_ - sizeof(int16_t))  = val; }
-    void setUInt16(uint16_t val) { *(uint16_t *)(ptr_ - sizeof(uint16_t)) = val; }
-    void setInt32(int32_t val)   { *(int32_t *) (ptr_ - sizeof(int32_t))  = val; }
-    void setUInt32(uint32_t val) { *(uint32_t *)(ptr_ - sizeof(uint32_t)) = val; }
-    void setInt64(int64_t val)   { *(int64_t *) (ptr_ - sizeof(int64_t))  = val; }
-    void setUInt64(uint64_t val) { *(uint64_t *)(ptr_ - sizeof(uint64_t)) = val; }
-    void setPointer(void * val)  { *(void **)   (ptr_ - sizeof(void *))   = val; }
+    void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
+    void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
+    void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
+    void setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
+    void setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
+    void setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
+    void setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
+    void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
+    void setPointer(void * val)  { *(void **)   ptr_ = val; }
 
-    void setPointer(unsigned char * val)  {
-        *(unsigned char **)ptr_ = val;
-    }
+    template <typename U = void *>
+    void setPointer(U val)  { *(U *)ptr_ = val; }
+
+    void setInt8Pointer(int8_t * val)   { setPointer<int8_t *>(val);  }
+    void setUInt8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
 
     template <typename U = int>
-    void setValue(U value) const { *(U *)ptr_ = value; }
+    void setValue(U value) { *(U *)ptr_ = value; }
 
     // BackwardPtr
     void back() { ptr_++; }
@@ -547,6 +529,12 @@ public:
     void backUInt64()  { ptr_ += sizeof(uint64_t); }
     void backPointer() { ptr_ += sizeof(void *);   }
 
+    template <typename U = void *>
+    void backPointer() { ptr_ += sizeof(void *);   }
+
+    void backInt8Pointer()  { backPointer<int8_t *>();  }
+    void backUInt8Pointer() { backPointer<uint8_t *>(); }
+
     // BackwardPtr
     void next() { ptr_--; }
     void next(int offset) { ptr_ -= offset; }
@@ -564,72 +552,79 @@ public:
     void nextUInt64()  { ptr_ -= sizeof(uint64_t); }
     void nextPointer() { ptr_ -= sizeof(void *);   }
 
+    template <typename U = void *>
+    void nextPointer() { ptr_ -= sizeof(void *);   }
+
+    void nextInt8Pointer()  { nextPointer<int8_t *>();  }
+    void nextUInt8Pointer() { nextPointer<uint8_t *>(); }
+
     // BackwardPtr
-    int8_t   readInt8()   { nextInt8();   return _getInt8();   }
-    uint8_t  readUInt8()  { nextUInt8();  return _getUInt8();  }
-    int16_t  readInt16()  { nextInt16();  return _getInt16();  }
-    uint16_t readUInt16() { nextUInt16(); return _getUInt16(); }
-    int32_t  readInt32()  { nextInt32();  return _getInt32();  }
-    uint32_t readUInt32() { nextUInt32(); return _getUInt32(); }
-    int64_t  readInt64()  { nextInt64();  return _getInt64();  }
-    uint64_t readUInt64() { nextUInt64(); return _getUInt64(); }
+    int8_t   readInt8()    { int8_t   value = getInt8();    nextInt8();    return value; }
+    uint8_t  readUInt8()   { uint8_t  value = getUInt8();   nextUInt8();   return value; }
+    int16_t  readInt16()   { int16_t  value = getInt16();   nextInt16();   return value; }
+    uint16_t readUInt16()  { uint16_t value = getUInt16();  nextUInt16();  return value; }
+    int32_t  readInt32()   { int32_t  value = getInt32();   nextInt32();   return value; }
+    uint32_t readUInt32()  { uint32_t value = getUInt32();  nextUInt32();  return value; }
+    int64_t  readInt64()   { int64_t  value = getInt64();   nextInt64();   return value; }
+    uint64_t readUInt64()  { uint64_t value = getUInt64();  nextUInt64();  return value; }
+    void *   readPointer() { void *   value = getPointer(); nextPointer(); return value; }
                                    
-    unsigned char * readPointer() {
-        nextPointer();
-        return _getPointer();
+    template <typename U = void *>
+    U readPointer() {
+        U value = getPointer<U>();
+        nextPointer<U>();
+        return value;
+    }
+
+    int8_t *  readInt8Pointer(int8_t * val)   { return readPointer<int8_t *>();  }
+    uint8_t * readUInt8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
+
+    // BackwardPtr
+    void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
+    void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
+    void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
+    void writeUInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
+    void writeInt32(int32_t val)   { setInt32(val);   nextInt32();   }
+    void writeUInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
+    void writeInt64(int64_t val)   { setInt64(val);   nextInt64();   }
+    void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
+    void writePointer(void * val)  { setPointer(val); nextPointer(); }
+
+    template <typename U = void *>
+    void writePointer(U val) {
+        setPointer<U>(val);
+        nextPointer<U>();
+    }
+
+    void writeInt8Pointer(int8_t * val)    { writePointer<int8_t *>(val);  }
+    void writeUInt8Pointer(uint8_t * val)  { writePointer<uint8_t *>(val); }
+
+    // BackwardPtr::Arg ##
+    int32_t * getArgPtrInt32(int32_t index) const {
+        return (((int32_t *)ptr_) + index);
+    }
+
+    uint32_t * getArgPtrUInt32(int32_t index) const {
+        return (((uint32_t *)ptr_) + index);
+    }
+
+    int32_t getArgValueInt32(int32_t index) const {
+        return *(((int32_t *)ptr_) + index);
+    }
+
+    uint32_t getArgValueUInt32(int32_t index) const {
+        return *(((uint32_t *)ptr_) + index);
+    }
+
+    void setArgValueInt32(int32_t index, int32_t value) {
+        *(((int32_t *)ptr_) + index) = value;
+    }
+
+    void setArgValueUInt32(int32_t index, uint32_t value) {
+        *(((uint32_t *)ptr_) + index) = value;
     }
 
     // BackwardPtr
-    void writeInt8(int8_t val)     { nextInt8();    _setInt8(val);    }
-    void writeUInt8(uint8_t val)   { nextUInt8();   _setUInt8(val);   }
-    void writeInt16(int16_t val)   { nextInt16();   _setInt16(val);   }
-    void writeUInt16(uint16_t val) { nextUInt16();  _setUInt16(val);  }
-    void writeInt32(int32_t val)   { nextInt32();   _setInt32(val);   }
-    void writeUInt32(uint32_t val) { nextUInt32();  _setUInt32(val);  }
-    void writeInt64(int64_t val)   { nextInt64();   _setInt64(val);   }
-    void writeUInt64(uint64_t val) { nextUInt64();  _setUInt64(val);  }
-    void writePointer(void * val)  { nextPointer(); _setPointer(val); }
-
-    void writePointer(unsigned char * val) {
-        nextPointer();
-        _setPointer(val);
-    }
-
-    // BackwardPtr
-    int8_t   getArg0Int8()   const { return *(int8_t *)  (ptr_ + 1); }
-    uint8_t  getArg0UInt8()  const { return *(uint8_t *) (ptr_ + 1); }
-    int16_t  getArg0Int16()  const { return *(int16_t *) (ptr_ + 1); }
-    uint16_t getArg0UInt16() const { return *(uint16_t *)(ptr_ + 1); }
-    int32_t  getArg0Int32()  const { return *(int32_t *) (ptr_ + 1); }
-    uint32_t getArg0UInt32() const { return *(uint32_t *)(ptr_ + 1); }
-    int64_t  getArg0Int64()  const { return *(int64_t *) (ptr_ + 1); }
-    uint64_t getArg0UInt64() const { return *(uint64_t *)(ptr_ + 1); }
-
-    int8_t   getArg1Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t));   }
-    uint8_t  getArg1UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t));  }
-    int16_t  getArg1Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t));  }
-    uint16_t getArg1UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t)); }
-    int32_t  getArg1Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t));  }
-    uint32_t getArg1UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t)); }
-    int64_t  getArg1Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t));  }
-    uint64_t getArg1UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t)); }
-
-    int8_t   getArg2Int8()   const { return *(int8_t *)  (ptr_ + 1 - sizeof(int8_t)   * 2); }
-    uint8_t  getArg2UInt8()  const { return *(uint8_t *) (ptr_ + 1 - sizeof(uint8_t)  * 2); }
-    int16_t  getArg2Int16()  const { return *(int16_t *) (ptr_ + 1 - sizeof(int16_t)  * 2); }
-    uint16_t getArg2UInt16() const { return *(uint16_t *)(ptr_ + 1 - sizeof(uint16_t) * 2); }
-    int32_t  getArg2Int32()  const { return *(int32_t *) (ptr_ + 1 - sizeof(int32_t)  * 2); }
-    uint32_t getArg2UInt32() const { return *(uint32_t *)(ptr_ + 1 - sizeof(uint32_t) * 2); }
-    int64_t  getArg2Int64()  const { return *(int64_t *) (ptr_ + 1 - sizeof(int64_t)  * 2); }
-    uint64_t getArg2UInt64() const { return *(uint64_t *)(ptr_ + 1 - sizeof(uint64_t) * 2); }
-
-    // BackwardPtr
-    template <int Index, typename U = int, int Offset = 1>
-    U getArgValue() const { return *(U *)(ptr_ + Offset - sizeof(U) * Index); }
-
-    template <int Index, typename U = int, int Offset = 1>
-    void setArgValue(U value) { (*(U *)(ptr_ + Offset - sizeof(U) * Index)) = value; }
-
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     U getValue() const { return *(U *)(ptr_ + Offset - sizeof(V) * Index); }
 
@@ -639,7 +634,10 @@ public:
     }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    U readValue() const { return getValue<Index, U, V, Offset>(); }
+    U readValue() {
+        return getValue<Index, U, V, Offset>();
+        next<U>();
+    }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void writeValue(U value) {
@@ -647,30 +645,11 @@ public:
         next<U>();
     }
 
-    // BackwardPtr::Arg ##
-    int32_t * getIArgPtr(int32_t index) const {
-        return (((int32_t *)ptr_) + index);
-    }
+    template <int Index, typename U = int, int Offset = 1>
+    U getArgValue() const { return *(U *)(ptr_ + Offset - sizeof(U) * Index); }
 
-    uint32_t * getUArgPtr(int32_t index) const {
-        return (((uint32_t *)ptr_) + index);
-    }
-
-    int32_t getInt32ArgValue(int32_t index) const {
-        return *(((int32_t *)ptr_) + index);
-    }
-
-    uint32_t getUInt32ArgValue(int32_t index) const {
-        return *(((uint32_t *)ptr_) + index);
-    }
-
-    void setIArgValue(int32_t index, int32_t value) {
-        *(((int32_t *)ptr_) + index) = value;
-    }
-
-    void setUInt32ArgValue(int32_t index, uint32_t value) {
-        *(((uint32_t *)ptr_) + index) = value;
-    }
+    template <int Index, typename U = int, int Offset = 1>
+    void setArgValue(U value) { (*(U *)(ptr_ + Offset - sizeof(U) * Index)) = value; }
 };
 
 typedef ForwardPtr  vmImagePtr;
@@ -807,11 +786,6 @@ public:
 template <typename BasicType>
 class ExecutionEngine;
 
-// Base interface class
-template <typename BasicType>
-struct IExecutionContext {
-};
-
 template <typename BasicType = uintptr_t>
 class ExecutionContext : public IExecutionContext<BasicType>,
                          public vmContextRegs {
@@ -819,7 +793,7 @@ public:
     typedef BasicType                       basic_type;
     typedef IExecutionContext<basic_type>   base_type;
     typedef size_t                          size_type;
-    typedef ExecutionEngine<basic_type>  engine_type;
+    typedef ExecutionEngine<basic_type>     engine_type;
     typedef vmReturn<basic_type>            return_type;
     typedef vmContextRegs                   ctx_reg_type;
     typedef ExecutionContext<basic_type>    this_type;

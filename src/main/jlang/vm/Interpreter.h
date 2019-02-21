@@ -154,6 +154,11 @@ public:
 
 static Console console;
 
+// Base interface class
+template <typename BasicType>
+struct IExecutionContext {
+};
+
 struct IntWrapper32 {
     int32_t low;
 };
