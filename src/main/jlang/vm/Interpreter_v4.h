@@ -386,17 +386,15 @@ public:
     }
 
     JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, void * returnFP) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.push_Pointer(fp.ptr());
+        sp.push_Pointer(returnFP);
         fp.set(sp.ptr());
         assert(!fp_isOverflow(sp));
     }
 
     JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
-        sp.backPointer();
-        void * returnIP = sp.getPointer();
-        sp.backPointer();
-        void * framePointer = sp.getPointer();
+        void * returnIP = sp.pop_Pointer();
+        void * framePointer = sp.pop_Pointer();
         fp.set(framePointer);
         return returnIP;
     }
@@ -409,8 +407,8 @@ public:
 
     JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
                                               void * returnFP, int retType) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.push_Pointer(fp.ptr());
+        sp.push_Pointer(returnFP);
         cp.writeInt32(retType);
         fp.set(sp.ptr());
         assert(!fp_isOverflow(sp));
@@ -418,10 +416,8 @@ public:
 
     JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
                                                vmFramePtr & fp, int & retType) {
-        sp.backPointer();
-        void * returnIP = sp.getPointer();
-        sp.backPointer();
-        void * framePointer = sp.getPointer();
+        void * returnIP = sp.pop_Pointer();
+        void * framePointer = sp.pop_Pointer();
         cp.backInt32();
         retType = cp.getInt32();
         fp.set(framePointer);

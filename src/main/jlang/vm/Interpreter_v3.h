@@ -360,6 +360,46 @@ public:
     void writeI8Pointer(int8_t * val)  { writePointer<int8_t *>(val);  }
     void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
 
+    // ForwardPtr
+    void push_Int8(int8_t val)     { setInt8(val);    nextInt8();    }
+    void push_UInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
+    void push_Int16(int16_t val)   { setInt16(val);   nextInt16();   }
+    void push_UInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
+    void push_Int32(int32_t val)   { setInt32(val);   nextInt32();   }
+    void push_UInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
+    void push_Int64(int64_t val)   { setInt64(val);   nextInt64();   }
+    void push_UInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
+    void push_Pointer(void * val)  { setPointer(val); nextPointer(); }
+
+    template <typename U = void *>
+    void push_Pointer(U val) {
+        setPointer<U>(val);
+        nextPointer<U>();
+    }
+
+    void push_I8Pointer(int8_t * val)  { push_Pointer<int8_t *>(val);  }
+    void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
+
+    // ForwardPtr
+    int8_t   pop_Int8()    { nextInt8();    return getInt8(); }
+    uint8_t  pop_UInt8()   { nextUInt8();   return getUInt8(); }
+    int16_t  pop_Int16()   { nextInt16();   return getInt16(); }
+    uint16_t pop_UInt16()  { nextUInt16();  return getUInt16(); }
+    int32_t  pop_Int32()   { nextInt32();   return getInt32(); }
+    uint32_t pop_UInt32()  { nextUInt32();  return getUInt32(); }
+    int64_t  pop_Int64()   { nextInt64();   return getInt64(); }
+    uint64_t pop_UInt64()  { nextUInt64();  return getUInt64(); }
+    void *   pop_Pointer() { nextPointer(); return getPointer(); }
+
+    template <typename U = void *>
+    U pop_Pointer() {
+        nextPointer<U>();
+        return getPointer<U>();
+    }
+
+    int8_t *  pop_I8Pointer(int8_t * val)  { return pop_Pointer<int8_t *>();  }
+    uint8_t * pop_U8Pointer(uint8_t * val) { return pop_Pointer<uint8_t *>(); }
+
     // ForwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
         return (((int32_t *)ptr_) + index);
@@ -598,6 +638,46 @@ public:
 
     void writeIPointer(int8_t * val)   { writePointer<int8_t *>(val);  }
     void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
+
+    // BackwardPtr
+    void push_Int8(int8_t val)     { setInt8(val);    nextInt8();    }
+    void push_UInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
+    void push_Int16(int16_t val)   { setInt16(val);   nextInt16();   }
+    void push_UInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
+    void push_Int32(int32_t val)   { setInt32(val);   nextInt32();   }
+    void push_UInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
+    void push_Int64(int64_t val)   { setInt64(val);   nextInt64();   }
+    void push_UInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
+    void push_Pointer(void * val)  { setPointer(val); nextPointer(); }
+
+    template <typename U = void *>
+    void push_Pointer(U val) {
+        setPointer<U>(val);
+        nextPointer<U>();
+    }
+
+    void push_I8Pointer(int8_t * val)  { push_Pointer<int8_t *>(val);  }
+    void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
+
+    // BackwardPtr
+    int8_t   pop_Int8()    { nextInt8();    return getInt8(); }
+    uint8_t  pop_UInt8()   { nextUInt8();   return getUInt8(); }
+    int16_t  pop_Int16()   { nextInt16();   return getInt16(); }
+    uint16_t pop_UInt16()  { nextUInt16();  return getUInt16(); }
+    int32_t  pop_Int32()   { nextInt32();   return getInt32(); }
+    uint32_t pop_UInt32()  { nextUInt32();  return getUInt32(); }
+    int64_t  pop_Int64()   { nextInt64();   return getInt64(); }
+    uint64_t pop_UInt64()  { nextUInt64();  return getUInt64(); }
+    void *   pop_Pointer() { nextPointer(); return getPointer(); }
+
+    template <typename U = void *>
+    U pop_Pointer() {
+        nextPointer<U>();
+        return getPointer<U>();
+    }
+
+    int8_t *  pop_I8Pointer(int8_t * val)  { return pop_Pointer<int8_t *>();  }
+    uint8_t * pop_U8Pointer(uint8_t * val) { return pop_Pointer<uint8_t *>(); }
 
     // BackwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
@@ -879,17 +959,15 @@ public:
     }
 
     JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, void * returnFP) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.push_Pointer(fp.ptr());
+        sp.push_Pointer(returnFP);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
 
     JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
-        sp.backPointer();
-        void * returnIP = sp.getPointer();
-        sp.backPointer();
-        void * framePointer = sp.getPointer();
+        void * returnIP = sp.pop_Pointer();
+        void * framePointer = sp.pop_Pointer();
         fp.set(framePointer);
         return returnIP;
     }
@@ -902,8 +980,8 @@ public:
 
     JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
                                               void * returnFP, int retType) {
-        sp.writePointer(fp.ptr());
-        sp.writePointer(returnFP);
+        sp.push_Pointer(fp.ptr());
+        sp.push_Pointer(returnFP);
         cp.writeInt32(retType);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
@@ -911,10 +989,8 @@ public:
 
     JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
                                                vmFramePtr & fp, int & retType) {
-        sp.backPointer();
-        void * returnIP = sp.getPointer();
-        sp.backPointer();
-        void * framePointer = sp.getPointer();
+        void * returnIP = sp.pop_Pointer();
+        void * framePointer = sp.pop_Pointer();
         cp.backInt32();
         retType = cp.getInt32();
         fp.set(framePointer);
