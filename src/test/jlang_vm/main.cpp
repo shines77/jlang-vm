@@ -357,6 +357,53 @@ void test_Interpreter_v4()
     printf("\n");
 }
 
+void test_Interpreter_v4_inline()
+{
+    printf("--------------------------------------------\n");
+    printf("  test_Interpreter_v4_inline()\n");
+    printf("--------------------------------------------\n\n");
+
+    uint32_t n;
+    printf("n = ? ");
+#if defined(_WIN32)
+    int r = scanf_s("%u", &n);
+#else
+    int r = scanf("%u", &n);
+#endif
+    printf("\n");
+
+    // Warm-up CPU for 500 ms.
+    cpu_warmup(kWarmupMillsecs);
+
+    StopWatch sw;
+
+    v4::Interpreter<> it;
+    vmReturn<> retVal;
+    retVal.setDataType(vmReturn<>::Basic);
+    retVal.setValue(n);
+    
+    int ec = it.create();
+
+    sw.start();
+    ec = it.run_inline(retVal);
+    if (ec >= 0) {
+        sw.stop();
+        if (retVal.isValid()) {
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
+#else
+            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
+#endif
+        }
+    }
+    printf("\n");
+
+    double elapsed_time = sw.getElapsedMillisec();
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("\n");
+}
+
 void print_version()
 {
     std::cout << std::endl;
@@ -377,8 +424,9 @@ int main(int argc, char * argv[])
 #endif
 #endif
 
+    test_Interpreter_v4_inline();
     test_Interpreter_v3_inline();
-    //test_Interpreter_v4();
+    test_Interpreter_v4();
     test_Interpreter_v3();
     test_Interpreter_v2();
     test_Interpreter_v1();

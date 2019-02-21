@@ -6,6 +6,24 @@
 #pragma once
 #endif
 
+//////////////////////////////////////////////////////////////
+
+#ifndef JLANG_VM_ARGS_DEFINE_H
+
+/* If is forward stack pointer ? */
+#ifndef USE_FORWARD_STACK_PTR
+#define USE_FORWARD_STACK_PTR   1
+#endif
+
+#ifndef FRAME_STACK_SIZEOF
+#define FRAME_STACK_SIZEOF      ((sizeof(void *) * 2) / sizeof(uint32_t))
+#endif
+
+#endif // JLANG_VM_ARGS_DEFINE_H
+
+//////////////////////////////////////////////////////////////
+
+#include "jlang/vm/ArgsDefine.h"
 #include "jlang/vm/Interpreter.h"
 #include "jlang/lang/ErrorCode.h"
 
@@ -16,59 +34,6 @@
 #include <list>
 #include <memory>
 #include <atomic>
-
-/* If is backward stack pointer ? */
-#ifndef USE_BACKWARD_STACK_PTR
-#define USE_BACKWARD_STACK_PTR  0
-#endif
-
-//////////////////////////////////////////////////////////////
-
-#define FRAME_STACK_SIZEOF  ((sizeof(void *) * 2) / sizeof(uint32_t))
-
-#if USE_BACKWARD_STACK_PTR
-
-#define __arg0  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 0))
-#define __arg1  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 1))
-#define __arg2  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 2))
-#define __arg3  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 3))
-#define __arg4  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 4))
-#define __arg5  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 5))
-#define __arg6  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 6))
-#define __arg7  ((uint8_t)(0 + FRAME_STACK_SIZEOF + 7))
-
-#define __var0  ((uint8_t)(0 - 1))
-#define __var1  ((uint8_t)(0 - 2))
-#define __var2  ((uint8_t)(0 - 3))
-#define __var3  ((uint8_t)(0 - 4))
-#define __var4  ((uint8_t)(0 - 5))
-#define __var5  ((uint8_t)(0 - 6))
-#define __var6  ((uint8_t)(0 - 7))
-#define __var7  ((uint8_t)(0 - 8))
-
-#else
-
-#define __arg0  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 1))
-#define __arg1  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 2))
-#define __arg2  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 3))
-#define __arg3  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 4))
-#define __arg4  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 5))
-#define __arg5  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 6))
-#define __arg6  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 7))
-#define __arg7  ((uint8_t)(0 - FRAME_STACK_SIZEOF - 8))
-
-#define __var0  ((uint8_t)(0))
-#define __var1  ((uint8_t)(1))
-#define __var2  ((uint8_t)(2))
-#define __var3  ((uint8_t)(3))
-#define __var4  ((uint8_t)(4))
-#define __var5  ((uint8_t)(5))
-#define __var6  ((uint8_t)(6))
-#define __var7  ((uint8_t)(7))
-
-#endif // USE_BACKWARD_STACK_PTR
-
-//////////////////////////////////////////////////////////////
 
 using namespace std;
 
@@ -91,7 +56,7 @@ namespace v3 {
 // 0000001A:    dec var1
 // 0000001E:    call 0x00000010 (short offset 0xFFEF)
 
-// 00000021:    copy_to_eax var0, eax
+// 00000021:    copy_from_eax var0, eax
 // 00000023:    dec var1
 // 00000025:    call 0x00000010 (short offset 0xFFE8)
 
@@ -132,8 +97,8 @@ static const unsigned char fibonacciBinary32[] = {
     // 0000001D:    call 0x00000010 (near offset 0xF1)
     OpCode::call_near, 0xF1,
 
-    // 0000001F:    copy_to_eax var0, eax
-    OpCode::copy_to_eax, __var0,
+    // 0000001F:    copy_from_eax var0, eax
+    OpCode::copy_from_eax, __var0,
     // 00000021:    dec var1
     OpCode::dec,  __var1,
     // 00000023:    call 0x00000010 (near offset 0xEB)
@@ -189,8 +154,8 @@ static const unsigned char fibonacciBinary32_2[] = {
     // 00000021:    call 0x00000010 (near offset 0xED)
     OpCode::call_near, 0xED,
 
-    // 00000023:    copy_to_eax var0, eax
-    OpCode::copy_to_eax, __var0,
+    // 00000023:    copy_from_eax var0, eax
+    OpCode::copy_from_eax, __var0,
     // 00000025:    dec var1
     OpCode::inc,  __var1,
     // 00000027:    call 0x00000010 (near offset 0xE7)
@@ -750,12 +715,12 @@ public:
 
 typedef ForwardPtr  vmImagePtr;
 
-#if USE_BACKWARD_STACK_PTR
-typedef BackwardPtr vmStackPtr;
-typedef BackwardPtr vmFramePtr;
-#else
+#if USE_FORWARD_STACK_PTR
 typedef ForwardPtr  vmStackPtr;
 typedef ForwardPtr  vmFramePtr;
+#else
+typedef BackwardPtr vmStackPtr;
+typedef BackwardPtr vmFramePtr;
 #endif
 
 struct vmContextRegs {
@@ -897,12 +862,12 @@ public:
     static const size_type kDefaultStackSize = 8 * 1048576U;
 
 private:
-#if USE_BACKWARD_STACK_PTR
-    vmStack<basic_type, true>  stack_;
-    vmStack<basic_type, true>  callstack_;
+#if USE_FORWARD_STACK_PTR
+    vmStack<basic_type, false>  stack_;
+    vmStack<basic_type, false>  callstack_;
 #else
-    vmStack<basic_type, false> stack_;
-    vmStack<basic_type, false> callstack_;
+    vmStack<basic_type, true> stack_;
+    vmStack<basic_type, true> callstack_;
 #endif
     vmImageInfo<basic_type> image_;
     vmHeap<basic_type>      heap_;
@@ -967,10 +932,10 @@ public:
     }
 
     int32_t getArgIndex(int8_t index) {
-#if USE_BACKWARD_STACK_PTR
-        return (index - FRAME_STACK_SIZEOF);
-#else
+#if USE_FORWARD_STACK_PTR
         return (index + (FRAME_STACK_SIZEOF + 1));
+#else
+        return (index - FRAME_STACK_SIZEOF);
 #endif
     }
 
@@ -994,7 +959,7 @@ public:
         return pop_callstack(sp, fp);
     }
 
-    JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+    JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmFramePtr & fp, vmStackPtr & cp,
                                               void * returnIP, int retType) {
         sp.push_Pointer(fp.ptr());
         sp.push_Pointer(returnIP);
@@ -1003,8 +968,8 @@ public:
         assert(!sp_isOverflow(sp));
     }
 
-    JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
-                                               vmFramePtr & fp, int & retType) {
+    JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmFramePtr & fp,
+                                               vmStackPtr & cp, int & retType) {
         void * returnIP = sp.pop_Pointer();
         void * framePointer = sp.pop_Pointer();
         cp.backInt32();
@@ -1013,11 +978,11 @@ public:
         return returnIP;
     }
 
-    JM_FORCEINLINE void* inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+    JM_FORCEINLINE void* inline_pop_callstack(vmStackPtr & sp, vmFramePtr & fp, vmStackPtr & cp,
                                               uint16_t localSize, int & retType) {
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
-        return inline_pop_callstack(sp, cp, fp, retType);
+        return inline_pop_callstack(sp, fp, cp, retType);
     }
 
     template <typename U>
@@ -1202,18 +1167,6 @@ public:
     }
 
     //
-    // load arg0, 0x00000006
-    //
-    JM_FORCEINLINE void op_load(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
-        int8_t index = ip.getValue<0, int8_t>();
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
-        fp.setArgValueUInt32(index, value);
-        console.trace("%08X:  load args[%d], 0x%08X\n",
-                      getIpOffset(ip), getArgIndex(index), value);
-        ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
-    }
-
-    //
     // load eax, 0x00000006
     //
     JM_FORCEINLINE void op_load_eax(vmImagePtr & ip, vmStackPtr & sp, Register & regs) {
@@ -1221,6 +1174,18 @@ public:
         regs.eax.u32 = value;
         console.trace("%08X:  load eax, 0x%08X\n", getIpOffset(ip), value);
         ip.next(1 + sizeof(uint32_t));
+    }
+
+    //
+    // store arg0, 0x00000006
+    //
+    JM_FORCEINLINE void op_store(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+        int8_t index = ip.getValue<0, int8_t>();
+        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
+        fp.setArgValueUInt32(index, value);
+        console.trace("%08X:  load args[%d], 0x%08X\n",
+                      getIpOffset(ip), getArgIndex(index), value);
+        ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
     }
 
     //
@@ -1242,7 +1207,7 @@ public:
     //
     // copy arg0, eax
     //
-    JM_FORCEINLINE void op_copy_to_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE void op_copy_from_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
         fp.setArgValueUInt32(index, value);
@@ -1641,7 +1606,7 @@ public:
         ip.next(1 + sizeof(int8_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(sp, fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1660,7 +1625,7 @@ public:
         ip.next(1 + sizeof(int16_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(sp, fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1679,7 +1644,7 @@ public:
         ip.next(1 + sizeof(int32_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(sp, fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1696,7 +1661,7 @@ public:
         uint32_t offset = getIpOffset(ip);
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(sp, fp, cp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1720,7 +1685,7 @@ public:
         uint16_t localSize = ip.getValue<0, uint16_t>();
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, localSize, retType);
+        void * returnIP = inline_pop_callstack(sp, fp, cp, localSize, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1746,7 +1711,7 @@ public:
         regs.eax.u32 = value;
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(sp, fp, cp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -2025,12 +1990,12 @@ public:
                     op_add_sp_4(ip, sp);
                     break;
 
-                case OpCode::load:
-                    op_load(ip, sp, fp);
-                    break;
-
                 case OpCode::load_eax:
                     op_load_eax(ip, sp, regs);
+                    break;
+
+                case OpCode::store:
+                    op_store(ip, sp, fp);
                     break;
 
                 case OpCode::move:
@@ -2041,8 +2006,8 @@ public:
                     op_move_to_eax(ip, sp);
                     break;
 
-                case OpCode::copy_to_eax:
-                    op_copy_to_eax(ip, sp, fp, regs);
+                case OpCode::copy_from_eax:
+                    op_copy_from_eax(ip, sp, fp, regs);
                     break;
 
                 case OpCode::cmp:
@@ -2279,7 +2244,7 @@ fibonacci_n:
                     op_inline_call_near(ip, sp, cp, fp, ret_01);
                     goto fibonacci_n;
 fibonacci_ret_01:
-                    op_copy_to_eax(ip, sp, fp, regs);
+                    op_copy_from_eax(ip, sp, fp, regs);
                     op_dec(ip, fp);
                     op_inline_call_near(ip, sp, cp, fp, ret_02);
                     goto fibonacci_n;
@@ -2426,5 +2391,37 @@ public:
 
 } // namespace v3
 } // namespace jlang
+
+#ifndef JLANG_VM_ARGS_DEFINE_H
+
+#undef __arg0 
+#undef __arg1 
+#undef __arg2 
+#undef __arg3 
+#undef __arg4 
+#undef __arg5 
+#undef __arg6 
+#undef __arg7 
+#undef __arg8 
+#undef __arg9 
+
+#undef __var0 
+#undef __var1 
+#undef __var2 
+#undef __var3 
+#undef __var4 
+#undef __var5 
+#undef __var6 
+#undef __var7 
+#undef __var8 
+#undef __var9 
+#undef __var10
+#undef __var11
+#undef __var12
+#undef __var13
+#undef __var14
+#undef __var15
+
+#endif // JLANG_VM_ARGS_DEFINE_H
 
 #endif // JLANG_VM_INTERPRETER_V3_H

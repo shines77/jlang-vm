@@ -6,6 +6,22 @@
 #pragma once
 #endif
 
+//////////////////////////////////////////////////////////////
+
+#undef FRAME_STACK_SIZEOF
+#undef USE_FORWARD_STACK_PTR
+
+/* If is forward stack pointer ? */
+#define USE_FORWARD_STACK_PTR   1
+
+#define FRAME_STACK_SIZEOF      ((sizeof(void *) * 2) / sizeof(uint32_t))
+
+//////////////////////////////////////////////////////////////
+
+#include "jlang/vm/ArgsDefine.h"
+
+#define JLANG_VM_ARGS_DEFINE_H
+
 #include "jlang/vm/Interpreter.h"
 #include "jlang/vm/Interpreter_v3.h"
 #include "jlang/lang/ErrorCode.h"
@@ -83,8 +99,8 @@ static const unsigned char fibonacciBinary32[] = {
     // 0000001E:    call 0x00000010 (short offset 0xFFEF)
     OpCode::call_short, 0xEF, 0xFF,
 
-    // 00000021:    copy_eax var0, eax
-    OpCode::copy_to_eax, __var0,
+    // 00000021:    copy_from var0, eax
+    OpCode::copy_from_eax, __var0,
     // 00000023:    dec var1
     OpCode::dec,  __var1,
     // 00000025:    call 0x00000010 (short offset 0xFFE8)
@@ -178,7 +194,7 @@ static const unsigned char fibonacciBinary32_old[] = {
     OpCode::call_short, 0xEF, 0xFF,
 
     // 00000021:    copy_eax var0, eax
-    OpCode::copy_to_eax, __var0,
+    OpCode::copy_from_eax, __var0,
     // 00000023:    dec var1
     OpCode::dec,  __var1,
     // 00000025:    call 0x00000010 (short offset 0xFFE8)
@@ -344,5 +360,35 @@ public:
 
 } // namespace v2
 } // namespace jlang
+
+#undef JLANG_VM_ARGS_DEFINE_H
+
+#undef __arg0 
+#undef __arg1 
+#undef __arg2 
+#undef __arg3 
+#undef __arg4 
+#undef __arg5 
+#undef __arg6 
+#undef __arg7 
+#undef __arg8 
+#undef __arg9 
+
+#undef __var0 
+#undef __var1 
+#undef __var2 
+#undef __var3 
+#undef __var4 
+#undef __var5 
+#undef __var6 
+#undef __var7 
+#undef __var8 
+#undef __var9 
+#undef __var10
+#undef __var11
+#undef __var12
+#undef __var13
+#undef __var14
+#undef __var15
 
 #endif // JLANG_VM_INTERPRETER_V2_H

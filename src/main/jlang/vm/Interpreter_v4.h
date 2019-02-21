@@ -6,8 +6,21 @@
 #pragma once
 #endif
 
-/* If is backward stack pointer ? */
-#define USE_BACKWARD_STACK_PTR  0
+//////////////////////////////////////////////////////////////
+
+#undef FRAME_STACK_SIZEOF
+#undef USE_FORWARD_STACK_PTR
+
+/* If is forward stack pointer ? */
+#define USE_FORWARD_STACK_PTR   1
+
+#define FRAME_STACK_SIZEOF      ((sizeof(void *) * 1) / sizeof(uint32_t))
+
+//////////////////////////////////////////////////////////////
+
+#include "jlang/vm/ArgsDefine.h"
+
+#define JLANG_VM_ARGS_DEFINE_H
 
 #include "jlang/vm/Interpreter.h"
 #include "jlang/vm/Interpreter_v3.h"
@@ -44,7 +57,7 @@ namespace v4 {
 // 0000001A:    dec var1
 // 0000001E:    call 0x00000010 (short offset 0xFFEF)
 
-// 00000021:    copy_to_eax var0, eax
+// 00000021:    copy_from_eax var0, eax
 // 00000023:    dec var1
 // 00000025:    call 0x00000010 (short offset 0xFFE8)
 
@@ -58,11 +71,9 @@ namespace v4 {
 
 static const unsigned char fibonacciBinary32[] = {
     // 00000000:    push_u32 0x00000014 (int32)
-    OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
-    // 00000005:    call 0x00000010 (short offset 0x0008)
-    OpCode::call_short, 0x08, 0x00,
-    // 00000008:    pop_u32
-    OpCode::pop_u32,
+    OpCode::store, __var0, 0x14, 0x00, 0x00, 0x00,
+    // 00000006:    call 0x00000010 (short offset 0x0007)
+    OpCode::call_short, 0x07, 0x00,
     // 00000009:    ret
     OpCode::ret,
 
@@ -85,8 +96,8 @@ static const unsigned char fibonacciBinary32[] = {
     // 0000001D:    call 0x00000010 (near offset 0xF1)
     OpCode::call_near, 0xF1,
 
-    // 0000001F:    copy_to_eax var0, eax
-    OpCode::copy_to_eax, __var0,
+    // 0000001F:    copy_from_eax var0, eax
+    OpCode::copy_from_eax, __var0,
     // 00000021:    dec var1
     OpCode::dec,  __var1,
     // 00000023:    call 0x00000010 (near offset 0xEB)
@@ -115,12 +126,12 @@ static const unsigned char fibonacciBinary32[] = {
 
 typedef v3::ForwardPtr  vmImagePtr;
 
-#if USE_BACKWARD_STACK_PTR
-typedef v3::BackwardPtr vmStackPtr;
-typedef v3::BackwardPtr vmFramePtr;
-#else
+#if USE_FORWARD_STACK_PTR
 typedef v3::ForwardPtr  vmStackPtr;
 typedef v3::ForwardPtr  vmFramePtr;
+#else
+typedef v3::BackwardPtr vmStackPtr;
+typedef v3::BackwardPtr vmFramePtr;
 #endif
 
 struct vmContextRegs {
@@ -260,12 +271,12 @@ public:
     static const size_type kDefaultStackSize = 8 * 1048576U;
 
 private:
-#if USE_BACKWARD_STACK_PTR
-    vmStack<basic_type, true>  stack_;
-    vmStack<basic_type, true>  callstack_;
+#if USE_FORWARD_STACK_PTR
+    vmStack<basic_type, false>  stack_;
+    vmStack<basic_type, false>  callstack_;
 #else
-    vmStack<basic_type, false> stack_;
-    vmStack<basic_type, false> callstack_;
+    vmStack<basic_type, true> stack_;
+    vmStack<basic_type, true> callstack_;
 #endif
     vmImageInfo<basic_type> image_;
     vmHeap<basic_type>      heap_;
@@ -318,62 +329,57 @@ public:
         return (uint32_t)(ptrdiff_t)(ip.ptr() - image_.getStart());
     }
 
-    bool fp_isOverflow(vmStackPtr & sp) const {
-        return (fp_.ptr() >= stack_.last());
+    bool fp_isOverflow(vmStackPtr & fp) const {
+        if (stack_.isBackwardPtr())
+            return (fp.ptr() <= stack_.first());
+        else
+            return (fp.ptr() >= stack_.last());
     }
 
     int32_t getArgIndex(int8_t index) {
-#if USE_BACKWARD_STACK_PTR
-        return (index - FRAME_STACK_SIZEOF);
-#else
+#if USE_FORWARD_STACK_PTR
         return (index + (FRAME_STACK_SIZEOF + 1));
+#else
+        return (index - FRAME_STACK_SIZEOF);
 #endif
     }
 
-    JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, void * returnIP) {
-        sp.push_Pointer(fp.ptr());
-        sp.push_Pointer(returnIP);
-        fp.set(sp.ptr());
-        assert(!fp_isOverflow(sp));
+    JM_FORCEINLINE void push_callstack(vmFramePtr & fp, void * returnIP) {
+        fp.push_Pointer(returnIP);
+        assert(!fp_isOverflow(fp));
     }
 
-    JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
-        void * returnIP = sp.pop_Pointer();
-        void * framePointer = sp.pop_Pointer();
-        fp.set(framePointer);
+    JM_FORCEINLINE void * pop_callstack(vmFramePtr & fp) {
+        void * returnIP = fp.pop_Pointer();
         return returnIP;
     }
 
-    JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp, uint16_t localSize) {
-        sp.back(localSize);
+    JM_FORCEINLINE void * pop_callstack(vmFramePtr & fp, uint16_t localSize) {
+        fp.back(localSize);
         assert((localSize & 0x03) == 0);
-        return pop_callstack(sp, fp);
+        return pop_callstack(fp);
     }
 
-    JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+    JM_FORCEINLINE void inline_push_callstack(vmFramePtr & fp, vmStackPtr & cp,
                                               void * returnIP, int retType) {
-        sp.push_Pointer(fp.ptr());
-        sp.push_Pointer(returnIP);
+        fp.push_Pointer(returnIP);
         cp.writeInt32(retType);
-        fp.set(sp.ptr());
-        assert(!fp_isOverflow(sp));
+        assert(!fp_isOverflow(fp));
     }
 
-    JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
-                                               vmFramePtr & fp, int & retType) {
-        void * returnIP = sp.pop_Pointer();
-        void * framePointer = sp.pop_Pointer();
+    JM_FORCEINLINE void * inline_pop_callstack(vmFramePtr & fp, vmStackPtr & cp,
+                                               int & retType) {
+        void * returnIP = fp.pop_Pointer();
         cp.backInt32();
         retType = cp.getInt32();
-        fp.set(framePointer);
         return returnIP;
     }
 
-    JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+    JM_FORCEINLINE void * inline_pop_callstack(vmFramePtr & fp, vmStackPtr & cp,
                                                uint16_t localSize, int & retType) {
-        sp.back(localSize);
+        fp.back(localSize);
         assert((localSize & 0x03) == 0);
-        return inline_pop_callstack(sp, cp, fp, retType);
+        return inline_pop_callstack(fp, cp, retType);
     }
 
     template <typename U>
@@ -558,21 +564,9 @@ public:
     }
 
     //
-    // load arg0, 0x00000006
-    //
-    JM_FORCEINLINE void op_load(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
-        int8_t index = ip.getValue<0, int8_t>();
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
-        fp.setArgValueUInt32(index, value);
-        console.trace("%08X:  load args[%d], 0x%08X\n",
-                      getIpOffset(ip), getArgIndex(index), value);
-        ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
-    }
-
-    //
     // load eax, 0x00000006
     //
-    JM_FORCEINLINE void op_load_eax(vmImagePtr & ip, vmStackPtr & sp, Register & regs) {
+    JM_FORCEINLINE void op_load_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
         console.trace("%08X:  load eax, 0x%08X\n", getIpOffset(ip), value);
@@ -580,9 +574,21 @@ public:
     }
 
     //
+    // store arg0, 0x00000006
+    //
+    JM_FORCEINLINE void op_store(vmImagePtr & ip, vmFramePtr & fp) {
+        int8_t index = ip.getValue<0, int8_t>();
+        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
+        fp.setArgValueUInt32(index, value);
+        console.trace("%08X:  store args[%d], 0x%08X\n",
+                      getIpOffset(ip), getArgIndex(index), value);
+        ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
+    }
+
+    //
     // move arg0, arg1
     //
-    JM_FORCEINLINE void op_move(vmImagePtr & ip, vmStackPtr & sp) {
+    JM_FORCEINLINE void op_move(vmImagePtr & ip, vmFramePtr & fp) {
         console.trace("%08X:  move args[%d], args[%d]\n", getIpOffset(ip), 0, 1);
         ip.next();
     }
@@ -590,7 +596,7 @@ public:
     //
     // move eax, arg1
     //
-    JM_FORCEINLINE void op_move_to_eax(vmImagePtr & ip, vmStackPtr & sp) {
+    JM_FORCEINLINE void op_move_to_eax(vmImagePtr & ip, vmFramePtr & fp) {
         console.trace("%08X:  move eax, args[%d]\n", getIpOffset(ip), 0);
         ip.next();
     }
@@ -598,7 +604,7 @@ public:
     //
     // copy arg0, eax
     //
-    JM_FORCEINLINE void op_copy_to_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE void op_copy_from_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
         fp.setArgValueUInt32(index, value);
@@ -607,7 +613,7 @@ public:
         ip.next(1 + sizeof(int8_t));
     }
 
-    JM_FORCEINLINE void op_cmp(vmImagePtr & ip, vmStackPtr & sp) {
+    JM_FORCEINLINE void op_cmp(vmImagePtr & ip, vmFramePtr & fp) {
         console.trace("%08X:  cmp\n", getIpOffset(ip));
         ip.next();
     }
@@ -615,7 +621,7 @@ public:
     //
     // cmp arg0, arg1 (int32)
     //
-    JM_FORCEINLINE bool op_cmp_i32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_cmp_i32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
         int8_t index2 = ip.getValue<0, int8_t>();
@@ -640,7 +646,7 @@ public:
     //
     // cmp arg0, arg1 (uint32)
     //
-    JM_FORCEINLINE bool op_cmp_u32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_cmp_u32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
         int8_t index2 = ip.getValue<0, int8_t>();
@@ -665,7 +671,7 @@ public:
     //
     // cmp arg0, 0x00000008 (int32)
     //
-    JM_FORCEINLINE bool op_cmp_imm_i32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_i32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.getValue<0, int8_t>();
         int32_t value1 = fp.getArgValueInt32(index);
@@ -688,7 +694,7 @@ public:
     //
     // cmp arg0, 0x00000008 (uint32)
     //
-    JM_FORCEINLINE bool op_cmp_imm_u32(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_cmp_imm_u32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value1 = fp.getArgValueUInt32(index);
@@ -813,13 +819,13 @@ public:
     //
     // call 0x00102030 (ptr32)
     //
-    JM_FORCEINLINE void op_call(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE void op_call(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint32_t callEntry = ip.getValue<0, uint32_t>();
         ip.next(1 + sizeof(uint32_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(sp, fp, returnIP);
+        push_callstack(fp, returnIP);
 
         unsigned char * newIP = image_.getStart() + callEntry;
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -831,13 +837,13 @@ public:
     //
     // call_near 0x08
     //
-    JM_FORCEINLINE void op_call_near(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE void op_call_near(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t callOffset = ip.getValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(sp, fp, returnIP);
+        push_callstack(fp, returnIP);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -849,13 +855,13 @@ public:
     //
     // call_short 0x08, 0x00
     //
-    JM_FORCEINLINE void op_call_short(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE void op_call_short(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.getValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(sp, fp, returnIP);
+        push_callstack(fp, returnIP);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -867,13 +873,13 @@ public:
     //
     // call_long 0x18, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_call_long(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE void op_call_long(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.getValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(sp, fp, returnIP);
+        push_callstack(fp, returnIP);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -885,9 +891,9 @@ public:
     //
     // ret
     //
-    JM_FORCEINLINE bool op_ret(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_ret(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
-        void * returnIP = pop_callstack(sp, fp);
+        void * returnIP = pop_callstack(fp);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -903,10 +909,10 @@ public:
     //
     // ret_n_sm 0x08
     //
-    JM_FORCEINLINE bool op_ret_n_sm(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_ret_n_sm(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint8_t localSize = ip.getValue<0, uint8_t>();
-        void * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -923,10 +929,10 @@ public:
     //
     // ret_n 0x08, 0x00
     //
-    JM_FORCEINLINE bool op_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
+    JM_FORCEINLINE bool op_ret_n(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
-        void * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -943,12 +949,12 @@ public:
     //
     // ret_eax 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
 
-        void * returnIP = pop_callstack(sp, fp);
+        void * returnIP = pop_callstack(fp);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -965,13 +971,13 @@ public:
     //
     // ret_eax_n 0x08, 0x00, 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
         uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
         regs.eax.u32 = value;
 
-        void * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -989,14 +995,14 @@ public:
     //
     // inline_call_near 0x08
     //
-    JM_FORCEINLINE void op_inline_call_near(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                            vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_near(vmImagePtr & ip, vmFramePtr & fp,
+                                            vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int8_t callOffset = ip.getValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1008,14 +1014,14 @@ public:
     //
     // inline_call_short 0x08, 0x00
     //
-    JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                             vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmFramePtr & fp,
+                                             vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.getValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1027,14 +1033,14 @@ public:
     //
     // inline_call_long 0x18, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_inline_call_long(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                            vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_long(vmImagePtr & ip, vmFramePtr & fp,
+                                            vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.getValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(sp, cp, fp, returnIP, retType);
+        inline_push_callstack(fp, cp, returnIP, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1046,12 +1052,12 @@ public:
     //
     // ret
     //
-    JM_FORCEINLINE int op_inline_ret(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                     vmFramePtr & fp, bool & done) {
+    JM_FORCEINLINE int op_inline_ret(vmImagePtr & ip, vmFramePtr & fp,
+                                     vmStackPtr & cp, bool & done) {
         uint32_t offset = getIpOffset(ip);
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(fp, cp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1069,13 +1075,13 @@ public:
     //
     // ret_n 0x08, 0x00
     //
-    JM_FORCEINLINE int op_inline_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                       vmFramePtr & fp, bool & done) {
+    JM_FORCEINLINE int op_inline_ret_n(vmImagePtr & ip, vmFramePtr & fp,
+                                       vmStackPtr & cp, bool & done) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, localSize, retType);
+        void * returnIP = inline_pop_callstack(fp, cp, localSize, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1094,14 +1100,14 @@ public:
     //
     // ret_eax 0x00000001
     //
-    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                         vmFramePtr & fp, Register & regs, bool & done) {
+    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmFramePtr & fp, vmStackPtr & cp,
+                                          Register & regs, bool & done) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
 
         int retType;
-        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(fp, cp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1330,7 +1336,7 @@ public:
             regs.uval = 0;
 
             // Push call program entry.
-            push_callstack(sp, fp, nullptr);
+            push_callstack(fp, nullptr);
 
             // Main loop
             while (ip.ptr() < image_.getLimit()) {
@@ -1340,84 +1346,44 @@ public:
                     op_error(ip);
                     break;
 
-                case OpCode::push:
-                    op_push(ip, sp, fp);
-                    break;
-
-                case OpCode::push_i32:
-                    op_push_i32(ip, sp);
-                    break;
-
-                case OpCode::push_i64:
-                    op_push_i64(ip, sp);
-                    break;
-
-                case OpCode::push_i32_0:
-                    op_push_i32_0(ip, sp);
-                    break;
-
-                case OpCode::push_i64_0:
-                    op_push_i64_0(ip, sp);
-                    break;
-
-                case OpCode::pop:
-                    op_pop(ip, sp);
-                    break;
-
-                case OpCode::pop_i32:
-                    op_pop_i32(ip, sp);
-                    break;
-
-                case OpCode::pop_i64:
-                    op_pop_i64(ip, sp);
-                    break;
-
-                case OpCode::add_sp:
-                    op_add_sp(ip, sp);
-                    break;
-
-                case OpCode::add_sp_4:
-                    op_add_sp_4(ip, sp);
-                    break;
-
-                case OpCode::load:
-                    op_load(ip, sp, fp);
-                    break;
-
                 case OpCode::load_eax:
-                    op_load_eax(ip, sp, regs);
+                    op_load_eax(ip, fp, regs);
+                    break;
+
+                case OpCode::store:
+                    op_store(ip, fp);
                     break;
 
                 case OpCode::move:
-                    op_move(ip, sp);
+                    op_move(ip, fp);
                     break;
 
                 case OpCode::move_to_eax:
-                    op_move_to_eax(ip, sp);
+                    op_move_to_eax(ip, fp);
                     break;
 
-                case OpCode::copy_to_eax:
-                    op_copy_to_eax(ip, sp, fp, regs);
+                case OpCode::copy_from_eax:
+                    op_copy_from_eax(ip, fp, regs);
                     break;
 
                 case OpCode::cmp:
-                    op_cmp(ip, sp);
+                    op_cmp(ip, fp);
                     break;
 
                 case OpCode::cmp_i32:
-                    op_cmp_i32(ip, sp, fp);
+                    op_cmp_i32(ip, fp);
                     break;
 
                 case OpCode::cmp_u32:
-                    op_cmp_u32(ip, sp, fp);
+                    op_cmp_u32(ip, fp);
                     break;
 
                 case OpCode::cmp_imm_i32:
-                    op_cmp_imm_i32(ip, sp, fp);
+                    op_cmp_imm_i32(ip, fp);
                     break;
 
                 case OpCode::cmp_imm_u32:
-                    op_cmp_imm_u32(ip, sp, fp);
+                    op_cmp_imm_u32(ip, fp);
                     break;
 
                 case OpCode::jl:
@@ -1453,24 +1419,24 @@ public:
                     break;
 
                 case OpCode::call:
-                    op_call(ip, sp, fp);
+                    op_call(ip, fp);
                     break;
 
                 case OpCode::call_near:
-                    op_call_near(ip, sp, fp);
+                    op_call_near(ip, fp);
                     break;
 
                 case OpCode::call_short:
-                    op_call_short(ip, sp, fp);
+                    op_call_short(ip, fp);
                     break;
 
                 case OpCode::call_long:
-                    op_call_long(ip, sp, fp);
+                    op_call_long(ip, fp);
                     break;
 
                 case OpCode::ret:
                     {
-                        bool isDone = op_ret(ip, sp, fp);
+                        bool isDone = op_ret(ip, fp);
                         if (!isDone)
                             break;
                         else
@@ -1479,7 +1445,7 @@ public:
 
                 case OpCode::ret_n_sm:
                     {
-                        bool isDone = op_ret_n_sm(ip, sp, fp);
+                        bool isDone = op_ret_n_sm(ip, fp);
                         if (!isDone)
                             break;
                         else
@@ -1488,7 +1454,7 @@ public:
 
                 case OpCode::ret_n:
                     {
-                        bool isDone = op_ret_n(ip, sp, fp);
+                        bool isDone = op_ret_n(ip, fp);
                         if (!isDone)
                             break;
                         else
@@ -1497,7 +1463,7 @@ public:
 
                 case OpCode::ret_eax:
                     {
-                        bool isDone = op_ret_eax(ip, sp, fp, regs);
+                        bool isDone = op_ret_eax(ip, fp, regs);
                         if (!isDone)
                             break;
                         else
@@ -1506,7 +1472,7 @@ public:
 
                 case OpCode::ret_eax_n:
                     {
-                        bool isDone = op_ret_eax_n(ip, sp, fp, regs);
+                        bool isDone = op_ret_eax_n(ip, fp, regs);
                         if (!isDone)
                             break;
                         else
@@ -1602,18 +1568,18 @@ Execute_Finished:
             regs.uval = 0;
 
             // Push call program entry.
-            inline_push_callstack(sp, cp, fp, nullptr, ret_first);
+            inline_push_callstack(cp, fp, nullptr, ret_first);
 
             // Main loop
             bool done;
             do {
                 op_push_i32(ip, sp);
-                op_inline_call_short(ip, sp, cp, fp, ret_00);
+                op_inline_call_short(ip, fp, cp, ret_00);
                 goto fibonacci_n;
 fibonacci_ret_00:
                 {
                     op_pop_i32(ip, sp);
-                    int retType = op_inline_ret(ip, sp, cp, fp, done);
+                    int retType = op_inline_ret(ip, fp, cp, done);
                     if (likely(done)) {
                         retVal.setDataType(return_type::Basic);
                         retVal.setValue(regs.eax.u32);
@@ -1625,22 +1591,22 @@ fibonacci_ret_00:
                     goto Execute_Finished;
                 }
 fibonacci_n:
-                op_cmp_imm_i32(ip, sp, fp);
+                op_cmp_imm_i32(ip, fp);
                 bool is_large = op_jl_near(ip);
                 if (likely(!is_large)) {
                     op_add_sp_4(ip, sp);
                     op_push(ip, sp, fp);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, sp, cp, fp, ret_01);
+                    op_inline_call_near(ip, fp, cp, ret_01);
                     goto fibonacci_n;
 fibonacci_ret_01:
-                    op_copy_to_eax(ip, sp, fp, regs);
+                    op_copy_from_eax(ip, fp, regs);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, sp, cp, fp, ret_02);
+                    op_inline_call_near(ip, fp, cp, ret_02);
                     goto fibonacci_n;
 fibonacci_ret_02:
                     op_add_eax(ip, fp, regs);
-                    int retType = op_inline_ret_n(ip, sp, cp, fp, done);
+                    int retType = op_inline_ret_n(ip, fp, cp, done);
                     if (retType == ret_01)
                         goto fibonacci_ret_01;
                     else if (retType == ret_02)
@@ -1649,7 +1615,7 @@ fibonacci_ret_02:
                         goto fibonacci_ret_00;
                 }
                 else {
-                    int retType = op_inline_ret_eax(ip, sp, cp, fp, regs, done);
+                    int retType = op_inline_ret_eax(ip, fp, cp, regs, done);
                     if (retType == ret_01)
                         goto fibonacci_ret_01;
                     else if (retType == ret_02)
@@ -1780,6 +1746,34 @@ public:
 } // namespace v4
 } // namespace jlang
 
-#undef USE_BACKWARD_STACK_PTR
+#undef JLANG_VM_ARGS_DEFINE_H
+
+#undef __arg0 
+#undef __arg1 
+#undef __arg2 
+#undef __arg3 
+#undef __arg4 
+#undef __arg5 
+#undef __arg6 
+#undef __arg7 
+#undef __arg8 
+#undef __arg9 
+
+#undef __var0 
+#undef __var1 
+#undef __var2 
+#undef __var3 
+#undef __var4 
+#undef __var5 
+#undef __var6 
+#undef __var7 
+#undef __var8 
+#undef __var9 
+#undef __var10
+#undef __var11
+#undef __var12
+#undef __var13
+#undef __var14
+#undef __var15
 
 #endif // JLANG_VM_INTERPRETER_V4_H

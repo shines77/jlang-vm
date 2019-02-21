@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StringUtils.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\system\System.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\test\Assert.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\vm\ArgsDefine.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v3.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v1.h" />
