@@ -159,6 +159,36 @@ template <typename BasicType>
 struct IExecutionContext {
 };
 
+template <typename U = void *>
+JM_FORCEINLINE U PointerInc(U ptr) {
+    return (U)((unsigned char *)ptr + 1);
+}
+
+template <typename U = void *>
+JM_FORCEINLINE U PointerDec(U ptr) {
+    return (U)((unsigned char *)ptr - 1);
+}
+
+template <typename U = void *>
+JM_FORCEINLINE U PointerAdd(U ptr, int offset) {
+    return (U)((unsigned char *)ptr + offset);
+}
+
+template <typename U = void *>
+JM_FORCEINLINE U PointerSub(U ptr, int offset) {
+    return (U)((unsigned char *)ptr - offset);
+}
+
+template <typename U = void *>
+JM_FORCEINLINE U PointerAdd(U ptr, int64_t offset) {
+    return (U)((unsigned char *)ptr + offset);
+}
+
+template <typename U = void *>
+JM_FORCEINLINE U PointerSub(U ptr, int64_t offset) {
+    return (U)((unsigned char *)ptr - offset);
+}
+
 struct IntWrapper32 {
     int32_t low;
 };
@@ -2597,7 +2627,7 @@ public:
 #endif
         sp_last_ = sp_first_ + capacity;
         if (isBackwardPtr())
-            sp_ = sp_last_;
+            sp_ = sp_last_ - sizeof(basic_type);
         else
             sp_ = sp_first_;
         capacity_ = capacity;

@@ -247,8 +247,8 @@ public:
     template <typename U = void *>
     U getPointer() const { return *(U *)ptr_; }
 
-    int8_t *  getInt8Pointer()  const { return getPointer<int8_t *>();  }
-    uint8_t * getUInt8Pointer() const { return getPointer<uint8_t *>(); }
+    int8_t *  getI8Pointer() const { return getPointer<int8_t *>();  }
+    uint8_t * getU8Pointer() const { return getPointer<uint8_t *>(); }
 
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
@@ -267,8 +267,8 @@ public:
     template <typename U = void *>
     void setPointer(U val)  { *(U *)ptr_ = val; }
 
-    void setInt8Pointer(int8_t * val)   { setPointer<int8_t *>(val);  }
-    void setUInt8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
+    void setI8Pointer(int8_t * val)  { setPointer<int8_t *>(val);  }
+    void setU8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
 
     template <typename U = int>
     void setValue(U value) { *(U *)ptr_ = value; }
@@ -293,8 +293,8 @@ public:
     template <typename U = void *>
     void backPointer() { ptr_ -= sizeof(void *);   }
 
-    void backInt8Pointer()  { backPointer<int8_t *>();  }
-    void backUInt8Pointer() { backPointer<uint8_t *>(); }
+    void backI8Pointer() { backPointer<int8_t *>();  }
+    void backU8Pointer() { backPointer<uint8_t *>(); }
 
     // ForwardPtr
     void next() { ptr_++; }
@@ -316,8 +316,8 @@ public:
     template <typename U = void *>
     void nextPointer() { ptr_ += sizeof(void *);   }
 
-    void nextInt8Pointer()  { nextPointer<int8_t *>();  }
-    void nextUInt8Pointer() { nextPointer<uint8_t *>(); }
+    void nextI8Pointer() { nextPointer<int8_t *>();  }
+    void nextU8Pointer() { nextPointer<uint8_t *>(); }
 
     // ForwardPtr
     int8_t   readInt8()    { int8_t   value = getInt8();    nextInt8();    return value; }
@@ -337,8 +337,8 @@ public:
         return value;
     }
 
-    int8_t *  readInt8Pointer(int8_t * val)   { return readPointer<int8_t *>();  }
-    uint8_t * readUInt8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
+    int8_t *  readI8Pointer(int8_t * val)  { return readPointer<int8_t *>();  }
+    uint8_t * readU8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
 
     // ForwardPtr
     void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
@@ -357,8 +357,8 @@ public:
         nextPointer<U>();
     }
 
-    void writeInt8Pointer(int8_t * val)    { writePointer<int8_t *>(val);  }
-    void writeUInt8Pointer(uint8_t * val)  { writePointer<uint8_t *>(val); }
+    void writeI8Pointer(int8_t * val)  { writePointer<int8_t *>(val);  }
+    void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
 
     // ForwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
@@ -486,8 +486,8 @@ public:
     template <typename U = void *>
     U getPointer() const { return *(U *)ptr_; }
 
-    int8_t *  getInt8Pointer()  const { return getPointer<int8_t *>();  }
-    uint8_t * getUInt8Pointer() const { return getPointer<uint8_t *>(); }
+    int8_t *  getI8Pointer() const { return getPointer<int8_t *>();  }
+    uint8_t * getU8Pointer() const { return getPointer<uint8_t *>(); }
 
     template <typename U = int>
     U getValue() const { return *(U *)ptr_; }
@@ -506,8 +506,8 @@ public:
     template <typename U = void *>
     void setPointer(U val)  { *(U *)ptr_ = val; }
 
-    void setInt8Pointer(int8_t * val)   { setPointer<int8_t *>(val);  }
-    void setUInt8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
+    void setI8Pointer(int8_t * val)  { setPointer<int8_t *>(val);  }
+    void setU8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
 
     template <typename U = int>
     void setValue(U value) { *(U *)ptr_ = value; }
@@ -532,8 +532,8 @@ public:
     template <typename U = void *>
     void backPointer() { ptr_ += sizeof(void *);   }
 
-    void backInt8Pointer()  { backPointer<int8_t *>();  }
-    void backUInt8Pointer() { backPointer<uint8_t *>(); }
+    void backI8Pointer() { backPointer<int8_t *>();  }
+    void backU8Pointer() { backPointer<uint8_t *>(); }
 
     // BackwardPtr
     void next() { ptr_--; }
@@ -555,8 +555,8 @@ public:
     template <typename U = void *>
     void nextPointer() { ptr_ -= sizeof(void *);   }
 
-    void nextInt8Pointer()  { nextPointer<int8_t *>();  }
-    void nextUInt8Pointer() { nextPointer<uint8_t *>(); }
+    void nextI8Pointer() { nextPointer<int8_t *>();  }
+    void nextU8Pointer() { nextPointer<uint8_t *>(); }
 
     // BackwardPtr
     int8_t   readInt8()    { int8_t   value = getInt8();    nextInt8();    return value; }
@@ -576,8 +576,8 @@ public:
         return value;
     }
 
-    int8_t *  readInt8Pointer(int8_t * val)   { return readPointer<int8_t *>();  }
-    uint8_t * readUInt8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
+    int8_t *  readI8Pointer(int8_t * val)  { return readPointer<int8_t *>();  }
+    uint8_t * readU8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
 
     // BackwardPtr
     void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
@@ -596,8 +596,8 @@ public:
         nextPointer<U>();
     }
 
-    void writeInt8Pointer(int8_t * val)    { writePointer<int8_t *>(val);  }
-    void writeUInt8Pointer(uint8_t * val)  { writePointer<uint8_t *>(val); }
+    void writeIPointer(int8_t * val)   { writePointer<int8_t *>(val);  }
+    void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
 
     // BackwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
@@ -864,7 +864,10 @@ public:
     }
 
     bool sp_isOverflow(vmStackPtr & sp) const {
-        return (sp.ptr() >= stack_.last());
+        if (stack_.isBackwardPtr())
+            return (sp.ptr() <= stack_.first());
+        else
+            return (sp.ptr() >= stack_.last());
     }
 
     int32_t getArgIndex(int8_t index) {
@@ -875,51 +878,51 @@ public:
 #endif
     }
 
-    JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, unsigned char * returnFP) {
-        sp.writeUInt8Pointer(fp.ptr());
-        sp.writeUInt8Pointer(returnFP);
+    JM_FORCEINLINE void push_callstack(vmStackPtr & sp, vmFramePtr & fp, void * returnFP) {
+        sp.writePointer(fp.ptr());
+        sp.writePointer(returnFP);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
 
-    JM_FORCEINLINE unsigned char * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
-        sp.backUInt8Pointer();
-        unsigned char * returnIP = sp.getUInt8Pointer();
-        sp.backUInt8Pointer();
-        unsigned char * framePointer = sp.getUInt8Pointer();
+    JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp) {
+        sp.backPointer();
+        void * returnIP = sp.getPointer();
+        sp.backPointer();
+        void * framePointer = sp.getPointer();
         fp.set(framePointer);
         return returnIP;
     }
 
-    JM_FORCEINLINE unsigned char * pop_callstack(vmStackPtr & sp, vmFramePtr & fp, uint16_t localSize) {
+    JM_FORCEINLINE void * pop_callstack(vmStackPtr & sp, vmFramePtr & fp, uint16_t localSize) {
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
         return pop_callstack(sp, fp);
     }
 
     JM_FORCEINLINE void inline_push_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
-                                              unsigned char * returnFP, int retType) {
-        sp.writeUInt8Pointer(fp.ptr());
-        sp.writeUInt8Pointer(returnFP);
+                                              void * returnFP, int retType) {
+        sp.writePointer(fp.ptr());
+        sp.writePointer(returnFP);
         cp.writeInt32(retType);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
 
-    JM_FORCEINLINE unsigned char * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
-                                                        vmFramePtr & fp, int & retType) {
-        sp.backUInt8Pointer();
-        unsigned char * returnIP = sp.getUInt8Pointer();
-        sp.backUInt8Pointer();
-        unsigned char * framePointer = sp.getUInt8Pointer();
+    JM_FORCEINLINE void * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp,
+                                               vmFramePtr & fp, int & retType) {
+        sp.backPointer();
+        void * returnIP = sp.getPointer();
+        sp.backPointer();
+        void * framePointer = sp.getPointer();
         cp.backInt32();
         retType = cp.getInt32();
         fp.set(framePointer);
         return returnIP;
     }
 
-    JM_FORCEINLINE unsigned char * inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
-                                                        uint16_t localSize, int & retType) {
+    JM_FORCEINLINE void* inline_pop_callstack(vmStackPtr & sp, vmStackPtr & cp, vmFramePtr & fp,
+                                              uint16_t localSize, int & retType) {
         sp.back(localSize);
         assert((localSize & 0x03) == 0);
         return inline_pop_callstack(sp, cp, fp, retType);
@@ -1367,7 +1370,7 @@ public:
         uint32_t callEntry = ip.readValue<0, uint32_t>();
         ip.next(1 + sizeof(uint32_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         push_callstack(sp, fp, returnIP);
 
         unsigned char * newIP = image_.getStart() + callEntry;
@@ -1385,10 +1388,10 @@ public:
         int8_t callOffset = ip.readValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         push_callstack(sp, fp, returnIP);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
@@ -1403,10 +1406,10 @@ public:
         int16_t callOffset = ip.readValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         push_callstack(sp, fp, returnIP);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
@@ -1421,10 +1424,10 @@ public:
         int32_t callOffset = ip.readValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         push_callstack(sp, fp, returnIP);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
@@ -1437,7 +1440,7 @@ public:
     //
     JM_FORCEINLINE bool op_ret(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
-        unsigned char * returnIP = pop_callstack(sp, fp);
+        void * returnIP = pop_callstack(sp, fp);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1456,7 +1459,7 @@ public:
     JM_FORCEINLINE bool op_ret_n_sm(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint8_t localSize = ip.readValue<0, uint8_t>();
-        unsigned char * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(sp, fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1476,7 +1479,7 @@ public:
     JM_FORCEINLINE bool op_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.readValue<0, uint16_t>();
-        unsigned char * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(sp, fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1498,7 +1501,7 @@ public:
         uint32_t value = ip.readValue<0, uint32_t>();
         regs.eax.u32 = value;
 
-        unsigned char * returnIP = pop_callstack(sp, fp);
+        void * returnIP = pop_callstack(sp, fp);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1521,7 +1524,7 @@ public:
         uint32_t value = ip.readValue<0, uint32_t, uint32_t, 2>();
         regs.eax.u32 = value;
 
-        unsigned char * returnIP = pop_callstack(sp, fp, localSize);
+        void * returnIP = pop_callstack(sp, fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1545,10 +1548,10 @@ public:
         int8_t callOffset = ip.readValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         inline_push_callstack(sp, cp, fp, returnIP, retType);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
@@ -1564,10 +1567,10 @@ public:
         int16_t callOffset = ip.readValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         inline_push_callstack(sp, cp, fp, returnIP, retType);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
@@ -1583,15 +1586,14 @@ public:
         int32_t callOffset = ip.readValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
 
-        unsigned char * returnIP = ip.ptr();
+        void * returnIP = ip.get<void *>();
         inline_push_callstack(sp, cp, fp, returnIP, retType);
 
-        unsigned char * newIP = returnIP + callOffset;
+        void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (long)\n\n",
-                      offset, getIpOffset(ip));
+        console.trace("%08X:  call 0x%08X (long)\n\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1602,7 +1604,7 @@ public:
         uint32_t offset = getIpOffset(ip);
 
         int retType;
-        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1626,7 +1628,7 @@ public:
         uint16_t localSize = ip.readValue<0, uint16_t>();
 
         int retType;
-        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, localSize, retType);
+        void * returnIP = inline_pop_callstack(sp, cp, fp, localSize, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1652,7 +1654,7 @@ public:
         regs.eax.u32 = value;
 
         int retType;
-        unsigned char * returnIP = inline_pop_callstack(sp, cp, fp, retType);
+        void * returnIP = inline_pop_callstack(sp, cp, fp, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
