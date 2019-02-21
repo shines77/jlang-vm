@@ -87,16 +87,14 @@ static const unsigned char fibonacciBinary32[] = {
     // 00000016:    jl_near 0x00000030 (near offset 0x18)
     OpCode::jl_near, 0x18,
 
-    // 00000018:    add_sp_4
-    OpCode::add_sp_4,
-    // 00000019:    push arg0  (var1)
-    OpCode::push, __arg0,
+    // 00000018:    move var1, arg0
+    OpCode::move, __var1, __arg0,
     // 0000001B:    dec var1
     OpCode::dec,  __var1,
     // 0000001D:    call 0x00000010 (near offset 0xF1)
     OpCode::call_near, 0xF1,
 
-    // 0000001F:    copy_from_eax var0, eax
+    // 0000001F:    copy_from var0, eax
     OpCode::copy_from_eax, __var0,
     // 00000021:    dec var1
     OpCode::dec,  __var1,
@@ -105,11 +103,11 @@ static const unsigned char fibonacciBinary32[] = {
 
     // 00000025:    add eax, var0
     OpCode::add_eax, __var0,
-    // 00000027:    ret_n 8  (pop var0, var1)
-    OpCode::ret_n, 0x08, 0x00,
+    // 00000027:    ret
+    OpCode::ret,
 
-    // 0000002A:    nop; nop;
-    OpCode::nop,  OpCode::nop,
+    // 00000028:    nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
     // 0000002C:    nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
 
@@ -179,7 +177,7 @@ public:
 
     void setInput(uintptr_t initValue) {
         char * imageData = (char *)image_.data();
-        uint32_t * pInitValue = (uint32_t *)&(imageData[1]);
+        uint32_t * pInitValue = (uint32_t *)&(imageData[2]);
         if (pInitValue) {
             *pInitValue = (uint32_t)initValue;
         }
@@ -589,8 +587,13 @@ public:
     // move arg0, arg1
     //
     JM_FORCEINLINE void op_move(vmImagePtr & ip, vmFramePtr & fp) {
-        console.trace("%08X:  move args[%d], args[%d]\n", getIpOffset(ip), 0, 1);
-        ip.next();
+        int8_t index1 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<1, int8_t>();
+        uint32_t value = fp.getArgValueUInt32(index2);
+        fp.setArgValueUInt32(index1, value);
+        console.trace("%08X:  move args[%d], args[%d] - 0x%08X\n",
+                      getIpOffset(ip), getArgIndex(index1), getArgIndex(index2), value);
+        ip.next(1 + sizeof(int8_t) + sizeof(int8_t));
     }
 
     //

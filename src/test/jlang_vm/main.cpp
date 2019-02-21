@@ -424,7 +424,7 @@ int main(int argc, char * argv[])
 #endif
 #endif
 
-    test_Interpreter_v4_inline();
+    //test_Interpreter_v4_inline();
     test_Interpreter_v3_inline();
     test_Interpreter_v4();
     test_Interpreter_v3();

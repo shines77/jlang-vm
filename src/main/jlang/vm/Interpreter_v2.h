@@ -148,7 +148,7 @@ static const unsigned char fibonacciBinary32[] = {
 // 0000001C:    push arg0  (var1)
 // 0000001E:    call 0x00000010 (short offset 0xFFEF)
 
-// 00000021:    copy_eax var0, eax
+// 00000021:    copy_from var0, eax
 // 00000023:    dec var1
 // 00000025:    call 0x00000010 (short offset 0xFFE8)
 

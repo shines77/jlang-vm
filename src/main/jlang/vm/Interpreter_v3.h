@@ -56,7 +56,7 @@ namespace v3 {
 // 0000001A:    dec var1
 // 0000001E:    call 0x00000010 (short offset 0xFFEF)
 
-// 00000021:    copy_from_eax var0, eax
+// 00000021:    copy_from var0, eax
 // 00000023:    dec var1
 // 00000025:    call 0x00000010 (short offset 0xFFE8)
 
@@ -97,7 +97,7 @@ static const unsigned char fibonacciBinary32[] = {
     // 0000001D:    call 0x00000010 (near offset 0xF1)
     OpCode::call_near, 0xF1,
 
-    // 0000001F:    copy_from_eax var0, eax
+    // 0000001F:    copy_from var0, eax
     OpCode::copy_from_eax, __var0,
     // 00000021:    dec var1
     OpCode::dec,  __var1,
@@ -154,7 +154,7 @@ static const unsigned char fibonacciBinary32_2[] = {
     // 00000021:    call 0x00000010 (near offset 0xED)
     OpCode::call_near, 0xED,
 
-    // 00000023:    copy_from_eax var0, eax
+    // 00000023:    copy_from var0, eax
     OpCode::copy_from_eax, __var0,
     // 00000025:    dec var1
     OpCode::inc,  __var1,
