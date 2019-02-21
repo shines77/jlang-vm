@@ -381,19 +381,19 @@ public:
     void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
 
     // ForwardPtr
-    int8_t   pop_Int8()    { nextInt8();    return getInt8(); }
-    uint8_t  pop_UInt8()   { nextUInt8();   return getUInt8(); }
-    int16_t  pop_Int16()   { nextInt16();   return getInt16(); }
-    uint16_t pop_UInt16()  { nextUInt16();  return getUInt16(); }
-    int32_t  pop_Int32()   { nextInt32();   return getInt32(); }
-    uint32_t pop_UInt32()  { nextUInt32();  return getUInt32(); }
-    int64_t  pop_Int64()   { nextInt64();   return getInt64(); }
-    uint64_t pop_UInt64()  { nextUInt64();  return getUInt64(); }
-    void *   pop_Pointer() { nextPointer(); return getPointer(); }
+    int8_t   pop_Int8()    { backInt8();    return getInt8(); }
+    uint8_t  pop_UInt8()   { backUInt8();   return getUInt8(); }
+    int16_t  pop_Int16()   { backInt16();   return getInt16(); }
+    uint16_t pop_UInt16()  { backUInt16();  return getUInt16(); }
+    int32_t  pop_Int32()   { backInt32();   return getInt32(); }
+    uint32_t pop_UInt32()  { backUInt32();  return getUInt32(); }
+    int64_t  pop_Int64()   { backInt64();   return getInt64(); }
+    uint64_t pop_UInt64()  { backUInt64();  return getUInt64(); }
+    void *   pop_Pointer() { backPointer(); return getPointer(); }
 
     template <typename U = void *>
     U pop_Pointer() {
-        nextPointer<U>();
+        backPointer<U>();
         return getPointer<U>();
     }
 
@@ -660,19 +660,19 @@ public:
     void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
 
     // BackwardPtr
-    int8_t   pop_Int8()    { nextInt8();    return getInt8(); }
-    uint8_t  pop_UInt8()   { nextUInt8();   return getUInt8(); }
-    int16_t  pop_Int16()   { nextInt16();   return getInt16(); }
-    uint16_t pop_UInt16()  { nextUInt16();  return getUInt16(); }
-    int32_t  pop_Int32()   { nextInt32();   return getInt32(); }
-    uint32_t pop_UInt32()  { nextUInt32();  return getUInt32(); }
-    int64_t  pop_Int64()   { nextInt64();   return getInt64(); }
-    uint64_t pop_UInt64()  { nextUInt64();  return getUInt64(); }
-    void *   pop_Pointer() { nextPointer(); return getPointer(); }
+    int8_t   pop_Int8()    { backInt8();    return getInt8(); }
+    uint8_t  pop_UInt8()   { backUInt8();   return getUInt8(); }
+    int16_t  pop_Int16()   { backInt16();   return getInt16(); }
+    uint16_t pop_UInt16()  { backUInt16();  return getUInt16(); }
+    int32_t  pop_Int32()   { backInt32();   return getInt32(); }
+    uint32_t pop_UInt32()  { backUInt32();  return getUInt32(); }
+    int64_t  pop_Int64()   { backInt64();   return getInt64(); }
+    uint64_t pop_UInt64()  { backUInt64();  return getUInt64(); }
+    void *   pop_Pointer() { backPointer(); return getPointer(); }
 
     template <typename U = void *>
     U pop_Pointer() {
-        nextPointer<U>();
+        backPointer<U>();
         return getPointer<U>();
     }
 

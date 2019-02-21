@@ -376,6 +376,7 @@ int main(int argc, char * argv[])
     test_Fibonacci32();
 #endif
 #endif
+
     test_Interpreter_v3_inline();
     //test_Interpreter_v4();
     test_Interpreter_v3();
