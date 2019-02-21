@@ -61,7 +61,7 @@ namespace v1 {
 // 0000004B:    ret
 //
 
-static const unsigned char s_fibonacciBinary32[] = {
+static const unsigned char fibonacciBinary32[] = {
     // 00000000:    push ecx
     OpCode::push, vmDataType::Reg, vmReg::ecx,
     // 00000003:    load ecx, 0x00000014 (uint32)
@@ -288,11 +288,11 @@ public:
     ~vmBinaryFile() {}
 
     int loadFromFile(const char * filename) {
-        static const size_t kImageSize = sizeof(s_fibonacciBinary32);
+        static const size_t kImageSize = sizeof(fibonacciBinary32);
         image_.allocate(kImageSize);
         void * imageData = image_.data();
         if (imageData) {
-            memcpy(imageData, (const void *)&s_fibonacciBinary32[0], kImageSize);
+            memcpy(imageData, (const void *)&fibonacciBinary32[0], kImageSize);
         }
         image_.setEntryOffset(0);
         return 1;

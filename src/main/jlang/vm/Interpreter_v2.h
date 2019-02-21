@@ -54,7 +54,7 @@ namespace v2 {
 // 00000035:    ret
 //
 
-static const unsigned char s_fibonacciBinary32[] = {
+static const unsigned char fibonacciBinary32[] = {
     // 00000000:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
     // 00000005:    call 0x00000010 (short offset 0x0008)
@@ -148,7 +148,7 @@ static const unsigned char s_fibonacciBinary32[] = {
 // 00000036:    ret
 //
 
-static const unsigned char s_fibonacciBinary32_old[] = {
+static const unsigned char fibonacciBinary32_old[] = {
     // 00000000:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
     // 00000005:    call 0x00000010 (short offset 0x0008)
@@ -218,11 +218,11 @@ public:
     ~vmBinaryFile() {}
 
     int loadFromFile(const char * filename) {
-        static const size_t kImageSize = sizeof(s_fibonacciBinary32);
+        static const size_t kImageSize = sizeof(fibonacciBinary32);
         image_.allocate(kImageSize);
         void * imageData = image_.data();
         if (imageData) {
-            memcpy(imageData, (const void *)&s_fibonacciBinary32[0], kImageSize);
+            memcpy(imageData, (const void *)&fibonacciBinary32[0], kImageSize);
         }
         image_.setEntryOffset(0);
         return 1;
