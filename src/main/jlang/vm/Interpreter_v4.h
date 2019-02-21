@@ -370,10 +370,6 @@ public:
         return ip_.ptr();
     }
 
-    unsigned char * getSP() const {
-        return sp_.ptr();
-    }
-
     unsigned char * getFP() const {
         return fp_.ptr();
     }
@@ -382,8 +378,8 @@ public:
         return (uint32_t)(ptrdiff_t)(ip.ptr() - image_.getStart());
     }
 
-    bool sp_isOverflow(vmStackPtr & sp) const {
-        return (sp.ptr() >= stack_.last());
+    bool fp_isOverflow(vmStackPtr & sp) const {
+        return (fp_.ptr() >= stack_.last());
     }
 
     int32_t getArgIndex(int8_t index) {

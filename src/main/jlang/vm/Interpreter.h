@@ -11,6 +11,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include <stdarg.h>     // For va_start(), va_end()
+
 #include <cstdint>
 #include <list>
 #include <memory>
