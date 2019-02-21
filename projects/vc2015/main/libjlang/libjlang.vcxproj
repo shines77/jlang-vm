@@ -23,6 +23,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\stddef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\ValueType.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jlang.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\CharInfo.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\NonCopyable.h" />

@@ -1,6 +1,6 @@
 
-#ifndef JLANG_SYSTEM_STRINGUTILS_H
-#define JLANG_SYSTEM_STRINGUTILS_H
+#ifndef JLANG_SUPPORT_STRINGUTILS_H
+#define JLANG_SUPPORT_STRINGUTILS_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -65,4 +65,4 @@ std::string ToUpperCase(const std::string & str) {
 } // namespace StringUtils
 } // namespace jlang
 
-#endif // JLANG_SYSTEM_STRINGUTILS_H
+#endif // JLANG_SUPPORT_STRINGUTILS_H

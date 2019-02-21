@@ -69,9 +69,9 @@
         break;                                      \
     default:                                        \
         assert(false);                              \
-        Debug.print("%08X:  jmp \t"                 \
-                    "Error: Unknown jump type. jumpType = %u\n", \
-                    offset, (uint32_t)jumpType);    \
+        console.trace("%08X:  jmp \t"               \
+                      "Error: Unknown jump type. jumpType = %u\n", \
+                      offset, (uint32_t)jumpType);  \
         break;                                      \
     }
 
@@ -94,9 +94,9 @@
         break;                                      \
     default:                                        \
         assert(false);                              \
-        Debug.print("%08X:  jmp \t"                 \
-                    "Error: Unknown jump type. jumpType = %u\n", \
-                    offset, (uint32_t)jumpType);    \
+        console.trace("%08X:  jmp \t"               \
+                      "Error: Unknown jump type. jumpType = %u\n", \
+                      offset, (uint32_t)jumpType);  \
         break;                                      \
     }
 
@@ -118,12 +118,23 @@ typedef unsigned long   DWORD;
 typedef void *          HANDLE;
 #endif // !_WIN32
 
-class DebugOutput {
+class Console {
 public:
-    DebugOutput() {}
-    ~DebugOutput() {}
+    Console() {}
+    ~Console() {}
 
     void print(const char * fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        this->vprint(fmt, args);
+        va_end(args);
+    }
+
+    void vprint(const char * fmt, va_list args) {
+        ::vprintf(fmt, args);
+    }
+
+    void trace(const char * fmt, ...) {
 #if USE_DEBUG_PRINT
         va_list args;
         va_start(args, fmt);
@@ -132,14 +143,14 @@ public:
 #endif
     }
 
-    void vprint(const char * fmt, va_list args) {
+    void trace(const char * fmt, va_list args) {
 #if USE_DEBUG_PRINT
-        vprintf(fmt, args);
+        this->vprint(fmt, args);
 #endif
     }
 };
 
-static DebugOutput Debug;
+static Console console;
 
 struct IntWrapper32 {
     int32_t low;
@@ -2292,7 +2303,7 @@ public:
             return (v1 >= v2);
 
         default:
-            Debug.print("Error: Unknown condition jump code. condType = %u\n",
+            console.trace("Error: Unknown condition jump code. condType = %u\n",
                         (uint32_t)condType);
             return false;
         }
@@ -2496,14 +2507,8 @@ private:
     frame_type *    frame_;
     size_type       capacity_;
 
-    static const bool kIsBackwardPtr = IsBackwardPtr;
-
 public:
-    vmStack(size_type capacity = 0)
-        : sp_(nullptr), sp_first_(nullptr), sp_last_(nullptr),
-          frame_(nullptr), capacity_(capacity) {
-    }
-    vmStack(frame_type * frame, size_type capacity = 0)
+    vmStack(frame_type * frame = nullptr, size_type capacity = 0)
         : sp_(nullptr), sp_first_(nullptr), sp_last_(nullptr),
           frame_(frame), capacity_(capacity) {
     }
@@ -2511,15 +2516,15 @@ public:
         destroy();
     }
 
-    bool isBackwardPtr() const { return kIsBackwardPtr; }
+    bool isBackwardPtr() const { return IsBackwardPtr; }
+    bool isInited() const { return (sp_first_ != nullptr); }
+
     int direction() const {
         if (isBackwardPtr())
             return -1;
         else
             return 1;
     }
-
-    bool isInited() const { return (sp_first_ != nullptr); }
 
     bool isEof() const {
         if (isBackwardPtr())
@@ -2558,6 +2563,7 @@ public:
     size_type capacity() const { return capacity_; }
 
     frame_type * getFrame() const { return frame_; }
+
     void setFrame(frame_type * frame) {
         this->frame_ = frame;
     }

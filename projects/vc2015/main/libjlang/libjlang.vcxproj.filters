@@ -73,6 +73,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v4.h">
       <Filter>src\vm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\CharInfo.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

@@ -30,6 +30,98 @@ namespace v2 {
 // 00000009:    ret
 
 // 0000000A:    nop; nop; nop;
+
+// 00000010:    cmp_imm_u32 arg0, 0x00000003
+// 00000016:    jl_short 0x00000030 (short offset 0x0017)
+
+// 00000019:    push_u32 0x00000000 (int32)
+// 0000001C:    push arg0  (var1)
+// 0000001A:    dec var1
+// 0000001E:    call 0x00000010 (short offset 0xFFEF)
+
+// 00000021:    copy_eax var0, eax
+// 00000023:    dec var1
+// 00000025:    call 0x00000010 (short offset 0xFFE8)
+
+// 00000028:    add eax, var0
+// 0000002A:    pop_u32  (var1)
+// 0000002B:    pop_u32  (var0)
+// 0000002C:    ret
+
+// 0000002D:    nop; nop; nop;
+
+// 00000030:    load eax, 0x00000001 (uint32)
+// 00000035:    ret
+//
+
+static const unsigned char s_fibonacciBinary32[] = {
+    // 00000000:    push_u32 0x00000014 (int32)
+    OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
+    // 00000005:    call 0x00000010 (short offset 0x0008)
+    OpCode::call_short, 0x08, 0x00,
+    // 00000008:    pop_u32
+    OpCode::pop_u32,
+    // 00000009:    ret
+    OpCode::ret,
+
+    // 0000000A:    nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop,
+    // 0000000D:    nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop,
+
+    // 00000010:    cmp_imm_u32 arg0, 0x00000003
+    OpCode::cmp_imm_u32, __arg0, 0x03, 0x00, 0x00, 0x00,
+    // 00000016:    jl_short 0x00000030 (short offset 0x0017)
+    OpCode::jl_short, 0x17, 0x00,
+
+    // 00000019:    push_u32 0x00000000 (int32)
+    OpCode::push_u32_0,
+    // 0000001A:    push arg0  (var1)
+    OpCode::push, __arg0,
+    // 0000001C:    dec var1
+    OpCode::dec,  __var1,
+    // 0000001E:    call 0x00000010 (short offset 0xFFEF)
+    OpCode::call_short, 0xEF, 0xFF,
+
+    // 00000021:    copy_eax var0, eax
+    OpCode::copy_to_eax, __var0,
+    // 00000023:    dec var1
+    OpCode::dec,  __var1,
+    // 00000025:    call 0x00000010 (short offset 0xFFE8)
+    OpCode::call_short, 0xE8, 0xFF,
+
+    // 00000028:    add eax, var0
+    OpCode::add_eax, __var0,
+    // 0000002A:    pop_u32  (var1)
+    OpCode::pop_u32,
+    // 0000002B:    pop_u32  (var0)
+    OpCode::pop_u32,
+    // 0000002C:    ret
+    OpCode::ret,
+
+    // 0000002D:    nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop,
+
+    // 00000030:    load eax, 0x00000001 (uint32)
+    OpCode::load_eax, 0x01, 0x00, 0x00, 0x00,
+    // 00000035:    ret
+    OpCode::ret,
+
+    // 00000036:    nop; nop; nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
+    // 0000003B:    nop; nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
+    // 0000003F:    exit
+    OpCode::exit
+};
+
+//
+// 00000000:    push_u32 0x00000014 (int32)
+// 00000005:    call 0x00000010 (short offset 0x0008)
+// 00000008:    pop_u32
+// 00000009:    ret
+
+// 0000000A:    nop; nop; nop;
 // 0000000D:    nop; nop; nop;
 
 // 00000010:    push_u32 0x00000000 (int32)
@@ -114,98 +206,6 @@ static const unsigned char s_fibonacciBinary32_old[] = {
     // 00000037:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
     // 0000003C:    exit
-    OpCode::exit
-};
-
-//
-// 00000000:    push_u32 0x00000014 (int32)
-// 00000005:    call 0x00000010 (short offset 0x0008)
-// 00000008:    pop_u32
-// 00000009:    ret
-
-// 0000000A:    nop; nop; nop;
-
-// 00000010:    cmp_imm_u32 arg0, 0x00000003
-// 00000016:    jl_short 0x00000030 (short offset 0x0017)
-
-// 00000019:    push_u32 0x00000000 (int32)
-// 0000001C:    push arg0  (var1)
-// 0000001A:    dec var1
-// 0000001E:    call 0x00000010 (short offset 0xFFEF)
-
-// 00000021:    copy_eax var0, eax
-// 00000023:    dec var1
-// 00000025:    call 0x00000010 (short offset 0xFFE8)
-
-// 00000028:    add eax, var0
-// 0000002A:    pop_u32  (var1)
-// 0000002B:    pop_u32  (var0)
-// 0000002C:    ret
-
-// 0000002D:    nop; nop; nop;
-
-// 00000030:    load eax, 0x00000001 (uint32)
-// 00000035:    ret
-//
-
-static const unsigned char s_fibonacciBinary32[] = {
-    // 00000000:    push_u32 0x00000014 (int32)
-    OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
-    // 00000005:    call 0x00000010 (short offset 0x0008)
-    OpCode::call_short, 0x08, 0x00,
-    // 00000008:    pop_u32
-    OpCode::pop_u32,
-    // 00000009:    ret
-    OpCode::ret,
-
-    // 0000000A:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
-    // 0000000D:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
-
-    // 00000010:    cmp_imm_u32 arg0, 0x00000003
-    OpCode::cmp_imm_u32, __arg0, 0x03, 0x00, 0x00, 0x00,
-    // 00000016:    jl_short 0x00000030 (short offset 0x0017)
-    OpCode::jl_short, 0x17, 0x00,
-
-    // 00000019:    push_u32 0x00000000 (int32)
-    OpCode::push_u32_0,
-    // 0000001A:    push arg0  (var1)
-    OpCode::push, __arg0,
-    // 0000001C:    dec var1
-    OpCode::dec,  __var1,
-    // 0000001E:    call 0x00000010 (short offset 0xFFEF)
-    OpCode::call_short, 0xEF, 0xFF,
-
-    // 00000021:    copy_eax var0, eax
-    OpCode::copy_to_eax, __var0,
-    // 00000023:    dec var1
-    OpCode::dec,  __var1,
-    // 00000025:    call 0x00000010 (short offset 0xFFE8)
-    OpCode::call_short, 0xE8, 0xFF,
-
-    // 00000028:    add eax, var0
-    OpCode::add_eax, __var0,
-    // 0000002A:    pop_u32  (var1)
-    OpCode::pop_u32,
-    // 0000002B:    pop_u32  (var0)
-    OpCode::pop_u32,
-    // 0000002C:    ret
-    OpCode::ret,
-
-    // 0000002D:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
-
-    // 00000030:    load eax, 0x00000001 (uint32)
-    OpCode::load_eax, 0x01, 0x00, 0x00, 0x00,
-    // 00000035:    ret
-    OpCode::ret,
-
-    // 00000036:    nop; nop; nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000003B:    nop; nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000003F:    exit
     OpCode::exit
 };
 
@@ -319,10 +319,10 @@ public:
 template <typename BasicType = uintptr_t>
 class Interpreter {
 public:
-    typedef BasicType                       basic_type;
-    typedef ExecutionEngine<basic_type>  engine_type;
-    typedef vmReturn<basic_type>            return_type;
-    typedef Interpreter<basic_type>      this_type;
+    typedef BasicType                   basic_type;
+    typedef ExecutionEngine<basic_type> engine_type;
+    typedef vmReturn<basic_type>        return_type;
+    typedef Interpreter<basic_type>     this_type;
 
 private:
     engine_type engine_;
