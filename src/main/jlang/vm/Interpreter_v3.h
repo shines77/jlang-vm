@@ -1041,7 +1041,7 @@ public:
                                               void * returnIP, int retType) {
         sp.push_Pointer(fp.ptr());
         sp.push_Pointer(returnIP);
-        cp.writeInt32(retType);
+        cp.push_Int32(retType);
         fp.set(sp.ptr());
         assert(!sp_isOverflow(sp));
     }
@@ -1050,8 +1050,7 @@ public:
                                                vmStackPtr & cp, int & retType) {
         void * returnIP = sp.pop_Pointer();
         void * framePointer = sp.pop_Pointer();
-        cp.backInt32();
-        retType = cp.getInt32();
+        retType = cp.pop_Int32();
         fp.set(framePointer);
         return returnIP;
     }
