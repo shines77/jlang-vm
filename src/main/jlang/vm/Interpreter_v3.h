@@ -119,13 +119,13 @@ static const unsigned char fibonacciBinary32[] = {
 
     // 00000035:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000003B:    nop; nop; nop; nop; nop;
+    // 0000003A:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
     // 0000003F:    exit
     OpCode::exit
 };
 
-static const unsigned char fibonacciBinary32_2[] = {
+static const unsigned char fibonacciBinary32_fast[] = {
     // 00000000:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
     // 00000005:    call 0x00000010 (short offset 0x0008)
@@ -174,10 +174,109 @@ static const unsigned char fibonacciBinary32_2[] = {
 
     // 00000035:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000003B:    nop; nop; nop; nop; nop;
+    // 0000003A:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
     // 0000003F:    exit
     OpCode::exit
+};
+
+class vmBinaryFile {
+private:
+    vmBinImage image_;
+
+public:
+    vmBinaryFile() {}
+    ~vmBinaryFile() {}
+
+    int loadFromFile(const char * filename) {
+        static const size_t kImageSize = sizeof(fibonacciBinary32);
+        image_.allocate(kImageSize);
+        void * imageData = image_.data();
+        if (imageData) {
+            memcpy(imageData, (const void *)&fibonacciBinary32[0], kImageSize);
+        }
+        image_.setEntryOffset(0);
+        return 1;
+    }
+
+    int saveToFile(const char * filename) {
+        return 1;
+    }
+
+    void setInput(uintptr_t initValue) {
+        char * imageData = (char *)image_.data();
+        uint32_t * pInitValue = (uint32_t *)&(imageData[1]);
+        if (pInitValue) {
+            *pInitValue = (uint32_t)initValue;
+        }
+    }
+
+    void * getImagePtr() const {
+        return image_.data();
+    }
+
+    size_t getImageSize() const {
+        return image_.size();
+    }
+
+    void * getImageEntry() const {
+        return image_.entry();
+    }
+};
+
+template <typename BasicType>
+class vmImageInfo {
+public:
+    typedef BasicType basic_type;
+
+private:
+    unsigned char * ip_;
+    unsigned char * ip_start_;
+    unsigned char * ip_limit_;
+
+public:
+    vmImageInfo() : ip_(nullptr), ip_start_(nullptr), ip_limit_(nullptr) {
+    }
+    ~vmImageInfo() {
+        clear();
+    }
+
+    bool isInited() const { return (ip_start_ != nullptr); }
+
+    bool isEof() const { return (ip_ == ip_limit_); }
+    bool isOverflow() const { return (ip_ >= ip_limit_); }
+    bool isUnderflow() const { return (ip_ < ip_start_); }
+
+    unsigned char * getPtr() const { return ip_; }
+    void setPtr(void * ip) {
+        this->ip_ = (unsigned char *)ip;
+    }
+
+    uint32_t getOffset() const { return (uint32_t)(ip_ - ip_start_); }
+    ptrdiff_t getOffset64() const { return (ip_ - ip_start_); }
+
+    unsigned char * getStart() const { return ip_start_; }
+    unsigned char * getLimit() const { return ip_limit_; }
+
+    void clear() {
+        this->ip_ = nullptr;
+        this->ip_limit_ = nullptr;
+        this->ip_start_ = nullptr;
+    }
+
+    void reset() {
+        this->ip_ = this->ip_start_;
+    }
+
+    void setting(void * imageStart, size_t imageSize, void * imageEntry) {
+        this->ip_ = (unsigned char *)imageEntry;
+        this->ip_limit_ = (unsigned char *)imageStart + imageSize;
+        this->ip_start_ = (unsigned char *)imageStart;
+    }
+
+    unsigned char get() const {
+        return *ip_;
+    }
 };
 
 class ForwardPtr {
@@ -243,6 +342,7 @@ public:
     // ForwardPtr
     void back() { ptr_--; }
     void back(int offset) { ptr_ -= offset; }
+    void back64(intptr_t offset) { ptr_ -= offset; }
 
     template <typename U>
     void back() { ptr_ -= sizeof(U); }
@@ -266,6 +366,7 @@ public:
     // ForwardPtr
     void next() { ptr_++; }
     void next(int offset) { ptr_ += offset; }
+    void next64(intptr_t offset) { ptr_ += offset; }
 
     template <typename U>
     void next() { ptr_ += sizeof(U); }
@@ -347,6 +448,25 @@ public:
     void push_I8Pointer(int8_t * val)  { push_Pointer<int8_t *>(val);  }
     void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
 
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+    void push_IntPtr(intptr_t val) {
+        push_Int64((int64_t)val);
+    }
+
+    void push_UIntPtr(uintptr_t val) {
+        push_UInt64((uint64_t)val);
+    }
+#else
+    void push_IntPtr(intptr_t val) {
+        push_Int32((int32_t)val);
+    }
+
+    void push_UIntPtr(uintptr_t val) {
+        push_UInt32((uint32_t)val);
+    }
+#endif
+
     // ForwardPtr
     int8_t   pop_Int8()    { backInt8();    return getInt8(); }
     uint8_t  pop_UInt8()   { backUInt8();   return getUInt8(); }
@@ -366,6 +486,25 @@ public:
 
     int8_t *  pop_I8Pointer(int8_t * val)  { return pop_Pointer<int8_t *>();  }
     uint8_t * pop_U8Pointer(uint8_t * val) { return pop_Pointer<uint8_t *>(); }
+
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+    intptr_t pop_IntPtr() {
+        return (intptr_t)pop_Int64();
+    }
+
+    uintptr_t pop_UIntPtr() {
+        return (uintptr_t)pop_UInt64();
+    }
+#else
+    intptr_t pop_IntPtr() {
+        return (intptr_t)pop_Int32();
+    }
+
+    uintptr_t pop_UIntPtr() {
+        return (uintptr_t)pop_UInt32();
+    }
+#endif
 
     // ForwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
@@ -633,6 +772,25 @@ public:
     void push_I8Pointer(int8_t * val)  { push_Pointer<int8_t *>(val);  }
     void push_U8Pointer(uint8_t * val) { push_Pointer<uint8_t *>(val); }
 
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+    void push_IntPtr(intptr_t val) {
+        push_Int64((int64_t)val);
+    }
+
+    void push_UIntPtr(uintptr_t val) {
+        push_UInt64((uint64_t)val);
+    }
+#else
+    void push_IntPtr(intptr_t val) {
+        push_Int32((int32_t)val);
+    }
+
+    void push_UIntPtr(uintptr_t val) {
+        push_UInt32((uint32_t)val);
+    }
+#endif
+
     // BackwardPtr
     int8_t   pop_Int8()    { backInt8();    return getInt8(); }
     uint8_t  pop_UInt8()   { backUInt8();   return getUInt8(); }
@@ -652,6 +810,25 @@ public:
 
     int8_t *  pop_I8Pointer(int8_t * val)  { return pop_Pointer<int8_t *>();  }
     uint8_t * pop_U8Pointer(uint8_t * val) { return pop_Pointer<uint8_t *>(); }
+
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+    intptr_t pop_IntPtr() {
+        return (intptr_t)pop_Int64();
+    }
+
+    uintptr_t pop_UIntPtr() {
+        return (uintptr_t)pop_UInt64();
+    }
+#else
+    intptr_t pop_IntPtr() {
+        return (intptr_t)pop_Int32();
+    }
+
+    uintptr_t pop_UIntPtr() {
+        return (uintptr_t)pop_UInt32();
+    }
+#endif
 
     // BackwardPtr::Arg ##
     int32_t * getArgPtrInt32(int32_t index) const {
@@ -742,105 +919,6 @@ struct vmContextRegs {
         fp_.clear();
         regs_.uval = 0;
         flags.uval = 0;
-    }
-};
-
-class vmBinaryFile {
-private:
-    vmBinImage image_;
-
-public:
-    vmBinaryFile() {}
-    ~vmBinaryFile() {}
-
-    int loadFromFile(const char * filename) {
-        static const size_t kImageSize = sizeof(fibonacciBinary32);
-        image_.allocate(kImageSize);
-        void * imageData = image_.data();
-        if (imageData) {
-            memcpy(imageData, (const void *)&fibonacciBinary32[0], kImageSize);
-        }
-        image_.setEntryOffset(0);
-        return 1;
-    }
-
-    int saveToFile(const char * filename) {
-        return 1;
-    }
-
-    void setInput(uintptr_t initValue) {
-        char * imageData = (char *)image_.data();
-        uint32_t * pInitValue = (uint32_t *)&(imageData[1]);
-        if (pInitValue) {
-            *pInitValue = (uint32_t)initValue;
-        }
-    }
-
-    void * getImagePtr() const {
-        return image_.data();
-    }
-
-    size_t getImageSize() const {
-        return image_.size();
-    }
-
-    void * getImageEntry() const {
-        return image_.entry();
-    }
-};
-
-template <typename BasicType>
-class vmImageInfo {
-public:
-    typedef BasicType basic_type;
-
-private:
-    unsigned char * ip_;
-    unsigned char * ip_start_;
-    unsigned char * ip_limit_;
-
-public:
-    vmImageInfo() : ip_(nullptr), ip_start_(nullptr), ip_limit_(nullptr) {
-    }
-    ~vmImageInfo() {
-        clear();
-    }
-
-    bool isInited() const { return (ip_start_ != nullptr); }
-
-    bool isEof() const { return (ip_ == ip_limit_); }
-    bool isOverflow() const { return (ip_ >= ip_limit_); }
-    bool isUnderflow() const { return (ip_ < ip_start_); }
-
-    unsigned char * getPtr() const { return ip_; }
-    void setPtr(void * ip) {
-        this->ip_ = (unsigned char *)ip;
-    }
-
-    uint32_t getOffset() const { return (uint32_t)(ip_ - ip_start_); }
-    ptrdiff_t getOffset64() const { return (ip_ - ip_start_); }
-
-    unsigned char * getStart() const { return ip_start_; }
-    unsigned char * getLimit() const { return ip_limit_; }
-
-    void clear() {
-        this->ip_ = nullptr;
-        this->ip_limit_ = nullptr;
-        this->ip_start_ = nullptr;
-    }
-
-    void reset() {
-        this->ip_ = this->ip_start_;
-    }
-
-    void setting(void * imageStart, size_t imageSize, void * imageEntry) {
-        this->ip_ = (unsigned char *)imageEntry;
-        this->ip_limit_ = (unsigned char *)imageStart + imageSize;
-        this->ip_start_ = (unsigned char *)imageStart;
-    }
-
-    unsigned char get() const {
-        return *ip_;
     }
 };
 
@@ -1553,7 +1631,8 @@ public:
     //
     // ret_eax 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax(vmImagePtr & ip, vmStackPtr & sp,
+                                   vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
@@ -1575,7 +1654,8 @@ public:
     //
     // ret_eax_n 0x08, 0x00, 0x00000001
     //
-    JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
+    JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmStackPtr & sp,
+                                     vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
         uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
@@ -1599,8 +1679,8 @@ public:
     //
     // inline_call_near 0x08
     //
-    JM_FORCEINLINE void op_inline_call_near(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                            vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_near(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                            vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int8_t callOffset = ip.getValue<0, int8_t>();
         ip.next(1 + sizeof(int8_t));
@@ -1618,8 +1698,8 @@ public:
     //
     // inline_call_short 0x08, 0x00
     //
-    JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                             vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                             vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.getValue<0, int16_t>();
         ip.next(1 + sizeof(int16_t));
@@ -1637,8 +1717,8 @@ public:
     //
     // inline_call_long 0x18, 0x00, 0x00, 0x00
     //
-    JM_FORCEINLINE void op_inline_call_long(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                            vmFramePtr & fp, int retType) {
+    JM_FORCEINLINE void op_inline_call_long(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                            vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.getValue<0, int32_t>();
         ip.next(1 + sizeof(int32_t));
@@ -1656,8 +1736,8 @@ public:
     //
     // ret
     //
-    JM_FORCEINLINE int op_inline_ret(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                     vmFramePtr & fp, bool & done) {
+    JM_FORCEINLINE int op_inline_ret(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                     vmStackPtr & cp, bool & done) {
         uint32_t offset = getIpOffset(ip);
 
         int retType;
@@ -1679,8 +1759,8 @@ public:
     //
     // ret_n 0x08, 0x00
     //
-    JM_FORCEINLINE int op_inline_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                       vmFramePtr & fp, bool & done) {
+    JM_FORCEINLINE int op_inline_ret_n(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                       vmStackPtr & cp, bool & done) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
 
@@ -1704,8 +1784,8 @@ public:
     //
     // ret_eax 0x00000001
     //
-    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmStackPtr & cp,
-                                         vmFramePtr & fp, Register & regs, bool & done) {
+    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp,
+                                         vmStackPtr & cp, Register & regs, bool & done) {
         uint32_t offset = getIpOffset(ip);
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
@@ -2212,18 +2292,18 @@ Execute_Finished:
             regs.uval = 0;
 
             // Push call program entry.
-            inline_push_callstack(sp, cp, fp, nullptr, ret_first);
+            inline_push_callstack(sp, fp, cp, nullptr, ret_first);
 
             // Main loop
             bool done;
             do {
                 op_push_i32(ip, sp);
-                op_inline_call_short(ip, sp, cp, fp, ret_00);
+                op_inline_call_short(ip, sp, fp, cp, ret_00);
                 goto fibonacci_n;
 fibonacci_ret_00:
                 {
                     op_pop_i32(ip, sp);
-                    int retType = op_inline_ret(ip, sp, cp, fp, done);
+                    int retType = op_inline_ret(ip, sp, fp, cp, done);
                     if (likely(done)) {
                         retVal.setDataType(return_type::Basic);
                         retVal.setValue(regs.eax.u32);
@@ -2241,16 +2321,16 @@ fibonacci_n:
                     op_add_sp_4(ip, sp);
                     op_push(ip, sp, fp);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, sp, cp, fp, ret_01);
+                    op_inline_call_near(ip, sp, fp, cp, ret_01);
                     goto fibonacci_n;
 fibonacci_ret_01:
                     op_copy_from_eax(ip, sp, fp, regs);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, sp, cp, fp, ret_02);
+                    op_inline_call_near(ip, sp, fp, cp, ret_02);
                     goto fibonacci_n;
 fibonacci_ret_02:
                     op_add_eax(ip, fp, regs);
-                    int retType = op_inline_ret_n(ip, sp, cp, fp, done);
+                    int retType = op_inline_ret_n(ip, sp, fp, cp, done);
                     if (retType == ret_01)
                         goto fibonacci_ret_01;
                     else if (retType == ret_02)
@@ -2259,7 +2339,7 @@ fibonacci_ret_02:
                         goto fibonacci_ret_00;
                 }
                 else {
-                    int retType = op_inline_ret_eax(ip, sp, cp, fp, regs, done);
+                    int retType = op_inline_ret_eax(ip, sp, fp, cp, regs, done);
                     if (retType == ret_01)
                         goto fibonacci_ret_01;
                     else if (retType == ret_02)

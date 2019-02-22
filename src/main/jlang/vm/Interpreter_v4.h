@@ -42,81 +42,70 @@ namespace jlang {
 namespace v4 {
 
 //
-// 00000000:    push_u32 0x00000014 (int32)
-// 00000005:    call 0x00000010 (short offset 0x0008)
-// 00000008:    pop_u32
-// 00000009:    ret
+// 00000000:    store var0, 0x00000014 (int32)
+// 00000006:    fast_call 0x00000010, 8 (short offset 0x0005, local_size = 8)
+// 0000000B:    ret_n 8
 
-// 0000000A:    nop; nop; nop;
+// 0000000E:    nop; nop;
 
 // 00000010:    cmp_imm_u32 arg0, 0x00000003
-// 00000016:    jl_short 0x00000030 (short offset 0x0017)
+// 00000016:    jl_near 0x00000030 (near offset 0x0018)
 
-// 00000019:    add_sp_4
-// 0000001C:    push arg0  (var1)
-// 0000001A:    dec var1
-// 0000001E:    call 0x00000010 (short offset 0xFFEF)
+// 00000018:    move var0, arg1
+// 0000001B:    dec var0
+// 0000001D:    fast_call 0x00000010, 8 (short offset 0xFFEE, local_size = 8)
 
-// 00000021:    copy_from_eax var0, eax
-// 00000023:    dec var1
-// 00000025:    call 0x00000010 (short offset 0xFFE8)
+// 00000022:    copy_from var1, eax
+// 00000024:    dec var0
+// 00000026:    fast_call 0x00000010, 8 (short offset 0xFFE5, local_size = 8)
 
-// 00000028:    add eax, var0
-// 0000002A:    ret_n 8  (pop var0, var1)
+// 0000002B:    add eax, var1
+// 0000002D:    ret_n 8  (pop var0, var1)
 
-// 0000002D:    nop; nop; nop;
-
-// 00000030:    ret eax, 0x00000001 (uint32)
+// 00000030:    ret_eax_n, 8, 0x00000001 (uint32)
 //
 
 static const unsigned char fibonacciBinary32[] = {
-    // 00000000:    push_u32 0x00000014 (int32)
+    // 00000000:    store var0, 0x00000014 (int32)
     OpCode::store, __var0, 0x14, 0x00, 0x00, 0x00,
-    // 00000006:    call 0x00000010 (short offset 0x0007)
-    OpCode::call_short, 0x07, 0x00,
-    // 00000009:    ret
-    OpCode::ret,
+    // 00000006:    call (0x00000010, 8) (short offset 0x0005, local_size = 8)
+    OpCode::fast_call_short, 0x05, 0x00, 0x08, 0x00,
+    // 0000000B:    ret_n 8
+    OpCode::ret_n, 0x08, 0x00,
 
-    // 0000000A:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
-    // 0000000D:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
+    // 0000000E:    nop; nop;
+    OpCode::nop,  OpCode::nop,
 
-    // 00000010:    cmp_imm_u32 arg0, 0x00000003
-    OpCode::cmp_imm_u32, __arg0, 0x03, 0x00, 0x00, 0x00,
+    // 00000010:    cmp_imm_u32 arg3, 0x00000003
+    OpCode::cmp_imm_u32, __arg1, 0x03, 0x00, 0x00, 0x00,
     // 00000016:    jl_near 0x00000030 (near offset 0x18)
     OpCode::jl_near, 0x18,
 
-    // 00000018:    move var1, arg0
-    OpCode::move, __var1, __arg0,
-    // 0000001B:    dec var1
-    OpCode::dec,  __var1,
-    // 0000001D:    call 0x00000010 (near offset 0xF1)
-    OpCode::call_near, 0xF1,
+    // 00000018:    move var0, arg1
+    OpCode::move, __var0, __arg1,
+    // 0000001B:    dec var0
+    OpCode::dec,  __var0,
+    // 0000001D:    fast_call (0x00000010, 8) (short offset 0xFFEE, local_size = 8)
+    OpCode::fast_call_short, 0xEE, 0xFF, 0x08, 0x00,
 
-    // 0000001F:    copy_from var0, eax
-    OpCode::copy_from_eax, __var0,
-    // 00000021:    dec var1
-    OpCode::dec,  __var1,
-    // 00000023:    call 0x00000010 (near offset 0xEB)
-    OpCode::call_near, 0xEB,
+    // 00000022:    copy_from var1, eax
+    OpCode::copy_from_eax, __var1,
+    // 00000024:    dec var0
+    OpCode::dec,  __var0,
+    // 00000026:    fast_call (0x00000010, 8) (short offset 0xFFE5, local_size = 8)
+    OpCode::fast_call_short, 0xE5, 0xFF, 0x08, 0x00,
 
-    // 00000025:    add eax, var0
-    OpCode::add_eax, __var0,
-    // 00000027:    ret
-    OpCode::ret,
-
-    // 00000028:    nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000002C:    nop; nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop,
+    // 0000002B:    add eax, var1
+    OpCode::add_eax, __var1,
+    // 0000002D:    ret_n 8
+    OpCode::ret_n,  0x08, 0x00,
 
     // 00000030:    ret eax, 0x00000001 (uint32)
-    OpCode::ret_eax, 0x01, 0x00, 0x00, 0x00,
+    OpCode::ret_eax_n, 0x08, 0x00, 0x01, 0x00, 0x00, 0x00,
 
-    // 00000035:    nop; nop; nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
-    // 0000003B:    nop; nop; nop; nop; nop;
+    // 00000037:    nop; nop; nop;
+    OpCode::nop,  OpCode::nop, OpCode::nop,
+    // 0000003A:    nop; nop; nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop, OpCode::nop, OpCode::nop,
     // 0000003F:    exit
     OpCode::exit
@@ -342,42 +331,68 @@ public:
 #endif
     }
 
-    JM_FORCEINLINE void push_callstack(vmFramePtr & fp, void * returnIP) {
+    JM_FORCEINLINE void push_callstack(vmFramePtr & fp, void * returnIP, intptr_t localSize) {
+        void * framePoint = fp.get<void *>();
+        fp.next64(localSize);
+        fp.push_Pointer(framePoint);
         fp.push_Pointer(returnIP);
         assert(!fp_isOverflow(fp));
     }
 
     JM_FORCEINLINE void * pop_callstack(vmFramePtr & fp) {
         void * returnIP = fp.pop_Pointer();
+        void * framePoint = fp.pop_Pointer();
+        fp.set(framePoint);
         return returnIP;
     }
 
-    JM_FORCEINLINE void * pop_callstack(vmFramePtr & fp, uint16_t localSize) {
+    JM_FORCEINLINE void push_callstack_fast(vmFramePtr & fp, void * returnIP, int32_t localSize) {
+        fp.next(localSize);
+        fp.push_Pointer(returnIP);
+        assert(!fp_isOverflow(fp));
+    }
+
+    JM_FORCEINLINE void * pop_callstack_fast(vmFramePtr & fp, int32_t localSize) {
+        void * returnIP = fp.pop_Pointer();
         fp.back(localSize);
         assert((localSize & 0x03) == 0);
-        return pop_callstack(fp);
+        return returnIP;
     }
 
     JM_FORCEINLINE void inline_push_callstack(vmFramePtr & fp, vmStackPtr & cp,
-                                              void * returnIP, int retType) {
+                                              void * returnIP, intptr_t localSize, int retType) {
+        void * framePoint = fp.get<void *>();
+        fp.next64(localSize);
+        fp.push_Pointer(framePoint);
         fp.push_Pointer(returnIP);
-        cp.writeInt32(retType);
+        cp.push_Int32(retType);
         assert(!fp_isOverflow(fp));
     }
 
     JM_FORCEINLINE void * inline_pop_callstack(vmFramePtr & fp, vmStackPtr & cp,
                                                int & retType) {
         void * returnIP = fp.pop_Pointer();
-        cp.backInt32();
-        retType = cp.getInt32();
+        void * framePoint = fp.pop_Pointer();
+        fp.set(framePoint);
+        retType = cp.pop_Int32();
         return returnIP;
     }
 
-    JM_FORCEINLINE void * inline_pop_callstack(vmFramePtr & fp, vmStackPtr & cp,
-                                               uint16_t localSize, int & retType) {
+    JM_FORCEINLINE void inline_push_callstack_fast(vmFramePtr & fp, vmStackPtr & cp,
+                                                   void * returnIP, int32_t localSize, int retType) {
+        fp.next(localSize);
+        fp.push_Pointer(returnIP);
+        cp.push_Int32(retType);
+        assert(!fp_isOverflow(fp));
+    }
+
+    JM_FORCEINLINE void * inline_pop_callstack_fast(vmFramePtr & fp, vmStackPtr & cp,
+                                                    int32_t localSize, int & retType) {
+        void * returnIP = fp.pop_Pointer();
         fp.back(localSize);
         assert((localSize & 0x03) == 0);
-        return inline_pop_callstack(fp, cp, retType);
+        retType = cp.pop_Int32();
+        return returnIP;
     }
 
     template <typename U>
@@ -588,7 +603,7 @@ public:
     //
     JM_FORCEINLINE void op_move(vmImagePtr & ip, vmFramePtr & fp) {
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<1, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value = fp.getArgValueUInt32(index2);
         fp.setArgValueUInt32(index1, value);
         console.trace("%08X:  move args[%d], args[%d] - 0x%08X\n",
@@ -627,7 +642,7 @@ public:
     JM_FORCEINLINE bool op_cmp_i32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         int32_t value1 = fp.getArgValueInt32(index1);
         int32_t value2 = fp.getArgValueInt32(index2);
         ip.next(1 + sizeof(int8_t) * 2);
@@ -652,7 +667,7 @@ public:
     JM_FORCEINLINE bool op_cmp_u32(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
         ip.next(1 + sizeof(int8_t) * 2);
@@ -825,70 +840,78 @@ public:
     JM_FORCEINLINE void op_call(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint32_t callEntry = ip.getValue<0, uint32_t>();
-        ip.next(1 + sizeof(uint32_t));
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 5>();
+        ip.next(1 + sizeof(uint32_t) + sizeof(uint16_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(fp, returnIP);
+        push_callstack(fp, returnIP, localSize);
 
         unsigned char * newIP = image_.getStart() + callEntry;
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (ptr32)\n\n", offset, getIpOffset(ip));
+        console.trace("%08X:  call 0x%08X, %u (ptr32)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
     }
 
     //
-    // call_near 0x08
-    //
-    JM_FORCEINLINE void op_call_near(vmImagePtr & ip, vmFramePtr & fp) {
-        uint32_t offset = getIpOffset(ip);
-        int8_t callOffset = ip.getValue<0, int8_t>();
-        ip.next(1 + sizeof(int8_t));
-
-        void * returnIP = ip.get<void *>();
-        push_callstack(fp, returnIP);
-
-        void * newIP = PointerAdd(returnIP, callOffset);
-        assert(CHECK_ADDR_ALIGNMENT(newIP));
-        ip.set(newIP);
-
-        console.trace("%08X:  call 0x%08X (near)\n\n", offset, getIpOffset(ip));
-    }
-
-    //
-    // call_short 0x08, 0x00
+    // call_short 0x08, 0x00, 0x08, 0x00
     //
     JM_FORCEINLINE void op_call_short(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.getValue<0, int16_t>();
-        ip.next(1 + sizeof(int16_t));
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 3>();
+        ip.next(1 + sizeof(int16_t) + sizeof(uint16_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(fp, returnIP);
+        push_callstack(fp, returnIP, localSize);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (short)\n\n", offset, getIpOffset(ip));
+        console.trace("%08X:  call 0x%08X, %u (short)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
     }
 
     //
-    // call_long 0x18, 0x00, 0x00, 0x00
+    // call_long 0x18, 0x00, 0x00, 0x00, 0x08, 0x00
     //
     JM_FORCEINLINE void op_call_long(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int32_t callOffset = ip.getValue<0, int32_t>();
-        ip.next(1 + sizeof(int32_t));
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 5>();
+        ip.next(1 + sizeof(int32_t) + sizeof(uint16_t));
 
         void * returnIP = ip.get<void *>();
-        push_callstack(fp, returnIP);
+        push_callstack(fp, returnIP, localSize);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (long)\n\n", offset, getIpOffset(ip));
+        console.trace("%08X:  call 0x%08X, %u (long)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
+    }
+
+    //
+    // fast_call_short 0x05, 0x00, 0x08, 0x00
+    //
+    JM_FORCEINLINE void op_fast_call_short(vmImagePtr & ip, vmFramePtr & fp) {
+        uint32_t offset = getIpOffset(ip);
+        int16_t callOffset = ip.getValue<0, int16_t>();
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 3>();
+        ip.next(1 + sizeof(int16_t) + sizeof(uint16_t));
+
+        void * returnIP = ip.get<void *>();
+        push_callstack_fast(fp, returnIP, localSize);
+
+        void * newIP = PointerAdd(returnIP, callOffset);
+        assert(CHECK_ADDR_ALIGNMENT(newIP));
+        ip.set(newIP);
+
+        console.trace("%08X:  fast_call 0x%08X, %u (short)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
     }
 
     //
@@ -915,18 +938,18 @@ public:
     JM_FORCEINLINE bool op_ret_n_sm(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint8_t localSize = ip.getValue<0, uint8_t>();
-        void * returnIP = pop_callstack(fp, localSize);
+        void * returnIP = pop_callstack_fast(fp, localSize);
         ip.set(returnIP);
 
-        if (returnIP != nullptr) {
-            console.trace("%08X:  ret_n_sm [%u] 0x%08X\n\n",
-                          offset, (uint32_t)localSize, getIpOffset(ip));
-            return false;
+        if (returnIP == nullptr) {
+            console.trace("%08X:  ret_n_sm [%u] (done)\n\n", offset, (uint32_t)localSize);
         }
         else {
-            console.trace("%08X:  ret_n_sm [%u] (done)\n\n", offset, (uint32_t)localSize);
-            return true;
+            console.trace("%08X:  ret_n_sm [%u] 0x%08X\n\n",
+                          offset, (uint32_t)localSize, getIpOffset(ip));
         }
+
+        return (returnIP == nullptr);
     }
 
     //
@@ -935,18 +958,18 @@ public:
     JM_FORCEINLINE bool op_ret_n(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
-        void * returnIP = pop_callstack(fp, localSize);
+        void * returnIP = pop_callstack_fast(fp, localSize);
         ip.set(returnIP);
 
-        if (returnIP != nullptr) {
-            console.trace("%08X:  ret_n [%u] 0x%08X\n\n",
-                          offset, (uint32_t)localSize, getIpOffset(ip));
-            return false;
+        if (returnIP == nullptr) {
+            console.trace("%08X:  ret_n [%u] (done)\n\n", offset, (uint32_t)localSize);
         }
         else {
-            console.trace("%08X:  ret_n [%u] (done)\n\n", offset, (uint32_t)localSize);
-            return true;
+            console.trace("%08X:  ret_n [%u] 0x%08X\n\n",
+                          offset, (uint32_t)localSize, getIpOffset(ip));
         }
+
+        return (returnIP == nullptr);
     }
 
     //
@@ -977,10 +1000,10 @@ public:
     JM_FORCEINLINE bool op_ret_eax_n(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
+        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 3>();
         regs.eax.u32 = value;
 
-        void * returnIP = pop_callstack(fp, localSize);
+        void * returnIP = pop_callstack_fast(fp, localSize);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1005,7 +1028,7 @@ public:
         ip.next(1 + sizeof(int8_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(fp, cp, returnIP, retType);
+        inline_push_callstack(fp, cp, returnIP, 0, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
@@ -1015,22 +1038,45 @@ public:
     }
 
     //
-    // inline_call_short 0x08, 0x00
+    // inline_call_short 0x05, 0x00, 0x08, 0x00
     //
     JM_FORCEINLINE void op_inline_call_short(vmImagePtr & ip, vmFramePtr & fp,
                                              vmStackPtr & cp, int retType) {
         uint32_t offset = getIpOffset(ip);
         int16_t callOffset = ip.getValue<0, int16_t>();
-        ip.next(1 + sizeof(int16_t));
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 3>();
+        ip.next(1 + sizeof(int16_t) + sizeof(uint16_t));
 
         void * returnIP = ip.get<void *>();
-        inline_push_callstack(fp, cp, returnIP, retType);
+        inline_push_callstack(fp, cp, returnIP, localSize, retType);
 
         void * newIP = PointerAdd(returnIP, callOffset);
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (short)\n\n", offset, getIpOffset(ip));
+        console.trace("%08X:  fast_call 0x%08X, %u (short)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
+    }
+
+    //
+    // inline_fast_call_short 0x05, 0x00, 0x08, 0x00
+    //
+    JM_FORCEINLINE void op_inline_fast_call_short(vmImagePtr & ip, vmFramePtr & fp,
+                                                  vmStackPtr & cp, int retType) {
+        uint32_t offset = getIpOffset(ip);
+        int16_t callOffset = ip.getValue<0, int16_t>();
+        uint16_t localSize = ip.getValue<0, uint16_t, uint16_t, 3>();
+        ip.next(1 + sizeof(int16_t) + sizeof(uint16_t));
+
+        void * returnIP = ip.get<void *>();
+        inline_push_callstack_fast(fp, cp, returnIP, localSize, retType);
+
+        void * newIP = PointerAdd(returnIP, callOffset);
+        assert(CHECK_ADDR_ALIGNMENT(newIP));
+        ip.set(newIP);
+
+        console.trace("%08X:  fast_call 0x%08X, %u (short)\n\n",
+                      offset, (uint32_t)localSize, getIpOffset(ip));
     }
 
     //
@@ -1084,7 +1130,7 @@ public:
         uint16_t localSize = ip.getValue<0, uint16_t>();
 
         int retType;
-        void * returnIP = inline_pop_callstack(fp, cp, localSize, retType);
+        void * returnIP = inline_pop_callstack_fast(fp, cp, localSize, retType);
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
@@ -1101,28 +1147,29 @@ public:
     }
 
     //
-    // ret_eax 0x00000001
+    // ret_eax_n 0x08, 0x00000001
     //
-    JM_FORCEINLINE int op_inline_ret_eax(vmImagePtr & ip, vmFramePtr & fp, vmStackPtr & cp,
-                                          Register & regs, bool & done) {
+    JM_FORCEINLINE int op_inline_ret_eax_n(vmImagePtr & ip, vmFramePtr & fp, vmStackPtr & cp,
+                                           Register & regs, bool & done) {
         uint32_t offset = getIpOffset(ip);
-        uint32_t value = ip.getValue<0, uint32_t>();
+        uint16_t localSize = ip.getValue<0, uint16_t>();
+        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 3>();
         regs.eax.u32 = value;
 
         int retType;
-        void * returnIP = inline_pop_callstack(fp, cp, retType);
+        void * returnIP = inline_pop_callstack_fast(fp, cp, localSize, retType);
         ip.set(returnIP);
 
-        if (returnIP != nullptr) {
-            console.trace("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n\n",
-                          offset, getIpOffset(ip), value);
-            done = false;
+        if (returnIP == nullptr) {
+            console.trace("%08X:  ret_eax_n %u (done) (eax = 0x%08X)\n\n",
+                          offset, (uint32_t)localSize, value);
         }
         else {
-            console.trace("%08X:  ret_eax (done) (eax = 0x%08X)\n\n", offset, value);
-            done = true;
+            console.trace("%08X:  ret_eax_n %u, 0x%08X (eax = 0x%08X)\n\n",
+                          offset, getIpOffset(ip), (uint32_t)localSize, value);
         }
 
+        done = (returnIP == nullptr);
         return retType;
     }
 
@@ -1328,18 +1375,16 @@ public:
         int ec = 0;
         if (isInited()) {
             register vmImagePtr ip;
-            register vmStackPtr sp;
             register vmFramePtr fp;
             register Register   regs;
 
             // Init environment
             ip.set(image_.getPtr());
-            sp.set(stack_.current());
             fp.set(stack_.current());
             regs.uval = 0;
 
             // Push call program entry.
-            push_callstack(fp, nullptr);
+            push_callstack(fp, nullptr, 0);
 
             // Main loop
             while (ip.ptr() < image_.getLimit()) {
@@ -1425,16 +1470,16 @@ public:
                     op_call(ip, fp);
                     break;
 
-                case OpCode::call_near:
-                    op_call_near(ip, fp);
-                    break;
-
                 case OpCode::call_short:
                     op_call_short(ip, fp);
                     break;
 
                 case OpCode::call_long:
                     op_call_long(ip, fp);
+                    break;
+
+                case OpCode::fast_call_short:
+                    op_fast_call_short(ip, fp);
                     break;
 
                 case OpCode::ret:
@@ -1571,7 +1616,7 @@ Execute_Finished:
             regs.uval = 0;
 
             // Push call program entry.
-            inline_push_callstack(cp, fp, nullptr, ret_first);
+            inline_push_callstack(cp, fp, nullptr, 0, ret_first);
 
             // Main loop
             bool done;
@@ -1600,12 +1645,12 @@ fibonacci_n:
                     op_add_sp_4(ip, sp);
                     op_push(ip, sp, fp);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, fp, cp, ret_01);
+                    op_inline_fast_call_short(ip, fp, cp, ret_01);
                     goto fibonacci_n;
 fibonacci_ret_01:
                     op_copy_from_eax(ip, fp, regs);
                     op_dec(ip, fp);
-                    op_inline_call_near(ip, fp, cp, ret_02);
+                    op_inline_fast_call_short(ip, fp, cp, ret_02);
                     goto fibonacci_n;
 fibonacci_ret_02:
                     op_add_eax(ip, fp, regs);
@@ -1618,7 +1663,7 @@ fibonacci_ret_02:
                         goto fibonacci_ret_00;
                 }
                 else {
-                    int retType = op_inline_ret_eax(ip, fp, cp, regs, done);
+                    int retType = op_inline_ret_eax_n(ip, fp, cp, regs, done);
                     if (retType == ret_01)
                         goto fibonacci_ret_01;
                     else if (retType == ret_02)
