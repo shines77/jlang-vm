@@ -1658,7 +1658,7 @@ public:
                                      vmFramePtr & fp, Register & regs) {
         uint32_t offset = getIpOffset(ip);
         uint16_t localSize = ip.getValue<0, uint16_t>();
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
+        uint32_t value = ip.getValue<0, uint32_t, uint32_t, 3>();
         regs.eax.u32 = value;
 
         void * returnIP = pop_callstack(sp, fp, localSize);
@@ -1860,7 +1860,7 @@ public:
     JM_FORCEINLINE void op_add(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
 
@@ -1927,7 +1927,7 @@ public:
     JM_FORCEINLINE void op_sub(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
         uint32_t newValue = value1 - value2;
@@ -1976,7 +1976,7 @@ public:
     //
     JM_FORCEINLINE void op_sub_eax_imm(vmImagePtr & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t>();
+        uint32_t value = ip.getValue<0, uint32_t>();
 
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;

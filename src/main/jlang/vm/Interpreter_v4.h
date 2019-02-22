@@ -48,7 +48,7 @@ namespace v4 {
 
 // 0000000E:    nop; nop;
 
-// 00000010:    cmp_imm_u32 arg0, 0x00000003
+// 00000010:    cmp_imm_u32 arg1, 0x00000003
 // 00000016:    jl_near 0x00000030 (near offset 0x0018)
 
 // 00000018:    move var0, arg1
@@ -76,7 +76,7 @@ static const unsigned char fibonacciBinary32[] = {
     // 0000000E:    nop; nop;
     OpCode::nop,  OpCode::nop,
 
-    // 00000010:    cmp_imm_u32 arg3, 0x00000003
+    // 00000010:    cmp_imm_u32 arg1, 0x00000003
     OpCode::cmp_imm_u32, __arg1, 0x03, 0x00, 0x00, 0x00,
     // 00000016:    jl_near 0x00000030 (near offset 0x18)
     OpCode::jl_near, 0x18,
@@ -1226,7 +1226,7 @@ public:
     JM_FORCEINLINE void op_add(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
 
@@ -1293,7 +1293,7 @@ public:
     JM_FORCEINLINE void op_sub(vmImagePtr & ip, vmFramePtr & fp) {
         uint32_t offset = getIpOffset(ip);
         int8_t index1 = ip.getValue<0, int8_t>();
-        int8_t index2 = ip.getValue<0, int8_t>();
+        int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
         uint32_t newValue = value1 - value2;
@@ -1342,7 +1342,7 @@ public:
     //
     JM_FORCEINLINE void op_sub_eax_imm(vmImagePtr & ip, Register & regs) {
         uint32_t offset = getIpOffset(ip);
-        uint32_t value = ip.getValue<0, uint32_t, uint32_t>();
+        uint32_t value = ip.getValue<0, uint32_t>();
 
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;
