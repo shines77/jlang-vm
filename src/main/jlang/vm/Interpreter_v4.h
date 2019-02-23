@@ -592,7 +592,7 @@ public:
     JM_FORCEINLINE void op_store(vmImagePtr & ip, vmFramePtr & fp) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
         console.trace("%08X:  store args[%d], 0x%08X\n",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
@@ -605,7 +605,7 @@ public:
         int8_t index1 = ip.getValue<0, int8_t>();
         int8_t index2 = ip.getValue<0, int8_t, int8_t, 2>();
         uint32_t value = fp.getArgValueUInt32(index2);
-        fp.setArgValueUInt32(index1, value);
+        fp.putArgValueUInt32(index1, value);
         console.trace("%08X:  move args[%d], args[%d] - 0x%08X\n",
                       getIpOffset(ip), getArgIndex(index1), getArgIndex(index2), value);
         ip.next(1 + sizeof(int8_t) + sizeof(int8_t));
@@ -625,7 +625,7 @@ public:
     JM_FORCEINLINE void op_copy_from_eax(vmImagePtr & ip, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
         console.trace("%08X:  copy args[%d], eax = (0x%08X)\n",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
@@ -1198,7 +1198,7 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = fp.getArgValueUInt32(index);
         value++;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
 
         console.trace("%08X:  inc  arg[%d]  (0x%08X)\n",
                       offset, getArgIndex(index), value);
@@ -1213,7 +1213,7 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = fp.getArgValueUInt32(index);
         value--;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
 
         console.trace("%08X:  dec  args[%d]  (0x%08X)\n",
                       offset, getArgIndex(index), value);
@@ -1231,7 +1231,7 @@ public:
         uint32_t value2 = fp.getArgValueUInt32(index2);
 
         uint32_t newValue = value1 + value2;
-        fp.setArgValueUInt32(index1, newValue);
+        fp.putArgValueUInt32(index1, newValue);
 
         console.trace("%08X:  add  args[%d], args[%d] = (0x%08X)\n",
                       offset, getArgIndex(index1), getArgIndex(index2),
@@ -1249,7 +1249,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index);
 
         uint32_t newValue = value1 + value2;
-        fp.setArgValueUInt32(index, newValue);
+        fp.putArgValueUInt32(index, newValue);
 
         console.trace("%08X:  add  args[%d], 0x%08X = (0x%08X)\n",
                       offset, getArgIndex(index), value2, newValue);
@@ -1297,7 +1297,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
         uint32_t newValue = value1 - value2;
-        fp.setArgValueUInt32(index1, newValue);
+        fp.putArgValueUInt32(index1, newValue);
 
         console.trace("%08X:  sub  args[%d], args[%d] = (0x%08X)\n",
                       offset, getArgIndex(index1), getArgIndex(index2),
@@ -1315,7 +1315,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index);
 
         uint32_t newValue = value1 - value2;
-        fp.setArgValueUInt32(index, newValue);
+        fp.putArgValueUInt32(index, newValue);
 
         console.trace("%08X:  sub  args[%d], 0x%08X = (0x%08X)\n",
                       offset, getArgIndex(index), value2, newValue);

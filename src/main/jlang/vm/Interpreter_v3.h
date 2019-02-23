@@ -41,12 +41,13 @@ namespace jlang {
 namespace v3 {
 
 //
-// 00000000:    push_u32 0x00000014 (int32)
-// 00000005:    call 0x00000010 (short offset 0x0008)
-// 00000008:    pop_u32
-// 00000009:    ret
+// 00000000:    add_sp_4
+// 00000001:    push_u32 0x00000014 (int32)
+// 00000006:    call 0x00000010 (short offset 0x0008)
+// 00000009:    pop_u32
+// 0000000A:    ret
 
-// 0000000A:    nop; nop; nop;
+// 0000000B:    nop; nop; nop; nop; nop;
 
 // 00000010:    cmp_imm_u32 arg0, 0x00000003
 // 00000016:    jl_short 0x00000030 (short offset 0x0017)
@@ -69,17 +70,19 @@ namespace v3 {
 //
 
 static const unsigned char fibonacciBinary32[] = {
-    // 00000000:    push_u32 0x00000014 (int32)
+    // 00000000:    add_sp_4
+    OpCode::add_sp_4,
+    // 00000001:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
-    // 00000005:    call 0x00000010 (short offset 0x0008)
-    OpCode::call_short, 0x08, 0x00,
-    // 00000008:    pop_u32
+    // 00000006:    call 0x00000010 (short offset 0x0007)
+    OpCode::call_short, 0x07, 0x00,
+    // 00000009:    pop_u32
     OpCode::pop_u32,
-    // 00000009:    ret
+    // 0000000A:    ret
     OpCode::ret,
 
-    // 0000000A:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
+    // 0000000B:    nop; nop;
+    OpCode::nop,  OpCode::nop,
     // 0000000D:    nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop,
 
@@ -126,17 +129,19 @@ static const unsigned char fibonacciBinary32[] = {
 };
 
 static const unsigned char fibonacciBinary32_fast[] = {
-    // 00000000:    push_u32 0x00000014 (int32)
+    // 00000000:    add_sp_4
+    OpCode::add_sp_4,
+    // 00000001:    push_u32 0x00000014 (int32)
     OpCode::push_u32, 0x14, 0x00, 0x00, 0x00,
-    // 00000005:    call 0x00000010 (short offset 0x0008)
-    OpCode::call_short, 0x08, 0x00,
-    // 00000008:    pop_u32
+    // 00000006:    call 0x00000010 (short offset 0x0007)
+    OpCode::call_short, 0x07, 0x00,
+    // 00000009:    pop_u32
     OpCode::pop_u32,
-    // 00000009:    ret
+    // 0000000A:    ret
     OpCode::ret,
 
-    // 0000000A:    nop; nop; nop;
-    OpCode::nop,  OpCode::nop, OpCode::nop,
+    // 0000000B:    nop; nop;
+    OpCode::nop,  OpCode::nop,
     // 0000000D:    nop; nop; nop;
     OpCode::nop,  OpCode::nop, OpCode::nop,
 
@@ -205,7 +210,7 @@ public:
 
     void setInput(uintptr_t initValue) {
         char * imageData = (char *)image_.data();
-        uint32_t * pInitValue = (uint32_t *)&(imageData[1]);
+        uint32_t * pInitValue = (uint32_t *)&(imageData[2]);
         if (pInitValue) {
             *pInitValue = (uint32_t)initValue;
         }
@@ -320,24 +325,24 @@ public:
     U getValue() const { return *(U *)ptr_; }
 
     // ForwardPtr
-    void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
-    void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
-    void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
-    void setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
-    void setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
-    void setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
-    void setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
-    void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
-    void setPointer(void * val)  { *(void **)   ptr_ = val; }
+    void putInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
+    void putUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
+    void putInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
+    void putUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
+    void putInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
+    void putUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
+    void putInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
+    void putUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
+    void putPointer(void * val)  { *(void **)   ptr_ = val; }
 
     template <typename U = void *>
-    void setPointer(U val)  { *(U *)ptr_ = val; }
+    void putPointer(U val)  { *(U *)ptr_ = val; }
 
-    void setI8Pointer(int8_t * val)  { setPointer<int8_t *>(val);  }
-    void setU8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
+    void putI8Pointer(int8_t * val)  { putPointer<int8_t *>(val);  }
+    void putU8Pointer(uint8_t * val) { putPointer<uint8_t *>(val); }
 
     template <typename U = int>
-    void setValue(U value) { *(U *)ptr_ = value; }
+    void putValue(U value) { *(U *)ptr_ = value; }
 
     // ForwardPtr
     void back() { ptr_--; }
@@ -409,19 +414,19 @@ public:
     uint8_t * readU8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
 
     // ForwardPtr
-    void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
-    void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
-    void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
-    void writeUInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
-    void writeInt32(int32_t val)   { setInt32(val);   nextInt32();   }
-    void writeUInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
-    void writeInt64(int64_t val)   { setInt64(val);   nextInt64();   }
-    void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
-    void writePointer(void * val)  { setPointer(val); nextPointer(); }
+    void writeInt8(int8_t val)     { putInt8(val);    nextInt8();    }
+    void writeUInt8(uint8_t val)   { putUInt8(val);   nextUInt8();   }
+    void writeInt16(int16_t val)   { putInt16(val);   nextInt16();   }
+    void writeUInt16(uint16_t val) { putUInt16(val);  nextUInt16();  }
+    void writeInt32(int32_t val)   { putInt32(val);   nextInt32();   }
+    void writeUInt32(uint32_t val) { putUInt32(val);  nextUInt32();  }
+    void writeInt64(int64_t val)   { putInt64(val);   nextInt64();   }
+    void writeUInt64(uint64_t val) { putUInt64(val);  nextUInt64();  }
+    void writePointer(void * val)  { putPointer(val); nextPointer(); }
 
     template <typename U = void *>
     void writePointer(U val) {
-        setPointer<U>(val);
+        putPointer<U>(val);
         nextPointer<U>();
     }
 
@@ -429,19 +434,19 @@ public:
     void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
 
     // ForwardPtr
-    void push_Int8(int8_t val)     { setInt8(val);    nextInt8();    }
-    void push_UInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
-    void push_Int16(int16_t val)   { setInt16(val);   nextInt16();   }
-    void push_UInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
-    void push_Int32(int32_t val)   { setInt32(val);   nextInt32();   }
-    void push_UInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
-    void push_Int64(int64_t val)   { setInt64(val);   nextInt64();   }
-    void push_UInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
-    void push_Pointer(void * val)  { setPointer(val); nextPointer(); }
+    void push_Int8(int8_t val)     { putInt8(val);    nextInt8();    }
+    void push_UInt8(uint8_t val)   { putUInt8(val);   nextUInt8();   }
+    void push_Int16(int16_t val)   { putInt16(val);   nextInt16();   }
+    void push_UInt16(uint16_t val) { putUInt16(val);  nextUInt16();  }
+    void push_Int32(int32_t val)   { putInt32(val);   nextInt32();   }
+    void push_UInt32(uint32_t val) { putUInt32(val);  nextUInt32();  }
+    void push_Int64(int64_t val)   { putInt64(val);   nextInt64();   }
+    void push_UInt64(uint64_t val) { putUInt64(val);  nextUInt64();  }
+    void push_Pointer(void * val)  { putPointer(val); nextPointer(); }
 
     template <typename U = void *>
     void push_Pointer(U val) {
-        setPointer<U>(val);
+        putPointer<U>(val);
         nextPointer<U>();
     }
 
@@ -523,11 +528,11 @@ public:
         return *(((uint32_t *)ptr_) + index);
     }
 
-    void setArgValueInt32(int32_t index, int32_t value) {
+    void putArgValueInt32(int32_t index, int32_t value) {
         *(((int32_t *)ptr_) + index) = value;
     }
 
-    void setArgValueUInt32(int32_t index, uint32_t value) {
+    void putArgValueUInt32(int32_t index, uint32_t value) {
         *(((uint32_t *)ptr_) + index) = value;
     }
 
@@ -538,7 +543,7 @@ public:
     }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    void setValue(U value) {
+    void putValue(U value) {
         (*(U *)(ptr_ + Offset + sizeof(V) * Index)) = value;
     }
 
@@ -551,7 +556,7 @@ public:
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void writeValue(U value) {
-        setValue<Index, U, V, Offset>(value);
+        putValue<Index, U, V, Offset>(value);
         next<U>();
     }
 
@@ -561,7 +566,7 @@ public:
     }
 
     template <int Index, typename U = int, int Offset = 1>
-    void setArgValue(U value) {
+    void putArgValue(U value) {
         (*(U *)(ptr_ + Offset + sizeof(U) * Index)) = value;
     }
 };
@@ -646,24 +651,24 @@ public:
     U getValue() const { return *(U *)ptr_; }
 
     // BackwardPtr
-    void setInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
-    void setUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
-    void setInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
-    void setUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
-    void setInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
-    void setUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
-    void setInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
-    void setUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
-    void setPointer(void * val)  { *(void **)   ptr_ = val; }
+    void putInt8(int8_t val)     { *(int8_t *)  ptr_ = val; }
+    void putUInt8(uint8_t val)   { *(uint8_t *) ptr_ = val; }
+    void putInt16(int16_t val)   { *(int16_t *) ptr_ = val; }
+    void putUInt16(uint16_t val) { *(uint16_t *)ptr_ = val; }
+    void putInt32(int32_t val)   { *(int32_t *) ptr_ = val; }
+    void putUInt32(uint32_t val) { *(uint32_t *)ptr_ = val; }
+    void putInt64(int64_t val)   { *(int64_t *) ptr_ = val; }
+    void putUInt64(uint64_t val) { *(uint64_t *)ptr_ = val; }
+    void putPointer(void * val)  { *(void **)   ptr_ = val; }
 
     template <typename U = void *>
-    void setPointer(U val)  { *(U *)ptr_ = val; }
+    void putPointer(U val)  { *(U *)ptr_ = val; }
 
-    void setI8Pointer(int8_t * val)  { setPointer<int8_t *>(val);  }
-    void setU8Pointer(uint8_t * val) { setPointer<uint8_t *>(val); }
+    void putI8Pointer(int8_t * val)  { putPointer<int8_t *>(val);  }
+    void putU8Pointer(uint8_t * val) { putPointer<uint8_t *>(val); }
 
     template <typename U = int>
-    void setValue(U value) { *(U *)ptr_ = value; }
+    void putValue(U value) { *(U *)ptr_ = value; }
 
     // BackwardPtr
     void back() { ptr_++; }
@@ -733,19 +738,19 @@ public:
     uint8_t * readU8Pointer(uint8_t * val) { return readPointer<uint8_t *>(); }
 
     // BackwardPtr
-    void writeInt8(int8_t val)     { setInt8(val);    nextInt8();    }
-    void writeUInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
-    void writeInt16(int16_t val)   { setInt16(val);   nextInt16();   }
-    void writeUInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
-    void writeInt32(int32_t val)   { setInt32(val);   nextInt32();   }
-    void writeUInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
-    void writeInt64(int64_t val)   { setInt64(val);   nextInt64();   }
-    void writeUInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
-    void writePointer(void * val)  { setPointer(val); nextPointer(); }
+    void writeInt8(int8_t val)     { putInt8(val);    nextInt8();    }
+    void writeUInt8(uint8_t val)   { putUInt8(val);   nextUInt8();   }
+    void writeInt16(int16_t val)   { putInt16(val);   nextInt16();   }
+    void writeUInt16(uint16_t val) { putUInt16(val);  nextUInt16();  }
+    void writeInt32(int32_t val)   { putInt32(val);   nextInt32();   }
+    void writeUInt32(uint32_t val) { putUInt32(val);  nextUInt32();  }
+    void writeInt64(int64_t val)   { putInt64(val);   nextInt64();   }
+    void writeUInt64(uint64_t val) { putUInt64(val);  nextUInt64();  }
+    void writePointer(void * val)  { putPointer(val); nextPointer(); }
 
     template <typename U = void *>
     void writePointer(U val) {
-        setPointer<U>(val);
+        putPointer<U>(val);
         nextPointer<U>();
     }
 
@@ -753,19 +758,19 @@ public:
     void writeU8Pointer(uint8_t * val) { writePointer<uint8_t *>(val); }
 
     // BackwardPtr
-    void push_Int8(int8_t val)     { setInt8(val);    nextInt8();    }
-    void push_UInt8(uint8_t val)   { setUInt8(val);   nextUInt8();   }
-    void push_Int16(int16_t val)   { setInt16(val);   nextInt16();   }
-    void push_UInt16(uint16_t val) { setUInt16(val);  nextUInt16();  }
-    void push_Int32(int32_t val)   { setInt32(val);   nextInt32();   }
-    void push_UInt32(uint32_t val) { setUInt32(val);  nextUInt32();  }
-    void push_Int64(int64_t val)   { setInt64(val);   nextInt64();   }
-    void push_UInt64(uint64_t val) { setUInt64(val);  nextUInt64();  }
-    void push_Pointer(void * val)  { setPointer(val); nextPointer(); }
+    void push_Int8(int8_t val)     { putInt8(val);    nextInt8();    }
+    void push_UInt8(uint8_t val)   { putUInt8(val);   nextUInt8();   }
+    void push_Int16(int16_t val)   { putInt16(val);   nextInt16();   }
+    void push_UInt16(uint16_t val) { putUInt16(val);  nextUInt16();  }
+    void push_Int32(int32_t val)   { putInt32(val);   nextInt32();   }
+    void push_UInt32(uint32_t val) { putUInt32(val);  nextUInt32();  }
+    void push_Int64(int64_t val)   { putInt64(val);   nextInt64();   }
+    void push_UInt64(uint64_t val) { putUInt64(val);  nextUInt64();  }
+    void push_Pointer(void * val)  { putPointer(val); nextPointer(); }
 
     template <typename U = void *>
     void push_Pointer(U val) {
-        setPointer<U>(val);
+        putPointer<U>(val);
         nextPointer<U>();
     }
 
@@ -847,11 +852,11 @@ public:
         return *(((uint32_t *)ptr_) + index);
     }
 
-    void setArgValueInt32(int32_t index, int32_t value) {
+    void putArgValueInt32(int32_t index, int32_t value) {
         *(((int32_t *)ptr_) + index) = value;
     }
 
-    void setArgValueUInt32(int32_t index, uint32_t value) {
+    void putArgValueUInt32(int32_t index, uint32_t value) {
         *(((uint32_t *)ptr_) + index) = value;
     }
 
@@ -862,7 +867,7 @@ public:
     }
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
-    void setValue(U value) {
+    void putValue(U value) {
         (*(U *)(ptr_ + Offset - sizeof(V) * Index)) = value;
     }
 
@@ -875,7 +880,7 @@ public:
 
     template <int Index, typename U = int, typename V = int, int Offset = 1>
     void writeValue(U value) {
-        setValue<Index, U, V, Offset>(value);
+        putValue<Index, U, V, Offset>(value);
         next<U>();
     }
 
@@ -885,7 +890,7 @@ public:
     }
 
     template <int Index, typename U = int, int Offset = 1>
-    void setArgValue(U value) {
+    void putArgValue(U value) {
         (*(U *)(ptr_ + Offset - sizeof(U) * Index)) = value;
     }
 };
@@ -1259,7 +1264,7 @@ public:
     JM_FORCEINLINE void op_store(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
         console.trace("%08X:  load args[%d], 0x%08X\n",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
@@ -1287,7 +1292,7 @@ public:
     JM_FORCEINLINE void op_copy_from_eax(vmImagePtr & ip, vmStackPtr & sp, vmFramePtr & fp, Register & regs) {
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
         console.trace("%08X:  copy args[%d], eax = (0x%08X)\n",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
@@ -1831,7 +1836,7 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = fp.getArgValueUInt32(index);
         value++;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
 
         console.trace("%08X:  inc  arg[%d]  (0x%08X)\n",
                       offset, getArgIndex(index), value);
@@ -1846,7 +1851,7 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = fp.getArgValueUInt32(index);
         value--;
-        fp.setArgValueUInt32(index, value);
+        fp.putArgValueUInt32(index, value);
 
         console.trace("%08X:  dec  args[%d]  (0x%08X)\n",
                       offset, getArgIndex(index), value);
@@ -1864,7 +1869,7 @@ public:
         uint32_t value2 = fp.getArgValueUInt32(index2);
 
         uint32_t newValue = value1 + value2;
-        fp.setArgValueUInt32(index1, newValue);
+        fp.putArgValueUInt32(index1, newValue);
 
         console.trace("%08X:  add  args[%d], args[%d] = (0x%08X)\n",
                       offset, getArgIndex(index1), getArgIndex(index2),
@@ -1882,7 +1887,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index);
 
         uint32_t newValue = value1 + value2;
-        fp.setArgValueUInt32(index, newValue);
+        fp.putArgValueUInt32(index, newValue);
 
         console.trace("%08X:  add  args[%d], 0x%08X = (0x%08X)\n",
                       offset, getArgIndex(index), value2, newValue);
@@ -1930,7 +1935,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index1);
         uint32_t value2 = fp.getArgValueUInt32(index2);
         uint32_t newValue = value1 - value2;
-        fp.setArgValueUInt32(index1, newValue);
+        fp.putArgValueUInt32(index1, newValue);
 
         console.trace("%08X:  sub  args[%d], args[%d] = (0x%08X)\n",
                       offset, getArgIndex(index1), getArgIndex(index2),
@@ -1948,7 +1953,7 @@ public:
         uint32_t value1 = fp.getArgValueUInt32(index);
 
         uint32_t newValue = value1 - value2;
-        fp.setArgValueUInt32(index, newValue);
+        fp.putArgValueUInt32(index, newValue);
 
         console.trace("%08X:  sub  args[%d], 0x%08X = (0x%08X)\n",
                       offset, getArgIndex(index), value2, newValue);
@@ -2296,6 +2301,7 @@ Execute_Finished:
             // Main loop
             bool done;
             do {
+                op_add_sp_4(ip, sp);
                 op_push_i32(ip, sp);
                 op_inline_call_short(ip, sp, fp, cp, ret_00);
                 goto fibonacci_n;
