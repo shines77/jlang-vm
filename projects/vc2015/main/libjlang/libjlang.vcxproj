@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Assembler.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\coredef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\stddef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\ValueType.h" />
@@ -27,6 +28,10 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\NonCopyable.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\MemoryStream.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamBase.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamMarker.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringStream.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StopWatch.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StringUtils.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\system\System.h" />
@@ -40,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp" />
+    <ClCompile Include="..\..\..\..\src\main\jlang\stream\StreamMarker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{55A43D28-97D5-43C1-B3A7-EE512F093BFF}</ProjectGuid>

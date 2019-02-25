@@ -23,6 +23,12 @@
     <Filter Include="src\vm">
       <UniqueIdentifier>{32f791e2-4437-44c5-8ae8-d47f38d540c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\asm">
+      <UniqueIdentifier>{387ae1f6-1e5e-479b-96db-a204393dd11f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream">
+      <UniqueIdentifier>{da39fa31-b956-4541-bd34-4eef99a242e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h">
@@ -79,10 +85,28 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\ArgsDefine.h">
       <Filter>src\vm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Assembler.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\MemoryStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamBase.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamMarker.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">
       <Filter>src\lang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\main\jlang\stream\StreamMarker.cpp">
+      <Filter>src\stream</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

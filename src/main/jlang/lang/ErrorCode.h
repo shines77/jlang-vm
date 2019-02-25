@@ -18,7 +18,7 @@ namespace jlang {
 
 class ErrorCode : public lang::NonCopyable {
 public:
-    enum error_type {
+    enum Type {
         First = -60000,
         ErrorFirst = -30000,
 
@@ -101,58 +101,58 @@ public:
     };
 
 private:
-    error_type ec_;
+    Type ec_;
 
 public:
-    ErrorCode() : ec_(error_type::Unknown) {}
-    ErrorCode(int ec) : ec_(static_cast<error_type>(ec)) {}
-    ErrorCode(error_type ec) : ec_(ec) {}
+    ErrorCode() : ec_(Type::Unknown) {}
+    ErrorCode(int ec) : ec_(static_cast<Type>(ec)) {}
+    ErrorCode(Type ec) : ec_(ec) {}
     ErrorCode & operator = (const ErrorCode & src) {
         this->ec_ = src.ec_;
         return *this;
     }
-    ErrorCode & operator = (error_type ec) {
+    ErrorCode & operator = (Type ec) {
         this->ec_ = ec;
         return *this;
     }
     ~ErrorCode() {}
 
     bool isOK() const {
-        return (this->ec_ == error_type::OK);
+        return (this->ec_ == Type::OK);
     }
 
     bool isSuccess() const {
-        return (this->ec_ == error_type::Success);
+        return (this->ec_ == Type::Success);
     }
 
-    bool operator != (error_type ec) {
+    bool operator != (Type ec) {
         return (this->ec_ != ec);
     }
-    bool operator == (error_type ec) {
+    bool operator == (Type ec) {
         return (this->ec_ == ec);
     }
-    bool operator < (error_type ec) {
+    bool operator < (Type ec) {
         return (this->ec_ < ec);
     }
-    bool operator > (error_type ec) {
+    bool operator > (Type ec) {
         return (this->ec_ > ec);
     }
-    bool operator <= (error_type ec) {
+    bool operator <= (Type ec) {
         return (this->ec_ <= ec);
     }
-    bool operator >= (error_type ec) {
+    bool operator >= (Type ec) {
         return (this->ec_ >= ec);
     }
 
-    ErrorCode::error_type get() const { return ec_; }
-    void set(int ec) { ec_ = static_cast<error_type>(ec); }
-    void set(error_type ec) { ec_ = ec; }
+    ErrorCode::Type get() const { return ec_; }
+    void set(int ec) { ec_ = static_cast<Type>(ec); }
+    void set(Type ec) { ec_ = ec; }
 
-    ErrorCode::error_type value() const { return ec_; }
+    ErrorCode::Type value() const { return ec_; }
 
     const char * toString() const {
         switch (ec_) {
-            case error_type::Unknown:
+            case Type::Unknown:
                 return "Unknown";
             default:
                 break;
