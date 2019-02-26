@@ -142,6 +142,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h">
       <Filter>src\jstd</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initor.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

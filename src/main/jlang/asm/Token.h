@@ -13,6 +13,8 @@
 
 #include <stdarg.h>     // For va_start(), va_end()
 
+#include <string>
+
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/asm/KeywordKind.h"
 

@@ -7,6 +7,7 @@
 #endif
 
 #include "jlang/lang/NonCopyable.h"
+#include "jlang/asm/Keyword.h"
 
 #include <stdint.h>
 
@@ -42,11 +43,23 @@ public:
     Global() {}
     ~Global() {}
 
-    // Global::errorInstance() implementation in FileSystem.h file.
-    static LastError & lastError();
+    // Global::init() implementation in Keyword.h file.
+    static void init();
 
     // Global::finalize() implementation in Keyword.h file.
     static void finalize();
+
+    // Global::getKeywordMapping() implementation in Keyword.h file.
+    static jasm::KeywordMapping & getKeywordMapping();
+
+    // Global::getPreprocessingKeywordMapping() implementation in Keyword.h file.
+    static jasm::KeywordMapping & getPreprocessingKeywordMapping();
+
+    // Global::errorInstance() implementation in FileSystem.h file.
+    static LastError & lastError();
+
+    // Global::destroyLastError() implementation in Keyword.h file.
+    static void destroyLastError();
 };
 
 } // namespace jlang

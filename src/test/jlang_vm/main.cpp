@@ -421,6 +421,8 @@ int main(int argc, char * argv[])
 {
     print_version();
 
+    jasm::Initor initor;
+
 #ifdef NDEBUG
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
  || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)

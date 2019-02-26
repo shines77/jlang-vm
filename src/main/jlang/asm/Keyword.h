@@ -384,14 +384,62 @@ private:
 
 class KeywordInitor : public lang::NonCopyable {
 public:
-    KeywordInitor() { init(); }
+    static KeywordMapping * keyword_mapping;
+    static KeywordMapping * prepocessing_keyword_mapping;
+
+public:
+    KeywordInitor() { KeywordInitor::init(); }
     ~KeywordInitor() {}
 
-    bool inited() const {
+    static bool inited() {
+        KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
+        KeywordMapping & preprocessingKeywordMapping = KeywordInitor::getPreprocessingKeywordMapping();
+        return (keywordMapping.inited() && preprocessingKeywordMapping.inited());
     }
 
-private:
-    void init() {
+    static void init() {
+        KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
+        assert(keywordMapping.inited());
+
+        KeywordMapping & preprocessingKeywordMapping = KeywordInitor::getPreprocessingKeywordMapping();
+        assert(preprocessingKeywordMapping.inited());
+    }
+
+    static void finalize() {
+        KeywordInitor::destroyKeywordMapping();
+        KeywordInitor::destroyPreprocessingKeywordMapping();
+    }
+
+    // KeywordInitor::getKeywordMapping() implementation in Keyword.h file.
+    static KeywordMapping & getKeywordMapping() {
+        if (KeywordInitor::keyword_mapping == nullptr) {
+            KeywordInitor::keyword_mapping = new KeywordMapping(KeywordRoot::Default);
+        }
+        return *KeywordInitor::keyword_mapping;
+    }
+
+    // KeywordInitor::getPreprocessingKeywordMapping() implementation in Keyword.h file.
+    static KeywordMapping & getPreprocessingKeywordMapping() {
+        if (KeywordInitor::prepocessing_keyword_mapping == nullptr) {
+            KeywordInitor::prepocessing_keyword_mapping = new KeywordMapping(KeywordRoot::Preprocessing);
+        }
+        return *KeywordInitor::prepocessing_keyword_mapping;
+    }
+
+    // KeywordInitor::destroyKeywordMapping() implementation in Keyword.h file.
+    static void destroyKeywordMapping() {
+        if (keyword_mapping) {
+            delete keyword_mapping;
+            keyword_mapping = nullptr;
+        }
+    }
+
+    // KeywordInitor::destroyPreprocessingKeywordMapping() implementation in Keyword.h file.
+    static void destroyPreprocessingKeywordMapping() {
+        if (prepocessing_keyword_mapping) {
+            delete prepocessing_keyword_mapping;
+            prepocessing_keyword_mapping = nullptr;
+        }
     }
 };
 
