@@ -29,6 +29,9 @@
     <Filter Include="src\stream">
       <UniqueIdentifier>{da39fa31-b956-4541-bd34-4eef99a242e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\jstd">
+      <UniqueIdentifier>{c87bb29e-5f9a-449a-8ad3-11042fc8dc38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h">
@@ -88,25 +91,61 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Assembler.h">
       <Filter>src\asm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Parser.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\FileStringStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\IInputStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\InputStringStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\IOutputStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\MemoryStream.h">
       <Filter>src\stream</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamBase.h">
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\OutputStringStream.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamDetail.h">
       <Filter>src\stream</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamMarker.h">
       <Filter>src\stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamRoot.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringStream.h">
       <Filter>src\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Token.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenDef.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Keyword.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordDef.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordKind.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h">
+      <Filter>src\jstd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">
       <Filter>src\lang</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\main\jlang\stream\StreamMarker.cpp">
-      <Filter>src\stream</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

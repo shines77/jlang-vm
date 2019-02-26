@@ -17,6 +17,11 @@ class NonCopyable {
 public:
     NonCopyable() {}
     ~NonCopyable() {}
+
+    // NonCopyable
+    NonCopyable(const NonCopyable & rhs) = delete;
+    NonCopyable(NonCopyable && rhs) = delete;
+    NonCopyable & operator = (const NonCopyable & rhs) = delete;
 };
 
 } // namespace lang

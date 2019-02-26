@@ -1,0 +1,38 @@
+<html lang="zh-cn">
+<header>
+<meta charset="utf-8" />
+<title>Test - fibonacci(n)</title>
+<script language="javascript">
+function fibonacci(n) {
+    if (n >= 3)
+        return fibonacci(n - 1) + fibonacci(n -2);
+    else
+        return 1;
+}
+
+function test_fib() {
+    var num = document.getElementsByName("n")[0].value;
+    if (num === undefined || (typeof num === "string" && num === "")) {
+        alert("n 值不能为空！");
+        return 0;
+    }
+    var n = parseInt(num, 10);
+    document.getElementsByName("fib_n")[0].value = "";
+    document.getElementsByName("elapsed_time")[0].value = "";
+    var startTime, endTime, elaspedTime;
+    startTime = new Date().getTime();
+    var fib_n = fibonacci(n);
+    endTime = new Date().getTime();
+    elaspedTime = endTime - startTime;
+    document.getElementsByName("fib_n")[0].value = fib_n;
+    document.getElementsByName("elapsed_time")[0].value = elaspedTime;
+    return result;
+}
+</script>
+</header>
+<body>
+<p>n = ? <input name="n" type="number" value="40" size="4" maxlength="10"> &nbsp;| &nbsp;<input type="button" onclick="test_fib()" value="开始计算"></p>
+<p>fibonacci(n): <input name="fib_n" type="number" value="" size="12" maxlength="20"></p>
+<p>耗时：<input name="elapsed_time" type="number" value="" size="12" maxlength="16"> 毫秒</p>
+</body>
+</html>

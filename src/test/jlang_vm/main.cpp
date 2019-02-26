@@ -404,6 +404,12 @@ void test_Interpreter_v4_inline()
     printf("\n");
 }
 
+void test_Assembler()
+{
+    jasm::Token token;
+    jasm::Parser parser;
+}
+
 void print_version()
 {
     std::cout << std::endl;
