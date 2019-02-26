@@ -109,7 +109,7 @@
 
     KEYWORD_DEF(JmpLessThan,        jl,             LogicFlow)
     KEYWORD_DEF(JmpGreaterThan,     jg,             LogicFlow)
-    KEYWORD_DEF(JmpLessOrEqual,     jle             LogicFlow)
+    KEYWORD_DEF(JmpLessOrEqual,     jle,             LogicFlow)
     KEYWORD_DEF(JmpGreaterOrEqual,  jge,            LogicFlow)
 
     KEYWORD_DEF(Question,           ?,              Operator)

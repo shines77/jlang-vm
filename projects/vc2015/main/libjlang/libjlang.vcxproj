@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\IOutputStream.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\OutputStringStream.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\Scanner.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamDetail.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamMarker.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamRoot.h" />

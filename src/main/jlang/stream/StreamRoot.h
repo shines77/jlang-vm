@@ -105,20 +105,60 @@ public:
     bool is_underflow() const { return (this->current_ <  this->head_); }
     bool is_overflow()  const { return (this->current_ >= this->tail_); }
 
+    bool before_equals(char ch) const {
+        return (*(this->current_ - 1) == ch);
+    }
+
+    bool is_equals(char ch) const {
+        return (*(this->current_) == ch);
+    }
+
+    bool is_equals(const std::string & pattern) const {
+        return (::memcmp((const void *)this->current_,
+                         (const void *)pattern.c_str(), pattern.size()) == 0);
+    }
+
+    bool has_before() const { return (this->current_ >= this->head_); }
+    bool has_next()   const { return (this->current_ <  this->tail_); }
+
+    bool has_before(size_t length) const { return ((this->current_ - length) <= this->head_); }
+    bool has_next(size_t length)   const { return ((this->current_ + length) <  this->tail_); }
+
+    bool has_before(char ch) const {
+        if (likely(this->has_before()))
+            return this->before_equals(ch);
+        else
+            return false;
+    }
+
+    bool has_next(char ch) const {
+        if (likely(this->has_next()))
+            return this->is_equals(ch);
+        else
+            return false;
+    }
+
+    bool has_next(const std::string & pattern) const {
+        if (likely(this->has_next(pattern.size())))
+            return this->is_equals(pattern);
+        else
+            return false;
+    }
+
     void reset() { this->current_ = this->head_; }
     
     intptr_t tell() const { return (this->current_ - this->head_); }
     intptr_t remain() const { return (this->tail_ - this->current_); }
 
     size_t remain_sizes() const {
-        if (this->current_ < this->tail_)
+        if (likely(this->current_ < this->tail_))
             return this->remain();
         else
             return 0;
     }
 
     void destroy() {
-        if (this->head_) {
+        if (likely(this->head_)) {
             ::free(this->head_);
         }
         this->current_ = nullptr;
@@ -138,8 +178,8 @@ public:
 
     bool reserve(size_t size, bool need_clear = false) {
         char * new_data = (char *)::malloc(size + 1);
-        if (new_data) {
-            if (need_clear && this->head_) {
+        if (likely(new_data)) {
+            if (unlikely(need_clear && this->head_)) {
                 ::free(this->head_);
             }
             this->current_ = new_data;
@@ -152,12 +192,12 @@ public:
 
     bool resize(size_t size, bool need_clear = false) {
         char * new_data = (char *)::realloc(this->head_, size + 1);
-        if (new_data) {
-            if (need_clear) {
-                if ((size > this->sizes())) {
+        if (likely(new_data)) {
+            if (unlikely(need_clear)) {
+                if (likely(size > this->sizes())) {
                     ::memset(this->head_ + this->sizes(), 0, size - this->sizes() + 1);
                 }
-                else if (new_data != this->head_) {
+                else if (likely(new_data != this->head_)) {
                     ::memset(new_data, 0, size + 1);
                 }
             }
@@ -178,14 +218,14 @@ public:
 
     template <int offset = 0>
     void seek(const SeekType::enum_type type) {
-        if (offset == 0) {
-            if (type == SeekType::Begin)
+        if (likely(offset == 0)) {
+            if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;
             else if (type == SeekType::End)
                 this->current_ = this->tail_;
         }
         else {
-            if (type == SeekType::Begin)
+            if (likely(type == SeekType::Begin))
                 this->current_ = this->head_ + offset;
             else if (type == SeekType::End)
                 this->current_ = this->tail_ + offset;
@@ -195,14 +235,14 @@ public:
     }
 
     void seek(const SeekType::enum_type type, int offset = 0) {
-        if (offset == 0) {
-            if (type == SeekType::Begin)
+        if (likely(offset == 0)) {
+            if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;
             else if (type == SeekType::End)
                 this->current_ = this->tail_;
         }
         else {
-            if (type == SeekType::Begin)
+            if (likely(type == SeekType::Begin))
                 this->current_ = this->head_ + offset;
             else if (type == SeekType::End)
                 this->current_ = this->tail_ + offset;
@@ -212,8 +252,8 @@ public:
     }
 
     void seek_limit(const SeekType::enum_type type, int offset = 0) {
-        if (type == SeekType::Begin) {
-            if (offset >= 0) {
+        if (likely(type == SeekType::Begin)) {
+            if (likely(offset >= 0)) {
                 if ((size_t)offset < this->sizes())
                     this->current_ = this->head_ + offset;
                 else
@@ -223,8 +263,8 @@ public:
                 this->current_ = this->head_;
             }
         }
-        else if (type == SeekType::End) {
-            if (offset >= 0) {
+        else if (likely(type == SeekType::End)) {
+            if (likely(offset >= 0)) {
                 this->current_ = this->tail_;
             }
             else if ((size_t)-offset > this->sizes()) {
@@ -235,7 +275,7 @@ public:
             }
         }
         else {
-            if (offset != 0) {
+            if (likely(offset != 0)) {
                 this->current_ += offset;
                 if (this->current_ < this->head_)
                     this->current_ = this->head_;

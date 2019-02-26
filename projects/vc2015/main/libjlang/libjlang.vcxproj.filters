@@ -145,6 +145,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initor.h">
       <Filter>src\asm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\Scanner.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">
