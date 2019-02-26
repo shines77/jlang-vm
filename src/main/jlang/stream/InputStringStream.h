@@ -6,7 +6,6 @@
 #pragma once
 #endif
 
-#include "jlang/stream/StreamStorage.h"
 #include "jlang/stream/IInputStream.h"
 #include "jlang/stream/IOutputStream.h"
 #include "jlang/stream/StreamRoot.h"
@@ -38,7 +37,6 @@ public:
     ~InputStringStream() {
     }
 
-#if 1
     //----------------------------------------------------------------------
 
     root_type * __this() {
@@ -64,7 +62,6 @@ public:
     void _set_tail(char * value)    { root_type::_set_tail(value); }
 
     //----------------------------------------------------------------------
-#endif
 };
 
 } // namespace jlang

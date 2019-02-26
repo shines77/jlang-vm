@@ -26,7 +26,7 @@ class InputStream;
 // class Scanner
 ///////////////////////////////////////////////////
 
-template <typename T>
+//template <typename T>
 class Scanner {
 private:
     InputStringStream & stream_;
@@ -36,10 +36,6 @@ public:
     Scanner(InputStringStream & stream) : stream_(stream) {}
     ~Scanner() {}
 
-    void close() {
-        //
-    }
-
     std::string & delimiter() { return delimier_; }
     const std::string & delimiter() const { return delimier_; }
 
@@ -47,24 +43,43 @@ public:
         delimier_ = delimiter;
     }
 
-    bool hasBefore() {
+    bool hasBefore() const {
         return stream_.has_before();
     }
 
-    bool hasBefore(char ch) {
+    bool hasBefore(char ch) const {
         return stream_.has_before(ch);
     }
 
-    bool hasNext() {
+    bool hasNext() const {
         return stream_.has_next();
     }
 
-    bool hasNext(char ch) {
+    bool hasNext(char ch) const {
         return stream_.has_next(ch);
     }
 
-    bool hasNext(const std::string & pattern) {
+    bool hasNext(const std::string & pattern) const {
         return stream_.has_next(pattern);
+    }
+
+    bool hasNextLine() const {
+        return true;
+    }
+
+    std::string nextLine() {
+        std::string line;
+        line.reserve(stream_.remain() + 1);
+        int line_size = stream_.read_line((char *)line.c_str(), line.size());
+        return line;
+    }
+
+    void reset() {
+        stream_.reset();
+    }
+
+    void close() {
+        stream_.destroy();
     }
 };
 

@@ -408,6 +408,9 @@ void test_Assembler()
 {
     jasm::Token token;
     jasm::Parser parser;
+
+    InputStringStream stream;
+    Scanner scanner(stream);
 }
 
 void print_version()

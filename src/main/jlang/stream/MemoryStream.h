@@ -6,7 +6,6 @@
 #pragma once
 #endif
 
-#include "jlang/stream/StreamStorage.h"
 #include "jlang/stream/IInputStream.h"
 #include "jlang/stream/IOutputStream.h"
 #include "jlang/stream/StreamRoot.h"
@@ -35,7 +34,6 @@ public:
     virtual ~MemoryStream() {
     }
 
-#if 0
     //----------------------------------------------------------------------
 
     root_type * __this() {
@@ -61,7 +59,6 @@ public:
     void _set_tail(char * value)    { root_type::_set_tail(value); }
 
     //----------------------------------------------------------------------
-#endif
 
     const char * write_impl(const char * buf, size_t size) {
         assert(buf != nullptr);
