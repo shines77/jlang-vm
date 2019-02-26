@@ -22,8 +22,6 @@
     TOKEN_DEF(WhiteSpace)               // ' ', '\t', '\v', '\f'
     TOKEN_DEF(NewLine)                  // '\r', 'n'
     TOKEN_DEF(LineComment)              // "//" \n
-    TOKEN_DEF(BlockComment)             // "/* xxxxx */"
-    TOKEN_DEF(NestedBlockComment)       // "/{ xxxxxx }/"
 
     // Atoms
     TOKEN_DEF(Identifier)               // ABC123, XYZ_123
@@ -37,8 +35,6 @@
     TOKEN_DEF(OcxLiteral)               // 0o713      (8)
     TOKEN_DEF(BinaryLiteral)            // 0b01010101 (2)
 
-    TOKEN_DEF(IllegalFloatNumber)       //
-    TOKEN_DEF(IllegalNumberOverflow)    //
     TOKEN_DEF(Error)                    //
 
     // Keywords

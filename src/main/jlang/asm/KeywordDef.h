@@ -19,21 +19,6 @@
     #define PREPROCESSING_DEF(keyword)
     #endif
 
-    // Logic flow
-    KEYWORD_DEF(If,                 if,             LogicFlow)
-    KEYWORD_DEF(Else,               else,           LogicFlow)
-    KEYWORD_DEF(For,                for,            LogicFlow)
-    KEYWORD_DEF(ForEach,            for_each,       LogicFlow)
-    KEYWORD_DEF(Do,                 do,             LogicFlow)
-    KEYWORD_DEF(While,              while,          LogicFlow)
-    KEYWORD_DEF(Until,              until,          LogicFlow)
-    KEYWORD_DEF(Switch,             switch,         LogicFlow)
-    KEYWORD_DEF(Case,               case,           LogicFlow)
-    KEYWORD_DEF(Default,            default,        LogicFlow)
-    KEYWORD_DEF(Break,              break,          LogicFlow)
-    KEYWORD_DEF(Continue,           continue,       LogicFlow)
-    KEYWORD_DEF(Goto,               goto,           LogicFlow)
-
     // Pod type
     KEYWORD_DEF(Void,               void,           PodType)
     KEYWORD_DEF(Bool,               bool,           PodType)
@@ -56,42 +41,8 @@
     KEYWORD_DEF(Int64,              int64,          PodType)
     KEYWORD_DEF(UInt64,             uint64,         PodType)
 
-    // Type define
-    KEYWORD_DEF(TypeDef,            typedef,        TypeDef)
-    KEYWORD_DEF(True,               true,           Constant)
-    KEYWORD_DEF(False,              false,          Constant)
-    KEYWORD_DEF(NullPtr,            nullptr,        Constant)
-
     // Reserved keywords
     KEYWORD_DEF(Namespace,          namespace,      Keywords)
-    KEYWORD_DEF(Using,              using,          Keywords)
-    KEYWORD_DEF(Import,             import,         Keywords)
-    KEYWORD_DEF(As,                 as,             Keywords)
-
-    // Language
-    KEYWORD_DEF(Auto,               auto,           Keywords)
-
-    // Constant
-    KEYWORD_DEF(Static,             static,         Classes)
-    KEYWORD_DEF(Const,              const,          TypeDef)
-
-    // Classes
-    KEYWORD_DEF(Class,              class,          Classes)
-    KEYWORD_DEF(Interface,          interface,      Classes)
-    KEYWORD_DEF(Enum,               enum,           Classes)
-    KEYWORD_DEF(Struct,             struct,         Classes)
-    KEYWORD_DEF(Private,            private,        Classes)
-    KEYWORD_DEF(Protected,          protected,      Classes)
-    KEYWORD_DEF(Public,             public,         Classes)
-    KEYWORD_DEF(Virtual,            virtual,        Classes)
-    KEYWORD_DEF(Override,           override,       Classes)
-    KEYWORD_DEF(Final,              final,          Classes)
-    KEYWORD_DEF(Abstract,           abstract,       Classes)
-    KEYWORD_DEF(Mutable,            mutable,        Classes)
-
-    KEYWORD_DEF(This,               this,           Classes)
-    KEYWORD_DEF(Super,              super,          Classes)
-    KEYWORD_DEF(In,                 in,             Classes)
 
     // Preprocessing
     PREPROCESSING_DEF(if)
@@ -113,47 +64,53 @@
     PREPROCESSING_DEF(unassert)
 
     // Operators
-    KEYWORD_DEF(Plus,               +,              Operator)
-    KEYWORD_DEF(Minus,              -,              Operator)
-    KEYWORD_DEF(Multiply,           *,              Operator)
-    KEYWORD_DEF(Div,                /,              Operator)
-    KEYWORD_DEF(Mod,                %,              Operator)
-    KEYWORD_DEF(Assignment,         =,              Operator)
+    KEYWORD_DEF(Add,                add,            Operator)
+    KEYWORD_DEF(Sub,                sub,            Operator)
+    KEYWORD_DEF(Multiply,           mul,            Operator)
+    KEYWORD_DEF(Div,                div,            Operator)
+    KEYWORD_DEF(Mod,                mod,            Operator)
+    KEYWORD_DEF(Assignment,         assign,         Operator)
 
-    KEYWORD_DEF(PlusEqual,          +=,             Operator)
-    KEYWORD_DEF(MinusEqual,         -=,             Operator)
-    KEYWORD_DEF(MultiplyEqual,      *=,             Operator)
-    KEYWORD_DEF(DivEqual,           /=,             Operator)
-    KEYWORD_DEF(ModEqual,           %=,             Operator)
+    KEYWORD_DEF(AddEqual,           add_eq,         Operator)
+    KEYWORD_DEF(SubEqual,           sub_eq,         Operator)
+    KEYWORD_DEF(MultiplyEqual,      mul_eq,         Operator)
+    KEYWORD_DEF(DivEqual,           div_eq,         Operator)
+    KEYWORD_DEF(ModEqual,           mod_eq,         Operator)
 
     // Bitwise operators
-    KEYWORD_DEF(BitNot,             ~,              Operator)
-    KEYWORD_DEF(BitAnd,             &,              Operator)
-    KEYWORD_DEF(BitOr,              |,              Operator)
-    KEYWORD_DEF(BitXor,             ^,              Operator)
-    KEYWORD_DEF(BoolNot,            !,              Operator)   // (exclamation mark)
-    KEYWORD_DEF(BoolAnd,            &&,             Operator)
-    KEYWORD_DEF(BoolOr,             ||,             Operator)
-    KEYWORD_DEF(BoolXor,            ^^,             Operator)
-    KEYWORD_DEF(BitShiftLeft,       <<,             Operator)
-    KEYWORD_DEF(BitShiftRight,      >>,             Operator)
+    KEYWORD_DEF(BitNot,             not,            Operator)
+    KEYWORD_DEF(BitAnd,             and,            Operator)
+    KEYWORD_DEF(BitOr,              or,             Operator)
+    KEYWORD_DEF(BitXor,             xor,            Operator)
+    KEYWORD_DEF(BoolNot,            bool_not,       Operator)   // (exclamation mark)
+    KEYWORD_DEF(BoolAnd,            bool_and,       Operator)
+    KEYWORD_DEF(BoolOr,             bool_or,        Operator)
+    KEYWORD_DEF(BoolXor,            bool_xor,       Operator)
+    KEYWORD_DEF(BitShiftLeft,       shl,            Operator)
+    KEYWORD_DEF(BitShiftRight,      shr,            Operator)
+    KEYWORD_DEF(BitRollShiftLeft,   ror,            Operator)
+    KEYWORD_DEF(BitRollShiftRight,  rol,            Operator)
 
-    KEYWORD_DEF(BitNotEqual,        ~=,             Operator)
-    KEYWORD_DEF(AndEqual,           &=,             Operator)
-    KEYWORD_DEF(OrEqual,            |=,             Operator)
-    KEYWORD_DEF(XorEqual,           ^=,             Operator)
+    KEYWORD_DEF(BitNotEqual,        not_eq,         Operator)
+    KEYWORD_DEF(AndEqual,           and_eq,         Operator)
+    KEYWORD_DEF(OrEqual,            or_eq,          Operator)
+    KEYWORD_DEF(XorEqual,           xor_eq,         Operator)
 
-    KEYWORD_DEF(Increase,           ++,             Operator)
-    KEYWORD_DEF(Decrease,           --,             Operator)
-                 
+    KEYWORD_DEF(Increase,           inc,            Operator)
+    KEYWORD_DEF(Decrease,           dec,            Operator)
+
     // Compare operators
-    KEYWORD_DEF(Equal,              ==,             Operator)
-    KEYWORD_DEF(NotEqual,           !=,             Operator)
+    KEYWORD_DEF(Compare,            cmp,            LogicFlow)
+    KEYWORD_DEF(Test,               test,           LogicFlow)
+                 
+    // Logic flow
+    KEYWORD_DEF(JmpEqual,           je,             LogicFlow)
+    KEYWORD_DEF(JmpNotEqual,        jne,            LogicFlow)
 
-    KEYWORD_DEF(LessThan,           <,              Operator)
-    KEYWORD_DEF(GreaterThan,        >,              Operator)
-    KEYWORD_DEF(LessThanOrEqual,    <=,             Operator)
-    KEYWORD_DEF(GreaterThanOrEqual, >=,             Operator)
+    KEYWORD_DEF(JmpLessThan,        jl,             LogicFlow)
+    KEYWORD_DEF(JmpGreaterThan,     jg,             LogicFlow)
+    KEYWORD_DEF(JmpLessOrEqual,     jle             LogicFlow)
+    KEYWORD_DEF(JmpGreaterOrEqual,  jge,            LogicFlow)
 
     KEYWORD_DEF(Question,           ?,              Operator)
     KEYWORD_DEF(Colon,              :,              Operator)
