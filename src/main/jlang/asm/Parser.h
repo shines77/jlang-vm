@@ -34,6 +34,11 @@ public:
         // Do nothing !!
     }
     virtual ~Parser() {}
+
+    // NonCopyable
+    Parser(const Parser & src) = delete;
+    Parser(Parser && src) = delete;
+    Parser & operator = (const Parser & rhs) = delete;
 };
 
 } // namespace jasm

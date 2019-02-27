@@ -66,7 +66,7 @@ std::string toUpperCase(const std::string & str) {
 
 template <bool windows_style = true>
 static inline
-size_t read_line_pos(const char * content, size_t length) {
+size_t next_line_pos(const char * content, size_t length) {
     size_t pos = length;
     assert(content != nullptr);
     char * cur = (char *)content;
@@ -117,11 +117,11 @@ size_t read_line_pos(const char * content, size_t length) {
 
 template <bool windows_style = true>
 static inline
-int read_line(char * line, size_t size, const char * content, size_t length) {
+int next_line(char * line, size_t size, const char * content, size_t length) {
     assert(line != nullptr);
     assert(content != nullptr);
     size_t max_size = jstd::minimum(size, length);
-    size_t line_size = read_line_pos<windows_style>(content, max_size);
+    size_t line_size = next_line_pos<windows_style>(content, max_size);
     assert(line_size > 0);
     ::memcpy(line, content, line_size);
     return (int)line_size;

@@ -92,7 +92,16 @@ public:
         return (size_t)(this->tail_ - this->head_);
     }
     size_t length() const { return this->sizes(); }
-    size_t size_of() const { return (this->sizes() + 1); }
+
+    intptr_t tell() const { return (this->current_ - this->head_); }
+    intptr_t remain() const { return (this->tail_ - this->current_); }
+
+    size_t remain_sizes() const {
+        if (likely(this->current_ < this->tail_))
+            return this->remain();
+        else
+            return 0;
+    }
 
     bool is_alive() const { return (this->head_ != nullptr && this->tail_ != nullptr); }
     bool is_valid() const { return (this->current_ != nullptr); }
@@ -104,19 +113,6 @@ public:
 
     bool is_underflow() const { return (this->current_ <  this->head_); }
     bool is_overflow()  const { return (this->current_ >= this->tail_); }
-
-    bool before_equals(char ch) const {
-        return (*(this->current_ - 1) == ch);
-    }
-
-    bool is_equals(char ch) const {
-        return (*(this->current_) == ch);
-    }
-
-    bool is_equals(const std::string & pattern) const {
-        return (::memcmp((const void *)this->current_,
-                         (const void *)pattern.c_str(), pattern.size()) == 0);
-    }
 
     bool has_before() const { return (this->current_ >= this->head_); }
     bool has_next()   const { return (this->current_ <  this->tail_); }
@@ -145,17 +141,56 @@ public:
             return false;
     }
 
-    void reset() { this->current_ = this->head_; }
-    
-    intptr_t tell() const { return (this->current_ - this->head_); }
-    intptr_t remain() const { return (this->tail_ - this->current_); }
-
-    size_t remain_sizes() const {
-        if (likely(this->current_ < this->tail_))
-            return this->remain();
-        else
-            return 0;
+    bool before_equals(char ch) const {
+        return (*(this->current_ - 1) == ch);
     }
+
+    bool before_equals(const void * pattern, size_t length) const {
+        return (::memcmp((const void *)(this->current_ - length),
+                         (const void *)pattern, length) == 0);
+    }
+
+    bool before_equals(const std::string & pattern) const {
+        return (::memcmp((const void *)(this->current_ - pattern.size()),
+                         (const void *)pattern.c_str(), pattern.size()) == 0);
+    }
+
+    bool is_equals(char ch) const {
+        return (*(this->current_) == ch);
+    }
+
+    bool is_equals(const void * pattern, size_t length) const {
+        return (::memcmp((const void *)this->current_,
+                         (const void *)pattern, length) == 0);
+    }
+
+    bool is_equals(const std::string & pattern) const {
+        return (::memcmp((const void *)this->current_,
+                         (const void *)pattern.c_str(), pattern.size()) == 0);
+    }
+
+    int before_cmp(const void * pattern, size_t length) const {
+        return ::memcmp((const void *)(this->current_ - length),
+                        (const void *)pattern, length);
+    }
+
+    int next_cmp(const void * pattern, size_t length) const {
+        return ::memcmp((const void *)this->current_,
+                        (const void *)pattern, length);
+    }
+
+    void skip(int offset) {
+        this->current_ += offset;
+    }
+
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+    void skip(intptr_t offset) {
+        this->current_ += offset;
+    }
+#endif
+
+    void reset() { this->current_ = this->head_; }
 
     void destroy() {
         if (likely(this->head_)) {
@@ -217,41 +252,37 @@ public:
     }
 
     template <int offset = 0>
-    void seek(const SeekType::enum_type type) {
+    void seek(SeekType::Type type) {
         if (likely(offset == 0)) {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;
-            else if (type == SeekType::End)
+            else
                 this->current_ = this->tail_;
         }
         else {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_ + offset;
-            else if (type == SeekType::End)
-                this->current_ = this->tail_ + offset;
             else
-                this->current_ = offset;
+                this->current_ = this->tail_ + offset;
         }
     }
 
-    void seek(const SeekType::enum_type type, int offset = 0) {
+    void seek(SeekType::Type type, int offset = 0) {
         if (likely(offset == 0)) {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;
-            else if (type == SeekType::End)
+            else
                 this->current_ = this->tail_;
         }
         else {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_ + offset;
-            else if (type == SeekType::End)
-                this->current_ = this->tail_ + offset;
             else
-                this->current_ += offset;
+                this->current_ = this->tail_ + offset;
         }
     }
 
-    void seek_limit(const SeekType::enum_type type, int offset = 0) {
+    void seek_limit(SeekType::Type type, int offset = 0) {
         if (likely(type == SeekType::Begin)) {
             if (likely(offset >= 0)) {
                 if ((size_t)offset < this->sizes())
@@ -263,7 +294,7 @@ public:
                 this->current_ = this->head_;
             }
         }
-        else if (likely(type == SeekType::End)) {
+        else {
             if (likely(offset >= 0)) {
                 this->current_ = this->tail_;
             }
@@ -274,20 +305,18 @@ public:
                 this->current_ = this->head_;
             }
         }
-        else {
-            if (likely(offset != 0)) {
-                this->current_ += offset;
-                if (this->current_ < this->head_)
-                    this->current_ = this->head_;
-                else if (this->current_ > this->tail_)
-                    this->current_ = this->tail_;
-            }
-        }
     }
 
-    int read_line(char * buf, size_t size) const {
-        int line_size = StringUtils::read_line(buf, size, this->current_, this->remain());
+    int next_line(char * buf, size_t size) const {
+        int line_size = StringUtils::next_line(buf, size, this->current_, this->remain());
         return line_size;
+    }
+
+    std::string next_line() const {
+        std::string line;
+        line.reserve(this->remain() + 1);
+        int line_size = this->next_line((char *)line.c_str(), line.size());
+        return line;
     }
 };
 

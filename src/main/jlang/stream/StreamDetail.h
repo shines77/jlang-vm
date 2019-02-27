@@ -30,11 +30,10 @@ namespace jlang {
 ///////////////////////////////////////////////////
 
 struct SeekType {
-    typedef int enum_type;
-
-    static const enum_type Begin = 0;
-    static const enum_type Current = 1;
-    static const enum_type End = 2;
+    enum Type {
+        Begin = 0,
+        End = 1
+    };
 };
 
 } // namespace jlang
@@ -42,7 +41,7 @@ struct SeekType {
 namespace jlang {
 namespace detail {
 
-// namespace detail
+// TODO:
 
 } // namespace detail
 } // namespace jlang
