@@ -53,6 +53,8 @@ include_directories(src/main)
 include_directories(src/test)
 
 set(SOURCE_FILES
+    src/main/jlang/lang/Global.cpp
+    src/main/jlang/fs/FileName.cpp
     src/test/jlang_vm/main.cpp
     )
 
