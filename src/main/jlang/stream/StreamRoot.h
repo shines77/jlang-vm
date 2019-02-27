@@ -251,6 +251,20 @@ public:
         return (last_pos - first_pos);
     }
 
+    size_t copy_from(StreamRoot & src) {
+        if (src.sizes() > 0) {
+            this->reserve(src.sizes());
+            assert(this->current() != nullptr);
+            assert(src.current() != nullptr);
+            src.seek(SeekType::Begin, 0);
+            ::memcpy(this->current(), src.current(), src.sizes());
+        }
+        else {
+            this->destroy();
+        }
+        return this->sizes();
+    }
+
     template <int offset = 0>
     void seek(SeekType::Type type) {
         if (likely(offset == 0)) {

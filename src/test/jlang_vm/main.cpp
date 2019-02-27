@@ -14,6 +14,14 @@
 
 using namespace jlang;
 
+#if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
+ || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__) 
+#define JLANG_SCRIPT_BASE_DIR       "..\\..\\..\\scripts\\"
+#else
+#define JLANG_SCRIPT_BASE_DIR       "./scripts/"
+#endif
+#define JLANG_SCRIPT_PATH(path)     JLANG_SCRIPT_BASE_DIR path
+
 static const int kWarmupMillsecs = 600;
 
 void cpu_warmup(int delayTime)
@@ -414,6 +422,9 @@ void test_Assembler()
     jasm::Token token;
     jasm::Parser parser;
 
+    FileStringStream stream(JLANG_SCRIPT_PATH("asm/fibonacci.jasm"));
+    parser.setStream(stream);
+
     bool success = parser.nextToken(token, ec);
     if (success) {
         printf("  success.\n");
@@ -422,8 +433,8 @@ void test_Assembler()
         printf("  failed.\n");
     }
 
-    InputStringStream stream;
-    Scanner scanner(stream);
+    InputStringStream stream1;
+    Scanner scanner(stream1);
 
     printf("\n");
 }

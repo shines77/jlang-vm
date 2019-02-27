@@ -49,6 +49,17 @@ public:
     Parser(Parser && src) = delete;
     Parser & operator = (const Parser & rhs) = delete;
 
+    void setStream(StringStream & stream) {
+        stream_.copy_from(stream);
+        stream_.seek(SeekType::End, 0);
+        stream_.put_null();
+    }
+
+    void setStream(FileStringStream & fileStream) {
+        StringStream & stream = fileStream.getStream();
+        setStream(stream);
+    }
+
 private:
     uint32_t getHash32(const char * keyword) const {
         return HashAlgorithm::getHash(keyword);

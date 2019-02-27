@@ -21,6 +21,7 @@
 #include "jlang/stream/StringStream.h"
 #include "jlang/stream/MemoryStream.h"
 #include "jlang/stream/Scanner.h"
+#include "jlang/stream/FileStringStream.h"
 
 #include "jlang/vm/Interpreter_v1.h"
 #include "jlang/vm/Interpreter_v2.h"
