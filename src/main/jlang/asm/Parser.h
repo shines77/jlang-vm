@@ -53,6 +53,7 @@ public:
         stream_.copy_from(stream);
         stream_.seek(SeekType::End, 0);
         stream_.put_null();
+        stream_.reset();
     }
 
     void setStream(FileStringStream & fileStream) {
