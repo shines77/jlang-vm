@@ -102,6 +102,10 @@
     // Compare operators
     KEYWORD_DEF(Compare,            cmp,            LogicFlow)
     KEYWORD_DEF(Test,               test,           LogicFlow)
+
+    // Operators
+    KEYWORD_DEF(Equal,              =,              Operator)
+    KEYWORD_DEF(NotEqual,           !=,             Operator)
                  
     // Logic flow
     KEYWORD_DEF(JmpEqual,           je,             LogicFlow)
@@ -109,7 +113,7 @@
 
     KEYWORD_DEF(JmpLessThan,        jl,             LogicFlow)
     KEYWORD_DEF(JmpGreaterThan,     jg,             LogicFlow)
-    KEYWORD_DEF(JmpLessOrEqual,     jle,             LogicFlow)
+    KEYWORD_DEF(JmpLessOrEqual,     jle,            LogicFlow)
     KEYWORD_DEF(JmpGreaterOrEqual,  jge,            LogicFlow)
 
     KEYWORD_DEF(Question,           ?,              Operator)

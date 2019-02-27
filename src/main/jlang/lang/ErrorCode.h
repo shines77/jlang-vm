@@ -16,7 +16,7 @@ namespace jlang {
 // class ErrorCode
 ///////////////////////////////////////////////////
 
-class ErrorCode : public lang::NonCopyable {
+class ErrorCode {
 public:
     enum Type {
         First = -60000,

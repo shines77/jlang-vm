@@ -34,7 +34,7 @@ namespace CharInfo {
         kIdentifierFirst    = kAlphabet | kUnderLine,           // [A-Z], [a-z], and [_]
         kIdentifierBody     = kIdentifierFirst | kDigital,      // [A-Z], [a-z], [0-9] and [_]
         kIdentifier         = kIdentifierFirst | kDigital,      // [A-Z], [a-z], [0-9] and [_]
-        kInternalKeyword    = kAlphabet | kUnderLine,           // [A-Z], [a-z], and [_]
+        kReservedKeyword    = kAlphabet | kUnderLine,           // [A-Z], [a-z], and [_]
 
         kIncludeEndOf       = kNull | kNewLine | kIncludeQuote, // '\0', '\n', '\r', ", >
 
@@ -968,8 +968,8 @@ namespace CharInfo {
         return ((CharInfo::mask[ch] & CharInfo::kIdentifier) != 0);
     }
 
-    static inline bool isInternalKeyword(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kInternalKeyword) != 0);
+    static inline bool isReservedKeyword(unsigned char ch) {
+        return ((CharInfo::mask[ch] & CharInfo::kReservedKeyword) != 0);
     }
 
     static inline bool IsIncludeEndOf(unsigned char ch) {

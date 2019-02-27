@@ -406,11 +406,26 @@ void test_Interpreter_v4_inline()
 
 void test_Assembler()
 {
+    printf("--------------------------------------------\n");
+    printf("  test_Assembler()\n");
+    printf("--------------------------------------------\n\n");
+
+    ErrorCode ec;
     jasm::Token token;
     jasm::Parser parser;
 
+    bool success = parser.nextToken(token, ec);
+    if (success) {
+        printf("  success.\n");
+    }
+    else {
+        printf("  failed.\n");
+    }
+
     InputStringStream stream;
     Scanner scanner(stream);
+
+    printf("\n");
 }
 
 void print_version()
@@ -425,6 +440,8 @@ int main(int argc, char * argv[])
     print_version();
 
     jasm::Initor initor;
+
+    test_Assembler();
 
 #ifdef NDEBUG
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \

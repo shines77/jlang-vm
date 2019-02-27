@@ -21,7 +21,8 @@
     // White spaces and comments
     TOKEN_DEF(WhiteSpace)               // ' ', '\t', '\v', '\f'
     TOKEN_DEF(NewLine)                  // '\r', 'n'
-    TOKEN_DEF(LineComment)              // "//" \n
+    TOKEN_DEF(LineComment)              // ';' or "//" \n
+    TOKEN_DEF(BlockComment)             // "//" \n
 
     // Atoms
     TOKEN_DEF(Identifier)               // ABC123, XYZ_123
@@ -38,7 +39,7 @@
     TOKEN_DEF(Error)                    //
 
     // Keywords
-    TOKEN_DEF(InternalKeyword)          // for reserved keywords
+    TOKEN_DEF(ReservedKeyword)          // for reserved keywords
     TOKEN_DEF(Macro)                    // Macro
     TOKEN_DEF(MacroDefine)              // Macro define
     TOKEN_DEF(MacroBody)                // Macro body
