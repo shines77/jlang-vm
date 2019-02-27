@@ -15,13 +15,25 @@
 
 #include "jlang/lang/ErrorCode.h"
 
+#include "jlang/asm/Token.h"
+
 namespace jlang {
 namespace jasm {
 
 class Parser {
+protected:
+    StringStream stream_;
+    std::string filename_;
+    Token token_;
+    std::string identifier_;
+
 public:
-    Parser() {}
-    ~Parser() {}
+    Parser() : token_(Token::Unknown, 0, 0) {}
+    Parser(const std::string & filename)
+        : filename_(filename), token_(Token::Unknown, 0, 0) {
+        // Do nothing !!
+    }
+    virtual ~Parser() {}
 };
 
 } // namespace jasm

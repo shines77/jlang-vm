@@ -932,7 +932,7 @@ namespace CharInfo {
         return ((CharInfo::mask[ch] & CharInfo::kNewLine) != 0);
     }
 
-    static inline bool IsAlphabet(unsigned char ch) {
+    static inline bool isAlphabet(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::kAlphabet) != 0);
     }
 

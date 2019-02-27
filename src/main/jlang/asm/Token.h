@@ -29,8 +29,8 @@ class Token {
 public:
     enum Type {
         FirstToken = -1,
-        UnrecognizedToken = FirstToken,
-        UnknownToken = 0,
+        Unrecognized = FirstToken,
+        Unknown = 0,
 
         #include "jlang/asm/TokenDef.h"
 
@@ -43,7 +43,7 @@ private:
     intptr_t pos_;
 
 public:
-    Token() : type_(Type::UnknownToken), length_(0), pos_(0) {}
+    Token() : type_(Type::Unknown), length_(0), pos_(0) {}
     Token(Type tokenType, int length, intptr_t pos)
         : type_(tokenType), length_(length), pos_(pos) {}
     Token(const Token & src) : type_(src.type_), length_(src.length_), pos_(src.pos_) {}
@@ -130,8 +130,8 @@ public:
 
     static const char * toString(Type tokenType) {
         switch (tokenType) {
-            CASE_TOKEN(UnrecognizedToken);
-            CASE_TOKEN(UnknownToken);
+            CASE_TOKEN(Unrecognized);
+            CASE_TOKEN(Unknown);
 
             #include "jlang/asm/TokenDef.h"
 

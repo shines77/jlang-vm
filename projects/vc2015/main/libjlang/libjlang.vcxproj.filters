@@ -32,6 +32,9 @@
     <Filter Include="src\jstd">
       <UniqueIdentifier>{c87bb29e-5f9a-449a-8ad3-11042fc8dc38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\fs">
+      <UniqueIdentifier>{ac65f910-75e5-44cc-95bb-2dd555492f06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h">
@@ -148,10 +151,22 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\Scanner.h">
       <Filter>src\stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileName.h">
+      <Filter>src\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileSystem.h">
+      <Filter>src\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h">
+      <Filter>src\fs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">
       <Filter>src\lang</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\main\jlang\fs\FileName.cpp">
+      <Filter>src\fs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

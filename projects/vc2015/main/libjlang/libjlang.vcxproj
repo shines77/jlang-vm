@@ -30,6 +30,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\coredef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\stddef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\ValueType.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileName.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileSystem.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jlang.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\CharInfo.h" />
@@ -59,6 +62,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\Interpreter_v4.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\main\jlang\fs\FileName.cpp" />
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

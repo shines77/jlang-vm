@@ -94,7 +94,7 @@ static const keyword_info_t g_keyword_list[] = {
     {
         (uint16_t)KEYWORD_ID_MAX,
         (uint16_t)jasm::KeywordKind::Unknown,
-        (uint16_t)jasm::Token::UnknownToken,
+        (uint16_t)jasm::Token::Unknown,
         0, ""
     }
 };
@@ -107,7 +107,7 @@ inline keyword_info_t getKeywordInfo()
     keyword_info_t keyword;
     keyword.id = keyword_id;
     keyword.kind = jasm::KeywordKind::Unknown;
-    keyword.token_type = jasm::Token::UnknownToken;
+    keyword.token_type = jasm::Token::Unknown;
     keyword.length = sizeof("Unknown keyword") - 1;
     keyword.name = "Unknown keyword";
     return keyword;
@@ -219,7 +219,7 @@ private:
 #endif
 
 public:
-    Keyword() : id_(-1), kind_(jasm::KeywordKind::Unknown), token_(jasm::Token::UnknownToken), length_(0)
+    Keyword() : id_(-1), kind_(jasm::KeywordKind::Unknown), token_(jasm::Token::Unknown), length_(0)
 #if (KEYWORD_HASHCODE_WORDLEN == 32)
         , hashCode_(0U)
 #elif (KEYWORD_HASHCODE_WORDLEN == 64)
