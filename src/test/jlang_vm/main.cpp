@@ -427,10 +427,10 @@ void test_Assembler()
 
     bool success = parser.nextToken(token, ec);
     if (success) {
-        printf("  success.\n");
+        printf("  success. [file = %s]\n", stream.filename().c_str());
     }
     else {
-        printf("  failed.\n");
+        printf("  failed. [file = %s]\n", stream.filename().c_str());
     }
 
     InputStringStream stream1;
