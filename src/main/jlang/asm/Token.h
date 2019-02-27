@@ -43,9 +43,9 @@ private:
     intptr_t pos_;
 
 public:
-    Token() : type_(Type::Unknown), length_(0), pos_(0) {}
-    Token(Type tokenType, int length, intptr_t pos)
-        : type_(tokenType), length_(length), pos_(pos) {}
+    Token(Type type = Type::Unknown) : type_(type), length_(0), pos_(0) {}
+    Token(Type type, int length, intptr_t pos)
+        : type_(type), length_(length), pos_(pos) {}
     Token(const Token & src) : type_(src.type_), length_(src.length_), pos_(src.pos_) {}
     ~Token() {}
 
@@ -61,8 +61,8 @@ public:
     intptr_t getEndPos() const { return (this->pos_ + this->length_); }
     int getLength() const { return this->length_; }
 
-    void setType(const Type tokenType) {
-        this->type_ = tokenType;
+    void setType(Type type) {
+        this->type_ = type;
     }
 
     void setStartPos(intptr_t pos) {

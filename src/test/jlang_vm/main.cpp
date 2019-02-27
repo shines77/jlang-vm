@@ -419,7 +419,7 @@ void test_Assembler()
     printf("--------------------------------------------\n\n");
 
     ErrorCode ec;
-    jasm::Token token;
+    jasm::Token token = jasm::Token::Unknown;
     jasm::Parser parser;
 
     FileStringStream stream(JLANG_SCRIPT_PATH("asm/fibonacci.jasm"));
