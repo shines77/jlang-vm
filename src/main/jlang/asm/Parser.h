@@ -1327,7 +1327,7 @@ public:
         return false;
     }
 
-    bool Parser::nextToken(Token & token, ErrorCode & ec) {
+    bool nextToken(Token & token, ErrorCode & ec) {
         ec = ErrorCode::OK;
         token.setType(Token::Unknown);
         StringStreamMarker marker(stream_);
