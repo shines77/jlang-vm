@@ -82,8 +82,8 @@ public:
 #undef JLANG_KEYWORD_ID
 #undef JLANG_PREPROCESSING_ID
 
-#define JLANG_KEYWORD_ID(token, category)       KeywordId::##token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)         KeywordId::pp_##keyword
+#define JLANG_KEYWORD_ID(token, category)       jasm::KeywordId::token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)         jasm::KeywordId::pp_##keyword
 
 #define KEYWORD_DEF(token, keyword, category)  \
     { \
