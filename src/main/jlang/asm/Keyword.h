@@ -37,8 +37,8 @@
 namespace jlang {
 namespace jasm {
 
-#define JLANG_KEYWORD_ID(token, category)       KeywordId::##token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)         KeywordId::##pp_##keyword
+#define JLANG_KEYWORD_ID(token, category)       jasm::KeywordId::##token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)         jasm::KeywordId::##pp_##keyword
 
 #define KEYWORD_DEF(token, keyword, category)   JLANG_KEYWORD_ID(token, category),
 #define PREPROCESSING_DEF(keyword)              JLANG_PREPROCESSING_ID(keyword),
@@ -239,8 +239,8 @@ public:
     std::string toString() { return this->name_; }
     const std::string toString() const { return this->name_; }
 
-    const KeywordCategory::Type getCategory() const { return KeywordCategory::Type(category_); }
-    const Token::Type getToken() const { return Token::Type(token_); }
+    const jasm::KeywordCategory::Type getCategory() const { return jasm::KeywordCategory::Type(category_); }
+    const jasm::Token::Type getToken() const { return jasm::Token::Type(token_); }
 
     void setCategory(uint16_t type) { category_ = type; }
     void setToken(uint16_t token) { token_ = token; }
@@ -307,9 +307,9 @@ public:
     typedef hashtable_type::const_iterator           const_iterator;
 
 private:
-    hashtable_type keywordMapping_;
     int root_;
     bool inited_;
+    hashtable_type keywordMapping_;
 
 public:
     KeywordMapping(int root = KeywordRoot::Default)
@@ -359,7 +359,7 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() == KeywordCategory::Preprocessing) {
+                if (keyword.getCategory() == jasm::KeywordCategory::Preprocessing) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
@@ -368,7 +368,7 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() == KeywordCategory::Section) {
+                if (keyword.getCategory() == jasm::KeywordCategory::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
@@ -377,8 +377,8 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() != KeywordCategory::Preprocessing &&
-                    keyword.getCategory() != KeywordCategory::Section) {
+                if (keyword.getCategory() != jasm::KeywordCategory::Preprocessing &&
+                    keyword.getCategory() != jasm::KeywordCategory::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
