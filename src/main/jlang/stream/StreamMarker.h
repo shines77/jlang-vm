@@ -180,21 +180,41 @@ public:
         }
     }
 
-    bool copy_string(char * word, size_t size) {
-        assert(word != nullptr);
+    intptr_t copy_string(char * substr, size_t size) {
+        assert(substr != nullptr);
         assert(this->end() >= this->start());
-        if (this->has_marked()) {
-            return StringUtils::sub_str(word, size, this->start(), this->end());
+        if (likely(this->has_marked())) {
+            return StringUtils::sub_str(substr, size, this->start(), this->end());
         }
         else {
-            *word = '\0';
-            return false;
+            *substr = '\0';
+            return 0;
         }
     }
 
     template <size_t N>
-    bool copy_string(char (&word)[N]) {
-        return this->copy_string(word, N);
+    intptr_t copy_string(char (&substr)[N]) {
+        return this->copy_string(substr, N);
+    }
+
+    intptr_t copy_string(std::string & substr) {
+        if (likely(this->has_marked())) {
+            return StringUtils::sub_str(substr, this->start(), this->end());
+        }
+        else {
+            substr.clear();
+            return 0;
+        }
+    }
+
+    intptr_t append_string(std::string & substr) {
+        if (likely(this->has_marked())) {
+            return StringUtils::append(substr, this->start(), this->end());
+        }
+        else {
+            substr.clear();
+            return 0;
+        }
     }
 };
 

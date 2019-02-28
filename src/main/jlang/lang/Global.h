@@ -19,11 +19,11 @@ private:
     ErrorCode err_;
 
 public:
-    LastError() : err_(0) {}
+    LastError() : err_(ErrorCode::OK) {}
     virtual ~LastError() {}
 
-    bool isSuccess() const { return (err_ == 0); }
-    bool hasErrors() const { return (err_ != 0); }
+    bool isSuccess() const { return (err_ == ErrorCode::OK); }
+    bool hasErrors() const { return (err_ != ErrorCode::OK); }
 
     ErrorCode getLastError() { return err_; }
 

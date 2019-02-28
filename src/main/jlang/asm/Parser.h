@@ -289,26 +289,37 @@ private:
     }
 
 public:
-    bool parseIdentifier(ErrorCode & ec) {
+    bool parseIdentifier(std::string & identName, Token & token, ErrorCode & ec) {
         StreamMarker marker(stream_);
         marker.remark();
         skipIdentifier();
-        intptr_t ident_length = marker.length();
-        if (ident_length > 0) {
-            intptr_t ident_start = marker.start_pos();
-            intptr_t ident_end = marker.end_pos();
-            char ident_name[MAX_IDENTIFIER_LEN];
-            marker.copy_string(ident_name);
-
-            KeywordMapping & keyMapping = Global::getKeywordMapping();
-            assert(keyMapping.inited());
-            KeywordMapping::iterator iter = keyMapping.find(ident_name, (size_t)ident_length);
-            if (iter != keyMapping.end()) {
-                Keyword keyword = iter->second;
-                return true;
-            }
+        intptr_t identLength = marker.length();
+        intptr_t identStart = marker.start_pos();
+        intptr_t identEnd = marker.end_pos();
+        assert(identLength > 0);
+        if (identLength > 0) {
+            marker.copy_string(identName);
+            token.setToken(Token::Identifier, identStart, identLength);
+            return true;
         }
-        return false;
+        else {
+            token.setToken(Token::Unrecognized, identStart, identLength);
+            return false;
+        }
+    }
+
+    void parseIdentifierBody(char firstChar, std::string & identName, Token & token, ErrorCode & ec) {
+        assert(firstChar == stream_.get(-1));
+        StreamMarker marker(stream_);
+        marker.remark();
+        skipIdentifier();
+        intptr_t identLength = marker.length() + 1;
+        intptr_t identStart = marker.start_pos() - 1;
+        intptr_t identEnd = marker.end_pos();
+
+        identName = firstChar;
+        marker.append_string(identName);
+        token.setToken(Token::Identifier, identStart, identLength);
     }
 
     bool parseReservedKeyword(ErrorCode & ec) {
@@ -1407,15 +1418,10 @@ public:
             case 'u': case 'v': case 'w': case 'x': case 'y':
             case 'z':
             case '_':
-                // Identifier or keywords
-                if (parseIdentifier(ec)) {
-                    //stream_.next();
-                    token.setType(Token::Identifier);
-                }
-                else {
-                    token.setType(Token::Unrecognized);
-                    if (marker.length() <= 0)
-                        stream_.next();
+                {
+                    // Identifier or keywords
+                    std::string identName;
+                    parseIdentifierBody(cur, identName, token, ec);
                 }
                 break;
 

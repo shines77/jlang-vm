@@ -2,6 +2,8 @@
 #include "jlang/lang/Global.h"
 #include "jlang/asm/Keyword.h"
 
+#include <assert.h>
+
 using namespace jlang;
 
 jasm::KeywordMapping * jasm::KeywordInitor::keyword_mapping    = nullptr;
@@ -49,9 +51,9 @@ LastError & Global::lastError() {
 ///////////////////////////////////////////////////
 
 void Global::destroyLastError() {
-    if (last_error) {
-        delete last_error;
-        last_error = nullptr;
+    if (Global::last_error) {
+        delete Global::last_error;
+        Global::last_error = nullptr;
     }
 }
 
@@ -61,6 +63,8 @@ void Global::destroyLastError() {
 
 void Global::init() {
     jasm::KeywordInitor::init();
+    LastError & _lastError = Global::lastError();
+    assert(_lastError.isSuccess() == ErrorCode::OK);
 }
 
 ///////////////////////////////////////////////////

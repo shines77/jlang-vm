@@ -128,17 +128,19 @@ int next_line(char * line, size_t size, const char * content, size_t length) {
 }
 
 static inline
-bool sub_str(char * text, size_t size, const char * target, size_t length) {
+intptr_t sub_str(char * text, size_t size, const char * target, size_t length) {
     assert(text != nullptr);
     assert(target != nullptr);
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
-|| defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__) 
+|| defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
+    intptr_t copy_size = 0;
     errno_t err = ::strncpy_s(text, size, target, length);
     if (err == 0 || err == STRUNCATE) {
         text[length] = '\0';
+        copy_size = (intptr_t)jstd::minimum(size - 1, length);
     }
 #else
-    int copy_size = jstd::minimum(size - 1, length);
+    intptr_t copy_size = (intptr_t)jstd::minimum(size - 1, length);
     if (likely(copy_size > 0)) {
         ::strncpy(text, target, copy_size);
         *(text + copy_size) = '\0';
@@ -147,30 +149,39 @@ bool sub_str(char * text, size_t size, const char * target, size_t length) {
         *text = '\0';
     }
 #endif
-    return true;
+    return copy_size;
 }
 
 static inline
-bool sub_str(char * text, size_t size, const char * first, const char * last) {
+intptr_t sub_str(char * text, size_t size, const char * first, const char * last) {
     assert(last >= first);
     return StringUtils::sub_str(text, size, first, last - first);
 }
 
 template <size_t N>
 static inline
-bool sub_str(char (&text)[N], const char * start, size_t length) {
+intptr_t sub_str(char (&text)[N], const char * start, size_t length) {
     return StringUtils::sub_str(text, N, start, length);
 }
 
 template <size_t N>
 static inline
-bool sub_str(char (&text)[N], const char * first, const char * last) {
+intptr_t sub_str(char (&text)[N], const char * first, const char * last) {
     assert(last >= first);
     return StringUtils::sub_str(text, N, first, last);
 }
 
 static inline
-intptr_t copy(std::string & str, const char * first, const char * last) {
+intptr_t sub_str(std::string & str, const char * first, const char * last) {
+    assert(first >= 0);
+    assert(last >= first);
+    str.clear();
+    str.append(first, (size_t)(last - first));
+    return (last - first);
+}
+
+static inline
+intptr_t append(std::string & str, const char * first, const char * last) {
     assert(first >= 0);
     assert(last >= first);
     str.append(first, (size_t)(last - first));

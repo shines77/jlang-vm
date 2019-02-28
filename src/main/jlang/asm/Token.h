@@ -39,30 +39,38 @@ public:
 
 private:
     Type type_;
-    int length_;
     intptr_t pos_;
+    intptr_t length_;
 
 public:
-    Token(Type type = Type::Unknown) : type_(type), length_(0), pos_(0) {}
+    Token(Type type = Type::Unknown) : type_(type), pos_(0), length_(0) {}
     Token(Type type, int length, intptr_t pos)
-        : type_(type), length_(length), pos_(pos) {}
-    Token(const Token & src) : type_(src.type_), length_(src.length_), pos_(src.pos_) {}
+        : type_(type), pos_(pos), length_(length) {}
+    Token(const Token & src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
     ~Token() {}
 
     Token & operator = (const Token & rhs) {
         this->type_ = rhs.type_;
-        this->length_ = rhs.length_;
         this->pos_ = rhs.pos_;
+        this->length_ = rhs.length_;
         return *this;
     }
 
     Type getType() const { return this->type_; }
     intptr_t getStartPos() const { return this->pos_; }
     intptr_t getEndPos() const { return (this->pos_ + this->length_); }
-    int getLength() const { return this->length_; }
+    intptr_t getLength() const { return this->length_; }
 
     void setType(Type type) {
         this->type_ = type;
+    }
+
+    void setType(int type) {
+        this->type_ = (Type)type;
+    }
+
+    void setType(int64_t type) {
+        this->type_ = (Type)type;
     }
 
     void setStartPos(intptr_t pos) {
@@ -76,12 +84,12 @@ public:
 
     void setLength(int length) {
         assert(length >= 0);
-        this->length_ = length;
+        this->length_ = (intptr_t)length;
     }
 
     void setLength(int64_t length) {
         assert(length >= 0);
-        this->length_ = (int)length;
+        this->length_ = (intptr_t)length;
     }
 
     bool isEquals(const Token & value) const {
@@ -113,25 +121,13 @@ public:
         return copyToken;
     }
 
-    void getToken(Type & tokenType, intptr_t & start_pos, int & length) {
+    void getToken(Type & tokenType, intptr_t & start_pos, intptr_t & length) {
         tokenType = this->getType();
         start_pos = this->getStartPos();
         length    = this->getLength();
     }
 
-    void getToken(Type & tokenType, intptr_t & start_pos, int64_t & length) {
-        tokenType = this->getType();
-        start_pos = this->getStartPos();
-        length    = this->getLength();
-    }
-
-    void setToken(const Type tokenType, intptr_t start_pos, int length) {
-        this->setType(tokenType);
-        this->setStartPos(start_pos);
-        this->setLength(length);
-    }
-
-    void setToken(const Type tokenType, intptr_t start_pos, int64_t length) {
+    void setToken(const Type tokenType, intptr_t start_pos, intptr_t length) {
         this->setType(tokenType);
         this->setStartPos(start_pos);
         this->setLength(length);
