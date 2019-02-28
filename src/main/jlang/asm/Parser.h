@@ -290,7 +290,7 @@ private:
 
 public:
     bool parseIdentifier(ErrorCode & ec) {
-        StringStreamMarker marker(stream_);
+        StreamMarker marker(stream_);
         marker.remark();
         skipIdentifier();
         intptr_t ident_length = marker.length();
@@ -312,35 +312,35 @@ public:
     }
 
     bool parseReservedKeyword(ErrorCode & ec) {
-        StringStreamMarker marker(stream_);
+        StreamMarker marker(stream_);
         marker.remark();
         skipReservedKeyword();
-        intptr_t keyword_length = marker.length();
-        if (keyword_length > 0) {
-            intptr_t keyword_start = marker.start_pos();
-            intptr_t keyword_end = marker.end_pos();
-            char keyword_name[MAX_IDENTIFIER_LEN];
-            marker.copy_string(keyword_name);
+        intptr_t keywordLength = marker.length();
+        if (keywordLength > 0) {
+            intptr_t keywordStart = marker.start_pos();
+            intptr_t keywordEnd = marker.end_pos();
+            char keywordName[MAX_IDENTIFIER_LEN];
+            marker.copy_string(keywordName);
 
 #if (KEYWORD_HASHCODE_WORDLEN == 32)
-            uint32_t hash32 = getHash32(keyword_name, (size_t)keyword_length);
+            uint32_t hash32 = getHash32(keywordName, (size_t)keywordLength);
 #elif (KEYWORD_HASHCODE_WORDLEN == 64)
-            uint64_t hash64 = getHash64(keyword_name, (size_t)keyword_length);
+            uint64_t hash64 = getHash64(keywordName, (size_t)keywordLength);
 #endif
             KeywordMapping & keyMapping = Global::getKeywordMapping();
             assert(keyMapping.inited());
-            KeywordMapping::iterator iter = keyMapping.find(keyword_name, (size_t)keyword_length);
+            KeywordMapping::iterator iter = keyMapping.find(keywordName, (size_t)keywordLength);
             if (iter != keyMapping.end()) {
                 Keyword keyword = iter->second;
-                if (keyword.getKind() == KeywordKind::PodType ||
-                    keyword.getKind() == KeywordKind::TypeDef) {
-                    if (keyword.getKind() != KeywordKind::PodType) {
+                if (keyword.getCategory() == KeywordCategory::Pod ||
+                    keyword.getCategory() == KeywordCategory::TypeDef) {
+                    if (keyword.getCategory() != KeywordCategory::Pod) {
                         // Parse full type define
                     }
                     skipWhiteSpace();
 
                     char identifier_name[MAX_IDENTIFIER_LEN];
-                    StringStreamMarker identifierMarker(stream_);
+                    StreamMarker identifierMarker(stream_);
                     intptr_t identifier_start, identifier_end;
 
                     identifierMarker.remark();
@@ -395,7 +395,7 @@ public:
                         //
                     }
                 }
-                else if (keyword.getKind() == KeywordKind::UserDefine) {
+                else if (keyword.getCategory() == KeywordCategory::UserDefine) {
                     // User define function or variant
                     skipWhiteSpace();
                 }
@@ -432,18 +432,18 @@ public:
         bool is_ok = true;
         Token::Type tokenType = Token::Unknown;
         ec = ErrorCode::OK;
-        StringStreamMarker marker(stream_);
+        StreamMarker marker(stream_);
         marker.set_mark();
         skipReservedKeyword();
         intptr_t keyword_length = marker.length();
         if (keyword_length > 0) {
             char * keyword_start = marker.start();
             std::string keyword_name(keyword_start, (size_t)keyword_length);
-            KeywordMapping & ppKeyMapping = Global::getPreprocessingKeywordMapping();
+            KeywordMapping & ppKeyMapping = Global::getPPKeywordMapping();
             KeywordMapping::iterator iter = ppKeyMapping.find(keyword_name);
             if (iter != ppKeyMapping.end()) {
                 Keyword & keyword = iter->second;
-                assert(keyword.getKind() == KeywordKind::Preprocessing);
+                assert(keyword.getCategory() == KeywordCategory::Preprocessing);
                 tokenType = keyword.getToken();
                 token.setStartPos(marker.start_pos());
                 token.setLength(keyword_length);
@@ -1281,7 +1281,7 @@ public:
     bool parseLiteral(Token & token, ErrorCode & ec) {
         bool parse_ok;
         Token::Type tokenType;
-        StringStreamMarker marker(stream_);
+        StreamMarker marker(stream_);
         marker.set_mark();
         // Starting with numbers: "[0-9]", or ".[0-9]"
         uint8_t ch = stream_.getu();
@@ -1331,7 +1331,7 @@ public:
     bool nextToken(Token & token, ErrorCode & ec) {
         ec = ErrorCode::OK;
         token.setType(Token::Unknown);
-        StringStreamMarker marker(stream_);
+        StreamMarker marker(stream_);
         while (likely(stream_.has_next())) {
             marker.remark();
             Token::Type tokenType;
@@ -1471,7 +1471,13 @@ public:
                 stream_.next();
                 {
                     ch = stream_.get();
-                    if (Helper::isDigital(ch)) {
+                    if (isAlphabet(ch)) {
+                        // It's a section declare
+                        std::string section = "";
+                        KeywordMapping & sections = Global::getSectionMapping();
+                        sections.find(section);
+                    }
+                    else if (isDigital(ch)) {
                         // It's a float or double number.
                         uint64_t fractional;
                         int exponent;
@@ -1479,24 +1485,6 @@ public:
                         if (success) {
                             token.setToken(tokenType, marker.start_pos(), marker.length());
                             return true;
-                        }
-                    }
-                    else if (ch == '.') {
-                        char ch1 = stream_.get(1);
-                        if (ch1 == '.') {
-                            char ch2 = stream_.get(2);
-                            if (ch2 != '.') {
-                                stream_.next(2);
-                                token.setType(Token::Ellipsis);
-                            }
-                            else {
-                                // Error: [....]
-                                ec = ErrorCode::IllegalFourDot;
-                            }
-                        }
-                        else {
-                            // Error: [..]
-                            ec = ErrorCode::IllegalDoubleDot;
                         }
                     }
                     else {

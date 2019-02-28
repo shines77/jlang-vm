@@ -14,13 +14,14 @@
 #include <string>
 
 #include "jlang/lang/CharInfo.h"
+#include "jlang/lang/NonCopyable.h"
 
 #define USE_CHARINFO_MASK   1
 
 namespace jlang {
 namespace jasm {
 
-class ParserHelper {
+class ParserHelper : public lang::NonCopyable {
 public:
     ParserHelper() {}
     ~ParserHelper() {}

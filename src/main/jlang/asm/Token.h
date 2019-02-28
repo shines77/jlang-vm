@@ -16,7 +16,7 @@
 #include <string>
 
 #include "jlang/lang/ErrorCode.h"
-#include "jlang/asm/KeywordKind.h"
+#include "jlang/asm/KeywordCategory.h"
 
 #define TOKEN_DEF(token_type)                       token_type,
 #define KEYWORD_DEF(token_type, keyword, kind)      token_type,
@@ -184,11 +184,11 @@ inline bool operator == (const Token & lhs, const Token & rhs) {
     return lhs.isEquals(rhs);
 }
 
-inline bool operator == (int lhs, const Token & rhs) {
+inline bool operator == (int32_t lhs, const Token & rhs) {
     return rhs.isEquals(lhs);
 }
 
-inline bool operator == (const Token & lhs, int rhs) {
+inline bool operator == (const Token & lhs, int32_t rhs) {
     return lhs.isEquals(rhs);
 }
 
@@ -206,11 +206,11 @@ inline bool operator != (const Token & lhs, const Token & rhs) {
     return lhs.isNotEquals(rhs);
 }
 
-inline bool operator != (int lhs, const Token & rhs) {
+inline bool operator != (int32_t lhs, const Token & rhs) {
     return rhs.isNotEquals(lhs);
 }
 
-inline bool operator != (const Token & lhs, int rhs) {
+inline bool operator != (const Token & lhs, int32_t rhs) {
     return lhs.isNotEquals(rhs);
 }
 

@@ -1,6 +1,6 @@
 
-#ifndef JLANG_ASM_KEYWORDKIND_H
-#define JLANG_ASM_KEYWORDKIND_H
+#ifndef JLANG_ASM_KEYWORDCATEGORY_H
+#define JLANG_ASM_KEYWORDCATEGORY_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -11,44 +11,50 @@
 namespace jlang {
 namespace jasm {
 
-struct KeywordCategory {
+struct KeywordMasks {
     enum {
-        DefaultCat      = 1 << 16,
-        UserDefineCat   = 2 << 16,
-        PrecompileCat   = 4 << 16,
-        CategoryMasks   = 0x7FFF0000UL,
+        DefaultCategory     = 1 << 16,
+        UserDefineCategory  = 2 << 16,
+        PrecompileCategory  = 4 << 16,
+        CategoryMask        = 0x7FFF0000UL,
     };
 };
 
-struct KeywordKind {
-    enum KindType {
+struct KeywordCategory {
+    enum Type {
         Unknown = 0,
+
         // Standard
         Default,
+        Section,
         Keywords,
         Others,
+
         // Normal
         Operator,
         Constant,
-        PodType,
+        Pod,
         TypeDef,
         InnerTypeDef,
         LogicFlow,
         Classes,
+
         // UserDefine
         UserDefine,
+
         // Precompile
         Preprocessing,
         Macro,
+
         // Others
-        MaxKindType,
-        TypeMasks = 0x0000FFFFUL
+        MaxCategoryType,
+        CategoryMask = 0x0000FFFFUL
     };
 
-    KeywordKind(uint16_t kind = 0) : kind_(kind) {
+    KeywordCategory(uint16_t kind = Type::Unknown) : kind_(kind) {
     }
 
-    KeywordKind(uint32_t kind) : kind_(kind) {
+    KeywordCategory(uint32_t kind) : kind_(static_cast<uint16_t>(kind)) {
     }
 
     uint16_t kind_;
@@ -57,4 +63,4 @@ struct KeywordKind {
 } // namespace jasm
 } // namespace jlang
 
-#endif // JLANG_ASM_KEYWORDKIND_H
+#endif // JLANG_ASM_KEYWORDCATEGORY_H

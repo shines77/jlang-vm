@@ -7,6 +7,7 @@
 #endif
 
 #include "jlang/lang/NonCopyable.h"
+#include "jlang/lang/ErrorCode.h"
 #include "jlang/asm/Keyword.h"
 
 #include <stdint.h>
@@ -14,11 +15,8 @@
 namespace jlang {
 
 class LastError {
-public:
-    typedef uint32_t error_code_t;
-
 private:
-    error_code_t err_;
+    ErrorCode err_;
 
 public:
     LastError() : err_(0) {}
@@ -27,8 +25,10 @@ public:
     bool isSuccess() const { return (err_ == 0); }
     bool hasErrors() const { return (err_ != 0); }
 
-    error_code_t getLastError() { return err_; }
-    void setLastError(error_code_t err) { err_ = err; }
+    ErrorCode getLastError() { return err_; }
+
+    void setLastError(const ErrorCode & err) { err_ = err; }
+    void setLastError(uint32_t err) { err_ = err; }
 };
 
 ///////////////////////////////////////////////////
@@ -52,8 +52,11 @@ public:
     // Global::getKeywordMapping() implementation in Keyword.h file.
     static jasm::KeywordMapping & getKeywordMapping();
 
-    // Global::getPreprocessingKeywordMapping() implementation in Keyword.h file.
-    static jasm::KeywordMapping & getPreprocessingKeywordMapping();
+    // Global::getPPKeywordMapping() implementation in Keyword.h file.
+    static jasm::KeywordMapping & getPPKeywordMapping();
+
+    // Global::getSectionMapping() implementation in Keyword.h file.
+    static jasm::KeywordMapping & getSectionMapping();
 
     // Global::errorInstance() implementation in FileSystem.h file.
     static LastError & lastError();

@@ -12,37 +12,12 @@
 #else
 
     #ifndef KEYWORD_DEF
-    #define KEYWORD_DEF(token_type, keyword, kind)
+    #define KEYWORD_DEF(id, keyword, category)
     #endif
 
     #ifndef PREPROCESSING_DEF
     #define PREPROCESSING_DEF(keyword)
     #endif
-
-    // Pod type
-    KEYWORD_DEF(Void,               void,           PodType)
-    KEYWORD_DEF(Bool,               bool,           PodType)
-    KEYWORD_DEF(Char,               char,           PodType)
-    KEYWORD_DEF(Short,              short,          PodType)
-    KEYWORD_DEF(Int,                int,            PodType)
-    KEYWORD_DEF(Long,               long,           PodType)
-    KEYWORD_DEF(Float,              float,          PodType)
-    KEYWORD_DEF(Double,             double,         PodType)
-    KEYWORD_DEF(Signed,             signed,         TypeDef)
-    KEYWORD_DEF(Unsigned,           unsigned,       TypeDef)
-
-    // Standard pod typedef (Alias)
-    KEYWORD_DEF(Int8,               int8,           PodType)
-    KEYWORD_DEF(UInt8,              uint8,          PodType)
-    KEYWORD_DEF(Int16,              int16,          PodType)
-    KEYWORD_DEF(UInt16,             uint16,         PodType)
-    KEYWORD_DEF(Int32,              int32,          PodType)
-    KEYWORD_DEF(UInt32,             uint32,         PodType)
-    KEYWORD_DEF(Int64,              int64,          PodType)
-    KEYWORD_DEF(UInt64,             uint64,         PodType)
-
-    // Reserved keywords
-    KEYWORD_DEF(Namespace,          namespace,      Keywords)
 
     // Preprocessing
     PREPROCESSING_DEF(if)
@@ -59,9 +34,36 @@
     PREPROCESSING_DEF(pragma)
     PREPROCESSING_DEF(warning)
     PREPROCESSING_DEF(error)
-    PREPROCESSING_DEF(import)
-    PREPROCESSING_DEF(assert)
-    PREPROCESSING_DEF(unassert)
+
+    // Pod type
+    KEYWORD_DEF(Void,               void,           Pod)
+    KEYWORD_DEF(Bool,               bool,           Pod)
+    KEYWORD_DEF(Char,               char,           Pod)
+    KEYWORD_DEF(Short,              short,          Pod)
+    KEYWORD_DEF(Int,                int,            Pod)
+    KEYWORD_DEF(Long,               long,           Pod)
+    KEYWORD_DEF(Float,              float,          Pod)
+    KEYWORD_DEF(Double,             double,         Pod)
+    KEYWORD_DEF(Signed,             signed,         TypeDef)
+    KEYWORD_DEF(Unsigned,           unsigned,       TypeDef)
+
+    // Standard pod typedef (Alias)
+    KEYWORD_DEF(Int8,               int8,           Pod)
+    KEYWORD_DEF(UInt8,              uint8,          Pod)
+    KEYWORD_DEF(Int16,              int16,          Pod)
+    KEYWORD_DEF(UInt16,             uint16,         Pod)
+    KEYWORD_DEF(Int32,              int32,          Pod)
+    KEYWORD_DEF(UInt32,             uint32,         Pod)
+    KEYWORD_DEF(Int64,              int64,          Pod)
+    KEYWORD_DEF(UInt64,             uint64,         Pod)
+
+    // Reserved keywords
+    KEYWORD_DEF(Namespace,          namespace,      Keywords)
+
+    // Section
+    KEYWORD_DEF(Align,              .align,         Section)
+    KEYWORD_DEF(Strings,            .strings,       Section)
+    KEYWORD_DEF(EntryPoint,         .entrypoint,    Section)
 
     // Operators
     KEYWORD_DEF(Add,                add,            Operator)

@@ -6,6 +6,8 @@
 #pragma once
 #endif
 
+#include "jlang/stream/InputStringStream.h"
+#include "jlang/stream/OutputStringStream.h"
 #include "jlang/stream/StringStream.h"
 #include "jlang/stream/MemoryStream.h"
 #include "jlang/support/StringUtils.h"
@@ -14,27 +16,53 @@
 #include <stdint.h>
 #include <assert.h>
 
+#define REF_CAST_TO(value, toType) \
+    (*(static_cast<toType *>(&value)))
+
 namespace jlang {
 
 ///////////////////////////////////////////////////
 // class StreamMarker
 ///////////////////////////////////////////////////
 
-template <typename T>
 class StreamMarker {
-public:
-    typedef T stream_type;
-
 private:
-    stream_type & stream_;
+    StreamRoot & stream_;
     char * marker_;
 #if !defined(NDEBUG) || defined(_DEBUG)
     bool marked_;
 #endif
 
 public:
-    StreamMarker(stream_type & steam)
-        : stream_(steam), marker_(nullptr)
+    StreamMarker(StringStream & steam)
+        : stream_(REF_CAST_TO(steam, StreamRoot)), marker_(nullptr)
+#if !defined(NDEBUG) || defined(_DEBUG)
+        , marked_(false)
+#endif
+    {
+        /* Do nothing!! */
+    }
+
+    StreamMarker(InputStringStream & steam)
+        : stream_(REF_CAST_TO(steam, StreamRoot)), marker_(nullptr)
+#if !defined(NDEBUG) || defined(_DEBUG)
+        , marked_(false)
+#endif
+    {
+        /* Do nothing!! */
+    }
+
+    StreamMarker(OutputStringStream & steam)
+        : stream_(REF_CAST_TO(steam, StreamRoot)), marker_(nullptr)
+#if !defined(NDEBUG) || defined(_DEBUG)
+        , marked_(false)
+#endif
+    {
+        /* Do nothing!! */
+    }
+
+    StreamMarker(MemoryStream & steam)
+        : stream_(REF_CAST_TO(steam, StreamRoot)), marker_(nullptr)
 #if !defined(NDEBUG) || defined(_DEBUG)
         , marked_(false)
 #endif
@@ -43,8 +71,8 @@ public:
     }
     ~StreamMarker() {}
 
-    stream_type & get_stream() { return stream_; }
-    const stream_type & get_stream() const { return stream_; }
+    StreamRoot & get_stream() { return stream_; }
+    const StreamRoot & get_stream() const { return stream_; }
 
     char * marker() const { return this->marker_; }
     char * current() const { return this->stream_.current(); }
@@ -97,7 +125,7 @@ public:
     char * get_marker() const { return this->start(); }
     char * get_current() const { return this->end(); }
 
-    void set_current(const char * position) {
+    void set_current(char * position) {
         assert(position >= this->stream_.head() || position < this->stream_.tail());
         assert(position != nullptr);
         this->stream_.set_current(position);
@@ -169,9 +197,6 @@ public:
         return this->copy_string(word, N);
     }
 };
-
-typedef StreamMarker<StringStream> StringStreamMarker;
-typedef StreamMarker<MemoryStream> MemoryStreamMarker;
 
 } // namespace jlang
 

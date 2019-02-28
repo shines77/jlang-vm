@@ -4,9 +4,10 @@
 
 using namespace jlang;
 
-jasm::KeywordMapping * jasm::KeywordInitor::keyword_mapping              = nullptr;
-jasm::KeywordMapping * jasm::KeywordInitor::prepocessing_keyword_mapping = nullptr;
-LastError *            Global::last_error                                = nullptr;
+jasm::KeywordMapping * jasm::KeywordInitor::keyword_mapping    = nullptr;
+jasm::KeywordMapping * jasm::KeywordInitor::pp_keyword_mapping = nullptr;
+jasm::KeywordMapping * jasm::KeywordInitor::section_mapping    = nullptr;
+LastError *            Global::last_error                      = nullptr;
 
 ///////////////////////////////////////////////////
 // Global::getKeywordMapping()
@@ -17,11 +18,19 @@ jasm::KeywordMapping & Global::getKeywordMapping() {
 }
 
 ///////////////////////////////////////////////////
-// Global::getPreprocessingKeywordMapping()
+// Global::getPPKeywordMapping()
 ///////////////////////////////////////////////////
 
-jasm::KeywordMapping & Global::getPreprocessingKeywordMapping() {
-    return jasm::KeywordInitor::getPreprocessingKeywordMapping();
+jasm::KeywordMapping & Global::getPPKeywordMapping() {
+    return jasm::KeywordInitor::getPPKeywordMapping();
+}
+
+///////////////////////////////////////////////////
+// Global::getSectionMapping()
+///////////////////////////////////////////////////
+
+jasm::KeywordMapping & Global::getSectionMapping() {
+    return jasm::KeywordInitor::getSectionMapping();
 }
 
 ///////////////////////////////////////////////////

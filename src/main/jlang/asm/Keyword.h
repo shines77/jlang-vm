@@ -8,7 +8,7 @@
 
 #include "jlang/lang/Global.h"
 #include "jlang/lang/NonCopyable.h"
-#include "jlang/asm/KeywordKind.h"
+#include "jlang/asm/KeywordCategory.h"
 #include "jlang/asm/Token.h"
 #include "jlang/jstd/min_max.h"
 #include "jlang/support/HashAlgorithm.h"
@@ -30,44 +30,58 @@
 #define PREPROCESSING_CHAR          '#'
 #define PREPROCESSING_CHAR_LEN      sizeof('#')
 
-#define KEYWORD_error               "error"
-#define KEYWORD_define              "define"
-#define KEYWORD_pragma              "pragma"
-#define KEYWORD_include             "include"
-#define KEYWORD_warning             "warning"
-
 #define TO_STRING(name)             #name
-
-#define KEYWORD_LENGTH(keyword)     (sizeof(keyword) - 1)
-#define KEYWORD_STRING(keyword)     keyword
-
-#define KEYWORD_LENGTH_EX(keyword)  (sizeof(TO_STRING(keyword)) - 1)
-#define KEYWORD_STRING_EX(keyword)  TO_STRING(keyword))
 
 #define MAX_IDENTIFIER_LEN          512
 
 namespace jlang {
 namespace jasm {
 
-#define JLANG_KEYWORD_ID(token_type, kind)      keyword_id_##token_type##_##kind
-#define JLANG_PREPROCESSING_ID(keyword)         keyword_id_pp_##keyword
+#define JLANG_KEYWORD_ID(token, category)       KeywordId::##token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)         KeywordId::##pp_##keyword
 
-#define KEYWORD_DEF(token_type, keyword, kind)  \
-        JLANG_KEYWORD_ID(token_type, kind),
+#define KEYWORD_DEF(token, keyword, category)   JLANG_KEYWORD_ID(token, category),
+#define PREPROCESSING_DEF(keyword)              JLANG_PREPROCESSING_ID(keyword),
 
-#define PREPROCESSING_DEF(keyword)  \
-        JLANG_PREPROCESSING_ID(keyword),
-
-enum keyword_id_t {
-    #include "jlang/asm/KeywordDef.h"
-    KEYWORD_ID_MAX
+struct KeywordId {
+    enum Type {
+        #include "jlang/asm/KeywordDef.h"
+        MaxKeywordId
+    };
 };
 
-#define KEYWORD_DEF(token_type, keyword, kind)  \
+class Keyword;
+
+struct KeywordInfoDef {
+    uint16_t id;
+    uint16_t category;
+    uint16_t token;
+    uint16_t length;
+    char name[64 - sizeof(uint16_t) * 4];   // Alignment for 64 bytes.
+};
+
+class KeywordInfo {
+protected:
+    uint16_t id_;
+    uint16_t category_;
+    uint16_t token_;
+    uint16_t length_;
+    std::string name_;
+
+public:
+    KeywordInfo() : id_(-1), category_(jasm::KeywordCategory::Unknown),
+                    token_(jasm::Token::Unknown), length_(0) {
+    }
+    ~KeywordInfo() {}
+
+    friend class Keyword;
+};
+
+#define KEYWORD_DEF(token, keyword, category)  \
     { \
-        (uint16_t)JLANG_KEYWORD_ID(token_type, kind), \
-        (uint16_t)jasm::KeywordKind::kind, \
-        (uint16_t)jasm::Token::token_type, \
+        (uint16_t)JLANG_KEYWORD_ID(token, category), \
+        (uint16_t)jasm::KeywordCategory::category, \
+        (uint16_t)jasm::Token::token, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
@@ -75,55 +89,24 @@ enum keyword_id_t {
 #define PREPROCESSING_DEF(keyword)  \
     { \
         (uint16_t)JLANG_PREPROCESSING_ID(keyword), \
-        (uint16_t)jasm::KeywordKind::Preprocessing, \
+        (uint16_t)jasm::KeywordCategory::Preprocessing, \
         (uint16_t)jasm::Token::pp_##keyword, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
 
-struct keyword_info_t {
-    uint16_t id;
-    uint16_t kind;
-    uint16_t token_type;
-    uint16_t length;
-    char name[64 - sizeof(uint16_t) * 4];   // Alignment for 64 bytes.
-};
-
-static const keyword_info_t g_keyword_list[] = {
+static const KeywordInfoDef gKeywordList[] = {
     #include "jlang/asm/KeywordDef.h"
     {
-        (uint16_t)KEYWORD_ID_MAX,
-        (uint16_t)jasm::KeywordKind::Unknown,
+        (uint16_t)KeywordId::MaxKeywordId,
+        (uint16_t)jasm::KeywordCategory::Unknown,
         (uint16_t)jasm::Token::Unknown,
-        0, ""
+        0,
+        ""
     }
 };
 
-static const size_t kKeywordListSize = sizeof(g_keyword_list) / sizeof(g_keyword_list[0]) - 1;
-
-template <int keyword_id>
-inline keyword_info_t getKeywordInfo()
-{
-    keyword_info_t keyword;
-    keyword.id = keyword_id;
-    keyword.kind = jasm::KeywordKind::Unknown;
-    keyword.token_type = jasm::Token::Unknown;
-    keyword.length = sizeof("Unknown keyword") - 1;
-    keyword.name = "Unknown keyword";
-    return keyword;
-}
-
-template <>
-inline keyword_info_t getKeywordInfo<keyword_id_pp_include>()
-{
-    keyword_info_t keyword;
-    keyword.id = keyword_id_pp_include;
-    keyword.kind = jasm::KeywordKind::Others;
-    keyword.token_type = jasm::Token::pp_ifndef;
-    ::memcpy(keyword.name, "include", sizeof("include"));
-    keyword.length = sizeof("include") - 1;
-    return keyword;
-}
+static const size_t gKeywordListSize = sizeof(gKeywordList) / sizeof(gKeywordList[0]) - 1;
 
 ///////////////////////////////////////////////////
 // struct KeywordHash
@@ -197,29 +180,23 @@ public:
 // class Keyword
 ///////////////////////////////////////////////////
 
-class Keyword {
+class Keyword : public KeywordInfo {
 public:
 #if (KEYWORD_HASHCODE_WORDLEN == 64)
-    typedef KeywordHash64 hashcode_type;
-    typedef KeywordHash64::value_type hashvalue_type;
+    typedef KeywordHash64               hashcode_type;
+    typedef KeywordHash64::value_type   hashvalue_type;
 #else
-    typedef KeywordHash hashcode_type;
-    typedef KeywordHash::value_type hashvalue_type;
+    typedef KeywordHash                 hashcode_type;
+    typedef KeywordHash::value_type     hashvalue_type;
 #endif
 
-private:
-    uint16_t id_;
-    uint16_t kind_;
-    uint16_t token_;
-    uint16_t length_;
-    std::string name_;
-
+protected:
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
     hashcode_type hashCode_;
 #endif
 
 public:
-    Keyword() : id_(-1), kind_(jasm::KeywordKind::Unknown), token_(jasm::Token::Unknown), length_(0)
+    Keyword() : KeywordInfo()
 #if (KEYWORD_HASHCODE_WORDLEN == 32)
         , hashCode_(0U)
 #elif (KEYWORD_HASHCODE_WORDLEN == 64)
@@ -229,12 +206,23 @@ public:
         /* Do nothing! */
     }
 
-    Keyword(const keyword_info_t & keyword_detail) : Keyword() {
-        id_ = keyword_detail.id;
-        kind_ = keyword_detail.kind;
-        token_ = keyword_detail.token_type;
-        length_ = keyword_detail.length;
-        name_ = keyword_detail.name;
+    Keyword(const KeywordInfoDef & src) {
+        id_ = src.id;
+        category_ = src.category;
+        token_ = src.token;
+        length_ = src.length;
+        name_ = src.name;
+#if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
+        hashCode_ = calcHashCode();
+#endif
+    }
+
+    Keyword(const KeywordInfo & src) {
+        id_ = src.id_;
+        category_ = src.category_;
+        token_ = src.token_;
+        length_ = src.length_;
+        name_ = src.name_;
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
         hashCode_ = calcHashCode();
 #endif
@@ -245,13 +233,16 @@ public:
 
     uint32_t length() const { return length_; }
 
+    char * c_str() { return const_cast<char *>(name_.c_str()); }
     const char * c_str() const { return name_.c_str(); }
-    const char * toString() const { return this->c_str(); }
 
-    const KeywordKind::KindType getKind() const { return KeywordKind::KindType(kind_); }
+    std::string toString() { return this->name_; }
+    const std::string toString() const { return this->name_; }
+
+    const KeywordCategory::Type getCategory() const { return KeywordCategory::Type(category_); }
     const Token::Type getToken() const { return Token::Type(token_); }
 
-    void setKind(uint16_t type) { kind_ = type; }
+    void setCategory(uint16_t type) { category_ = type; }
     void setToken(uint16_t token) { token_ = token; }
 
     const std::string & getName() const { return name_; }
@@ -292,9 +283,17 @@ private:
     }
 };
 
-enum KeywordRoot {
-    Default,
-    Preprocessing
+///////////////////////////////////////////////////
+// struct KeywordRoot
+///////////////////////////////////////////////////
+
+struct KeywordRoot {
+    enum Type {
+        Default,
+        Preprocessing,
+        Section,
+        MaxRoot
+    };
 };
 
 ///////////////////////////////////////////////////
@@ -303,24 +302,24 @@ enum KeywordRoot {
 
 class KeywordMapping {
 public:
-    typedef std::unordered_map<std::string, Keyword> hash_table_type;
-    typedef hash_table_type::iterator iterator;
-    typedef hash_table_type::const_iterator const_iterator;
+    typedef std::unordered_map<std::string, Keyword> hashtable_type;
+    typedef hashtable_type::iterator                 iterator;
+    typedef hashtable_type::const_iterator           const_iterator;
 
 private:
-    hash_table_type keywordMapping_;
-    KeywordRoot root_;
+    hashtable_type keywordMapping_;
+    int root_;
     bool inited_;
 
 public:
-    KeywordMapping(KeywordRoot root = KeywordRoot::Default)
+    KeywordMapping(int root = KeywordRoot::Default)
         : root_(root), inited_(false) { init(); }
     ~KeywordMapping() { inited_ = false; }
 
     bool inited() const { return inited_; }
-    KeywordRoot root() const { return root_; }
+    int root() const { return root_; }
 
-    void set_root(KeywordRoot root) {
+    void set_root(int root) {
         root_ = root;
         init();
     }
@@ -357,19 +356,29 @@ private:
     void init() {
         keywordMapping_.clear();
         if (root_ == KeywordRoot::Preprocessing) {
-            for (size_t i = 0; i < kKeywordListSize; ++i) {
-                Keyword keyword(g_keyword_list[i]);
+            for (size_t i = 0; i < gKeywordListSize; ++i) {
+                Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getKind() == KeywordKind::Preprocessing) {
+                if (keyword.getCategory() == KeywordCategory::Preprocessing) {
+                    keywordMapping_.insert(std::make_pair(keywordName, keyword));
+                }
+            }
+        }
+        else if (root_ == KeywordRoot::Section) {
+            for (size_t i = 0; i < gKeywordListSize; ++i) {
+                Keyword keyword(gKeywordList[i]);
+                const std::string & keywordName = keyword.getName();
+                if (keyword.getCategory() == KeywordCategory::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
         }
         else {
-            for (size_t i = 0; i < kKeywordListSize; ++i) {
-                Keyword keyword(g_keyword_list[i]);
+            for (size_t i = 0; i < gKeywordListSize; ++i) {
+                Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getKind() != KeywordKind::Preprocessing) {
+                if (keyword.getCategory() != KeywordCategory::Preprocessing &&
+                    keyword.getCategory() != KeywordCategory::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
@@ -385,7 +394,8 @@ private:
 class KeywordInitor : public lang::NonCopyable {
 public:
     static KeywordMapping * keyword_mapping;
-    static KeywordMapping * prepocessing_keyword_mapping;
+    static KeywordMapping * pp_keyword_mapping;
+    static KeywordMapping * section_mapping;
 
 public:
     KeywordInitor() { KeywordInitor::init(); }
@@ -393,24 +403,28 @@ public:
 
     static bool inited() {
         KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
-        KeywordMapping & preprocessingKeywordMapping = KeywordInitor::getPreprocessingKeywordMapping();
-        return (keywordMapping.inited() && preprocessingKeywordMapping.inited());
+        KeywordMapping & ppKeywordMapping = KeywordInitor::getPPKeywordMapping();
+        KeywordMapping & SectionMapping = KeywordInitor::getSectionMapping();
+        return (keywordMapping.inited() && ppKeywordMapping.inited() && SectionMapping.inited());
     }
 
     static void init() {
         KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
         assert(keywordMapping.inited());
 
-        KeywordMapping & preprocessingKeywordMapping = KeywordInitor::getPreprocessingKeywordMapping();
-        assert(preprocessingKeywordMapping.inited());
+        KeywordMapping & ppKeywordMapping = KeywordInitor::getPPKeywordMapping();
+        assert(ppKeywordMapping.inited());
+
+        KeywordMapping & SectionMapping = KeywordInitor::getSectionMapping();
+        assert(SectionMapping.inited());
     }
 
     static void finalize() {
         KeywordInitor::destroyKeywordMapping();
-        KeywordInitor::destroyPreprocessingKeywordMapping();
+        KeywordInitor::destroyPPKeywordMapping();
+        KeywordInitor::destroySectionMapping();
     }
 
-    // KeywordInitor::getKeywordMapping() implementation in Keyword.h file.
     static KeywordMapping & getKeywordMapping() {
         if (KeywordInitor::keyword_mapping == nullptr) {
             KeywordInitor::keyword_mapping = new KeywordMapping(KeywordRoot::Default);
@@ -418,15 +432,20 @@ public:
         return *KeywordInitor::keyword_mapping;
     }
 
-    // KeywordInitor::getPreprocessingKeywordMapping() implementation in Keyword.h file.
-    static KeywordMapping & getPreprocessingKeywordMapping() {
-        if (KeywordInitor::prepocessing_keyword_mapping == nullptr) {
-            KeywordInitor::prepocessing_keyword_mapping = new KeywordMapping(KeywordRoot::Preprocessing);
+    static KeywordMapping & getPPKeywordMapping() {
+        if (KeywordInitor::pp_keyword_mapping == nullptr) {
+            KeywordInitor::pp_keyword_mapping = new KeywordMapping(KeywordRoot::Preprocessing);
         }
-        return *KeywordInitor::prepocessing_keyword_mapping;
+        return *KeywordInitor::pp_keyword_mapping;
     }
 
-    // KeywordInitor::destroyKeywordMapping() implementation in Keyword.h file.
+    static KeywordMapping & getSectionMapping() {
+        if (KeywordInitor::section_mapping == nullptr) {
+            KeywordInitor::section_mapping = new KeywordMapping(KeywordRoot::Section);
+        }
+        return *KeywordInitor::section_mapping;
+    }
+
     static void destroyKeywordMapping() {
         if (keyword_mapping) {
             delete keyword_mapping;
@@ -434,11 +453,17 @@ public:
         }
     }
 
-    // KeywordInitor::destroyPreprocessingKeywordMapping() implementation in Keyword.h file.
-    static void destroyPreprocessingKeywordMapping() {
-        if (prepocessing_keyword_mapping) {
-            delete prepocessing_keyword_mapping;
-            prepocessing_keyword_mapping = nullptr;
+    static void destroyPPKeywordMapping() {
+        if (pp_keyword_mapping) {
+            delete pp_keyword_mapping;
+            pp_keyword_mapping = nullptr;
+        }
+    }
+
+    static void destroySectionMapping() {
+        if (section_mapping) {
+            delete section_mapping;
+            section_mapping = nullptr;
         }
     }
 };
