@@ -430,14 +430,16 @@ void test_Assembler()
     bool success = false;
     do {
         success = parser.nextToken(token, ec);
-        if (!success) break;
-    } while (token != Token::EndOfFile);
+        if (!success) {
+            break;
+        }
+    } while (token != Token::Eof);
 
-    if (success) {
-        printf("  success. [file = %s]\n", stream.filename().c_str());
+    if (success || token == Token::Eof) {
+        printf(">>  Parser: success. [file = %s]\n", stream.filename().c_str());
     }
     else {
-        printf("  failed. [file = %s]\n", stream.filename().c_str());
+        printf(">>  Parser: failed. [file = %s]\n", stream.filename().c_str());
     }
 
     InputStringStream stream1;

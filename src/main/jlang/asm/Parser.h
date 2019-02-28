@@ -27,8 +27,8 @@ namespace jasm {
 
 class Parser {
 public:
-    typedef Parser          this_type;
-    typedef ParserHelper    Helper;
+    typedef Parser       this_type;
+    typedef ParserHelper Helper;
 
 protected:
     StringStream stream_;
@@ -1328,9 +1328,8 @@ public:
         return false;
     }
 
-    bool nextToken(Token & token, ErrorCode & ec) {
-        ec = ErrorCode::OK;
-        token.setType(Token::Unknown);
+    bool nextToken(Token & token, ErrorCode & ec_) {
+        ErrorCode ec = ErrorCode::OK;
         StreamMarker marker(stream_);
         while (likely(stream_.has_next())) {
             marker.remark();
@@ -1341,8 +1340,8 @@ public:
             int8_t cur = stream_.get();
             switch (cur) {
             case '\0':
-                // Set 'EndOfFile' token's position first.
-                token.setToken(Token::EndOfFile, stream_.tell(), 0);
+                // Set 'Eof' token's position first.
+                token.setToken(Token::Eof, stream_.tell(), 0);
                 stream_.next();
                 return false;
 
@@ -1779,11 +1778,12 @@ public:
             }
         }
 
-        if (likely(stream_.is_eof())) {
-            token.setToken(Token::EndOfFile, stream_.tell(), 0);
-            return false;
+        if (likely(!stream_.has_next())) {
+            token.setToken(Token::Eof, stream_.tell(), 0);
         }
-        return true;
+
+        ec_ = ec;
+        return (ec == ErrorCode::OK);
     }
 };
 

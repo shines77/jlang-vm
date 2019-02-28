@@ -16,7 +16,7 @@
     #endif
 
     // Special Marks
-    TOKEN_DEF(EndOfFile)                // EOF
+    TOKEN_DEF(Eof)                      // EOF
 
     // White spaces and comments
     TOKEN_DEF(WhiteSpace)               // ' ', '\t', '\v', '\f'
