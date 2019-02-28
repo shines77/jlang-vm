@@ -289,7 +289,7 @@ private:
     }
 
 public:
-    bool parseIdentifier(std::string & identName, Token & token, ErrorCode & ec) {
+    void parseIdentifier(std::string & identName, Token & token) {
         StreamMarker marker(stream_);
         marker.remark();
         skipIdentifier();
@@ -297,15 +297,8 @@ public:
         intptr_t identStart = marker.start_pos();
         intptr_t identEnd = marker.end_pos();
         assert(identLength > 0);
-        if (identLength > 0) {
-            marker.copy_string(identName);
-            token.setToken(Token::Identifier, identStart, identLength);
-            return true;
-        }
-        else {
-            token.setToken(Token::Unrecognized, identStart, identLength);
-            return false;
-        }
+        marker.append_string(identName);
+        token.setToken(Token::Identifier, identStart, identLength);
     }
 
     void parseIdentifierBody(char firstChar, std::string & identName, Token & token, ErrorCode & ec) {
@@ -320,6 +313,24 @@ public:
         identName = firstChar;
         marker.append_string(identName);
         token.setToken(Token::Identifier, identStart, identLength);
+    }
+
+    bool parseIdentifierStrict(std::string & identName, Token & token, ErrorCode & ec) {
+        StreamMarker marker(stream_);
+        marker.remark();
+        skipIdentifier();
+        intptr_t identLength = marker.length();
+        intptr_t identStart = marker.start_pos();
+        intptr_t identEnd = marker.end_pos();
+        if (identLength > 0) {
+            marker.append_string(identName);
+            token.setToken(Token::Identifier, identStart, identLength);
+            return true;
+        }
+        else {
+            token.setToken(Token::Unrecognized, identStart, identLength);
+            return false;
+        }
     }
 
     bool parseReservedKeyword(ErrorCode & ec) {
@@ -455,7 +466,7 @@ public:
             if (iter != ppKeyMapping.end()) {
                 Keyword & keyword = iter->second;
                 assert(keyword.getCategory() == KeywordCategory::Preprocessing);
-                tokenType = keyword.getToken();
+                tokenType = keyword.getType();
                 token.setStartPos(marker.start_pos());
                 token.setLength(keyword_length);
                 ec = handlePreprocessingToken(tokenType, token);
@@ -798,6 +809,14 @@ public:
             is_valid = false;
         }
         return parse_ok;
+    }
+
+    bool parserDecimalNumber(uint64_t & number, ErrorCode & ec) {
+        bool is_valid = parseRadixNumber<10>(number);
+        if (!is_valid) {
+            ec = ErrorCode::IllegalRadix10Number;
+        }
+        return is_valid;
     }
 
     bool parseRealNumber(Token::Type & tokenType, ErrorCode & ec,
@@ -1339,6 +1358,100 @@ public:
         return false;
     }
 
+    uint64_t roundAlignedBytes(uint64_t alignedBytes) {
+        static const uint64_t kMinAlignedBytes = 16;
+        static const uint64_t kAlignedMask = kMinAlignedBytes - 1;
+        if (likely(alignedBytes >= kMinAlignedBytes)) {
+            if (likely((alignedBytes % kMinAlignedBytes) == 0)) {
+                return alignedBytes;
+            }
+            else {
+                alignedBytes = (alignedBytes + kAlignedMask) & (~kAlignedMask);
+                return alignedBytes;
+            }
+        }
+        else {
+            return kMinAlignedBytes;
+        }
+    }
+
+    int handleSectionKeyword(Token::Type sectionType, Token & token, ErrorCode & ec) {
+        int result = 0;
+        switch (sectionType) {
+        case Token::Align:
+            {
+                // Skip the leading whitespace character first
+                skipWhiteSpace();
+
+                uint8_t ch = stream_.getu();
+                if (likely(isNumber(ch))) {
+ParseAlignBytesNumber_start:
+                    uint64_t alignedBytes = 0;
+                    if (parserDecimalNumber(alignedBytes, ec)) {
+                        uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
+                        if (newAlignedBytes != alignedBytes) {
+                            // Have changed to newAlignedBytes from alignedBytes
+                            std::cout << ">>> Section [.align]: alignedBytes have changed to " << newAlignedBytes;
+                            std::cout << " from " << alignedBytes << " bytes" << std::endl;
+                        }
+                        std::cout << ">>> Section [.align]: alignedBytes = " << newAlignedBytes << " bytes" << std::endl;
+                    }
+                    skipWhiteSpaces();
+                }
+                else if (likely(isAlphabet(ch))) {
+                    std::string identName;
+                    Token identToken;
+                    parseIdentifier(identName, identToken);
+                    if (identName == "default") {   // Setting default align bytes
+                        skipWhiteSpace();
+                        uint8_t ch = stream_.getu();
+                        if (likely(isNumber(ch))) {
+                            goto ParseAlignBytesNumber_start;
+                        }
+                        else {
+                            // Got Errors, expect to decimal integer.
+                            ec = ErrorCode::Unknown;
+                        }
+                    }
+                }
+            }
+            break;
+
+        case Token::Strings:
+            {
+                // Skip the leading whitespace character first
+                skipWhiteSpace();
+
+                uint8_t ch = stream_.getu();
+                if (likely(ch == '{')) {
+                    //
+                    skipWhiteSpaces();
+                }
+                else {
+                    // Got Errors, expect to '{'.
+                    ec = ErrorCode::Unknown;
+                }
+            }
+            break;
+
+        case Token::EntryPoint:
+            {
+                // Skip the trailing whitespace and newline character
+                skipWhiteSpaces();
+            }
+            break;
+
+        default:
+            {
+                // Unsupported section keyword
+                token.setType(Token::Unsupported);
+                result = -1;
+            }
+            break;
+        }
+        return result;
+    }
+
     bool nextToken(Token & token, ErrorCode & ec_) {
         ErrorCode ec = ErrorCode::OK;
         StreamMarker marker(stream_);
@@ -1421,7 +1534,8 @@ public:
                 {
                     // Identifier or keywords
                     std::string identName;
-                    parseIdentifierBody(cur, identName, token, ec);
+                    parseIdentifier(identName, token);
+                    std::cout << ">>> Identifier name = [" << identName.c_str() << "]" << std::endl;
                 }
                 break;
 
@@ -1478,9 +1592,18 @@ public:
                     ch = stream_.get();
                     if (isAlphabet(ch)) {
                         // It's a section declare
-                        std::string section = "";
-                        KeywordMapping & sections = Global::getSectionMapping();
-                        sections.find(section);
+                        std::string sectionName = ".";
+                        parseIdentifier(sectionName, token);
+
+                        KeywordMapping & sectionMapping = Global::getSectionMapping();
+                        auto iter = sectionMapping.find(sectionName);
+                        if (iter != sectionMapping.end()) {
+                            Keyword section = iter->second;
+                            int result = handleSectionKeyword(section.getType(), token, ec);
+                            if (result >= 0) {
+                                // success
+                            }
+                        }
                     }
                     else if (isDigital(ch)) {
                         // It's a float or double number.

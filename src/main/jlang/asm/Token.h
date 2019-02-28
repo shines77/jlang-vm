@@ -28,12 +28,13 @@ namespace jasm {
 class Token {
 public:
     enum Type {
-        FirstToken = -1,
-        Unrecognized = FirstToken,
+        Unrecognized = -2,
+        Unsupported = -1,
         Unknown = 0,
 
         #include "jlang/asm/TokenDef.h"
 
+        FirstToken = Unrecognized,
         LastToken
     };
 
@@ -43,10 +44,17 @@ private:
     intptr_t length_;
 
 public:
-    Token(Type type = Type::Unknown) : type_(type), pos_(0), length_(0) {}
-    Token(Type type, int length, intptr_t pos)
-        : type_(type), pos_(pos), length_(length) {}
+    Token() : type_(Type::Unknown), pos_(0), length_(0) {}
+    Token(Type type) : type_(type), pos_(0), length_(0) {}
+    Token(Type type, int length, intptr_t pos) : type_(type), pos_(pos), length_(length) {}
+    Token(uint16_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(uint16_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(uint32_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(uint32_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(uint64_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(uint64_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
     Token(const Token & src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
+    Token(Token && src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
     ~Token() {}
 
     Token & operator = (const Token & rhs) {

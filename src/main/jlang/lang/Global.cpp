@@ -64,7 +64,7 @@ void Global::destroyLastError() {
 void Global::init() {
     jasm::KeywordInitor::init();
     LastError & _lastError = Global::lastError();
-    assert(_lastError.isSuccess() == ErrorCode::OK);
+    assert(_lastError.isSuccess());
 }
 
 ///////////////////////////////////////////////////

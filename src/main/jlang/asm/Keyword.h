@@ -248,10 +248,12 @@ public:
     const std::string toString() const { return this->name_; }
 
     const jasm::KeywordCategory::Type getCategory() const { return jasm::KeywordCategory::Type(category_); }
-    const jasm::Token::Type getToken() const { return jasm::Token::Type(token_); }
+    const jasm::Token getToken() const { return jasm::Token(token_); }
+    const jasm::Token::Type getType() const { return jasm::Token::Type(token_); }
 
     void setCategory(uint16_t type) { category_ = type; }
-    void setToken(uint16_t token) { token_ = token; }
+    void setToken(const jasm::Token & token) { token_ = token.getType(); }
+    void setType(uint16_t token) { token_ = token; }
 
     const std::string & getName() const { return name_; }
 
