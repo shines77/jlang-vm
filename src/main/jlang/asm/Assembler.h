@@ -23,11 +23,11 @@ public:
     ~Assembler() {}
 
     int readFromFile(const char * filename) {
-        //
+        return 0;
     }
 
     int writeToFile(const char * filename) {
-        //
+        return 0;
     }
 
     virtual int parse() = 0;
@@ -38,7 +38,9 @@ public:
     Assembler32() {}
     ~Assembler32() {}
 
-    int parse() {}
+    int parse() {
+        return 0;
+    }
 };
 
 class Assembler32Ext : public Assembler {
@@ -46,7 +48,9 @@ public:
     Assembler32Ext() {}
     ~Assembler32Ext() {}
 
-    int parse() {}
+    int parse() {
+        return 0;
+    }
 };
 
 class Assembler64 : public Assembler {
@@ -54,7 +58,9 @@ public:
     Assembler64() {}
     ~Assembler64() {}
 
-    int parse() {}
+    int parse() {
+        return 0;
+    }
 };
 
 } // namespace jlang

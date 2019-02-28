@@ -207,14 +207,26 @@ public:
 
     int32_t value() const { return static_cast<int32_t>(this->ec_); }
 
-    const std::string & toString() const {
-        switch (ec_) {
+    static const char * toString(Type ec) {
+        switch (ec) {
             case Type::Unknown:
                 return "Unknown";
             default:
                 break;
         }
         return "Undefined Error";
+    }
+
+    char * toString() {
+        return (char *)ErrorCode::toString(this->ec_);
+    }
+
+    const char * toString() const {
+        return ErrorCode::toString(this->ec_);
+    }
+
+    void toString(std::string & str) {
+        str = this->toString();
     }
 };
 
