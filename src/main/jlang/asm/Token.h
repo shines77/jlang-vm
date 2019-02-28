@@ -84,6 +84,30 @@ public:
         this->length_ = (int)length;
     }
 
+    bool isEquals(const Token & value) const {
+        return (this->type_ == value.type_);
+    }
+
+    bool isNotEquals(const Token & value) const {
+        return (this->type_ != value.type_);
+    }
+
+    bool isEquals(int value) const {
+        return (this->type_ == value);
+    }
+
+    bool isNotEquals(int value) const {
+        return (this->type_ != value);
+    }
+
+    bool isEquals(int64_t value) const {
+        return (this->type_ == value);
+    }
+
+    bool isNotEquals(int64_t value) const {
+        return (this->type_ != value);
+    }
+
     Token copy() {
         Token copyToken(*this);
         return copyToken;
@@ -153,6 +177,50 @@ public:
         str = this->toString();
     }
 };
+
+// operator == 
+
+inline bool operator == (const Token & lhs, const Token & rhs) {
+    return lhs.isEquals(rhs);
+}
+
+inline bool operator == (int lhs, const Token & rhs) {
+    return rhs.isEquals(lhs);
+}
+
+inline bool operator == (const Token & lhs, int rhs) {
+    return lhs.isEquals(rhs);
+}
+
+inline bool operator == (int64_t lhs, const Token & rhs) {
+    return rhs.isEquals(lhs);
+}
+
+inline bool operator == (const Token & lhs, int64_t rhs) {
+    return lhs.isEquals(rhs);
+}
+
+// operator !=
+
+inline bool operator != (const Token & lhs, const Token & rhs) {
+    return lhs.isNotEquals(rhs);
+}
+
+inline bool operator != (int lhs, const Token & rhs) {
+    return rhs.isNotEquals(lhs);
+}
+
+inline bool operator != (const Token & lhs, int rhs) {
+    return lhs.isNotEquals(rhs);
+}
+
+inline bool operator != (int64_t lhs, const Token & rhs) {
+    return rhs.isNotEquals(lhs);
+}
+
+inline bool operator != (const Token & lhs, int64_t rhs) {
+    return lhs.isNotEquals(rhs);
+}
 
 } // namespace jasm
 } // namespace jlang

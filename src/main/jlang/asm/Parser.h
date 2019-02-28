@@ -1332,7 +1332,7 @@ public:
         ec = ErrorCode::OK;
         token.setType(Token::Unknown);
         StringStreamMarker marker(stream_);
-        while (likely(!stream_.is_eof())) {
+        while (likely(stream_.has_next())) {
             marker.remark();
             Token::Type tokenType;
             bool success;

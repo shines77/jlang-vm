@@ -418,14 +418,21 @@ void test_Assembler()
     printf("  test_Assembler()\n");
     printf("--------------------------------------------\n\n");
 
+    using namespace jlang::jasm;
+
     ErrorCode ec;
-    jasm::Token token = jasm::Token::Unknown;
-    jasm::Parser parser;
+    Token token = Token::Unknown;
+    Parser parser;
 
     FileStringStream stream(JLANG_SCRIPT_PATH("asm/fibonacci.jasm"));
     parser.setStream(stream);
 
-    bool success = parser.nextToken(token, ec);
+    bool success = false;
+    do {
+        success = parser.nextToken(token, ec);
+        if (!success) break;
+    } while (token != Token::EndOfFile);
+
     if (success) {
         printf("  success. [file = %s]\n", stream.filename().c_str());
     }
