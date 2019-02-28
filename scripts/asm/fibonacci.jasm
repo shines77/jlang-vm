@@ -5,6 +5,9 @@
     HelloWorld "Hello World"
 }
 
+.align 15
+.align 31
+
 int fibonacci32(int n)
 {
 fib_start:

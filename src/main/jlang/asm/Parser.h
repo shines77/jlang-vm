@@ -1375,7 +1375,7 @@ public:
         }
     }
 
-    int handleSectionKeyword(Token::Type sectionType, Token & token, ErrorCode & ec) {
+    int handleSectionStatement(Token::Type sectionType, Token & token, ErrorCode & ec) {
         int result = 0;
         switch (sectionType) {
         case Token::Align:
@@ -1599,7 +1599,7 @@ ParseAlignBytesNumber_start:
                         auto iter = sectionMapping.find(sectionName);
                         if (iter != sectionMapping.end()) {
                             Keyword section = iter->second;
-                            int result = handleSectionKeyword(section.getType(), token, ec);
+                            int result = handleSectionStatement(section.getType(), token, ec);
                             if (result >= 0) {
                                 // success
                             }
