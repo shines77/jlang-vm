@@ -18,9 +18,9 @@
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/asm/KeywordCategory.h"
 
-#define TOKEN_DEF(token_type)                       token_type,
-#define KEYWORD_DEF(token_type, keyword, kind)      token_type,
-#define PREPROCESSING_DEF(keyword)                  pp_##keyword,
+#define TOKEN_DEF(token)                        token,
+#define KEYWORD_DEF(token, keyword, category)   token,
+#define PREPROCESSING_DEF(keyword)              pp_##keyword,
 
 namespace jlang {
 namespace jasm {
@@ -137,23 +137,23 @@ public:
         this->setLength(length);
     }
 
-    #define TOKEN_TO_STRING(token_str)  #token_str
+    #define TOKEN_TO_STRING(token)  #token
 
-    #define CASE_TOKEN(token_type)      \
-        case Type::token_type:          \
-            return TOKEN_TO_STRING(token_type);
+    #define CASE_TOKEN(token)       \
+        case Type::token:           \
+            return TOKEN_TO_STRING(token);
 
-    #define CASE_PREPROCESSING_TOKEN(token_type)    \
-        case Type::pp_##token_type:                 \
-            return "#" TOKEN_TO_STRING(token_type);
+    #define CASE_PREPROCESSING_TOKEN(token)     \
+        case Type::pp_##token:                  \
+            return "#" TOKEN_TO_STRING(token);
 
-    #define TOKEN_DEF(token_type)       CASE_TOKEN(token_type)
-    #define KEYWORD_DEF(token_type, keyword, kind) \
-                                        CASE_TOKEN(token_type)
+    #define TOKEN_DEF(token)            CASE_TOKEN(token)
+    #define KEYWORD_DEF(token, keyword, category) \
+                                        CASE_TOKEN(token)
     #define PREPROCESSING_DEF(keyword)  CASE_PREPROCESSING_TOKEN(keyword)
 
-    static const char * toString(Type tokenType) {
-        switch (tokenType) {
+    static const char * toString(Type token) {
+        switch (token) {
             CASE_TOKEN(Unrecognized);
             CASE_TOKEN(Unknown);
 
@@ -168,6 +168,10 @@ public:
     #undef TOKEN_TO_STRING
     #undef CASE_TOKEN
     #undef CASE_PREPROCESSING_TOKEN
+
+    char * toString() {
+        return (char *)Token::toString(this->type_);
+    }
 
     const char * toString() const {
         return Token::toString(this->type_);

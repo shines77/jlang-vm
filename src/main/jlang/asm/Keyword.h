@@ -34,11 +34,13 @@
 
 #define MAX_IDENTIFIER_LEN          512
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace jlang {
 namespace jasm {
 
-#define JLANG_KEYWORD_ID(token, category)       jasm::KeywordId::##token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)         jasm::KeywordId::##pp_##keyword
+#define JLANG_KEYWORD_ID(token, category)       token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)         pp_##keyword
 
 #define KEYWORD_DEF(token, keyword, category)   JLANG_KEYWORD_ID(token, category),
 #define PREPROCESSING_DEF(keyword)              JLANG_PREPROCESSING_ID(keyword),
@@ -77,6 +79,12 @@ public:
     friend class Keyword;
 };
 
+#undef JLANG_KEYWORD_ID
+#undef JLANG_PREPROCESSING_ID
+
+#define JLANG_KEYWORD_ID(token, category)       KeywordId::##token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)         KeywordId::pp_##keyword
+
 #define KEYWORD_DEF(token, keyword, category)  \
     { \
         (uint16_t)JLANG_KEYWORD_ID(token, category), \
@@ -98,7 +106,7 @@ public:
 static const KeywordInfoDef gKeywordList[] = {
     #include "jlang/asm/KeywordDef.h"
     {
-        (uint16_t)KeywordId::MaxKeywordId,
+        (uint16_t)jasm::KeywordId::Type::MaxKeywordId,
         (uint16_t)jasm::KeywordCategory::Unknown,
         (uint16_t)jasm::Token::Unknown,
         0,
