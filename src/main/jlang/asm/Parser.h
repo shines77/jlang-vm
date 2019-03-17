@@ -469,7 +469,7 @@ public:
                 tokenType = keyword.getType();
                 token.setStartPos(marker.start_pos());
                 token.setLength(keyword_length);
-                ec = handlePreprocessingToken(tokenType, token);
+                ec = handlePreprocessingStatement(tokenType, token);
                 if (ec.isOK()) {
                     token.setType(tokenType);
                 }
@@ -498,9 +498,9 @@ public:
         return is_ok;
     }
 
-    ErrorCode handlePreprocessingToken(Token::Type tokenType, const Token & token) {
+    ErrorCode handlePreprocessingStatement(Token::Type preprocessingToken, const Token & token) {
         ErrorCode ec = ErrorCode::OK;
-        switch (tokenType) {
+        switch (preprocessingToken) {
         case Token::pp_if:
             //
             break;
