@@ -16,6 +16,8 @@
 #include <memory>
 #include <atomic>
 
+#include "jlang/support/Console.h"
+
 //////////////////////////////////////////////////////////////
 
 #define USE_VMSTACK_CALLSTACK       1
@@ -2304,7 +2306,7 @@ public:
 
         default:
             console.trace("Error: Unknown condition jump code. condType = %u\n",
-                        (uint32_t)condType);
+                          (uint32_t)condType);
             return false;
         }
     }

@@ -75,18 +75,18 @@ public:
     void nextLine() {
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
  || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
-        ::printf("\r\n");
+        ::printf("%s", "\r\n");
 #else
-        ::printf("\n");
+        ::printf("%s", "\n");
 #endif
     }
 
     void print(const char * info) {
-        ::printf(info);
+        ::printf("%s", info);
     }
 
     void println(const char * info) {
-        ::printf(info);
+        ::printf("%s", info);
         this->nextLine();
     }
 
