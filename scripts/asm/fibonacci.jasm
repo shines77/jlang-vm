@@ -2,7 +2,8 @@
 .align default 16
 
 .strings {
-    HelloWorld "Hello World"
+    HelloWorld      "Hello World"
+    Fibonacci32     "Fibonacci32"
 }
 
 .align 15

@@ -1198,7 +1198,7 @@ public:
     }
 
     // Single character literal
-    bool parseSingleCharLiteral(Token & token, ErrorCode & ec) {
+    bool parseSingleCharLiteral(std::string & content, Token & token, ErrorCode & ec) {
         ec = ErrorCode::OK;
         unsigned char character;
         char ch = stream_.get();
@@ -1232,15 +1232,21 @@ public:
             // It's a illegal single character format.
             ec = ErrorCode::IllegalSingleCharacterFormat;
         }
+
+        if (ec == ErrorCode::OK) {
+            content = character;
+        }
         return (ec == ErrorCode::OK);
     }
 
     // Normal string literal
-    bool parseStringLiteral(Token & token, ErrorCode & ec) {
+    bool parseStringLiteral(std::string & content, Token & token, ErrorCode & ec) {
         ec = ErrorCode::OK;
-        std::string content;
         int multipart_cnt = 0;
+        bool completed;
+
         do {
+            completed = false;
             char ch;
             while ((ch = stream_.get()) != '\0') {
                 if (likely(ch != '\"')) {
@@ -1281,34 +1287,46 @@ public:
                         // It's the end of the normal string literal.
                         stream_.next();
                         multipart_cnt++;
+                        completed = true;
                         break;
                     }
                 }
             }
+
+            // If it reach the end of file and it's not completed, exit now.
+            if (!completed) {
+                std::cout << ">>> Error: String literal is not completed!" << std::endl;
+                ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
+                return false;
+            }
+
+            // Skip the white spaces between the multi-part string literal.
             skipWhiteSpaces();
+
             if (likely(stream_.get() != '\"')) {
                 // It's the end of normal string literal or multi-part string literal.
                 break;
             }
             else {
+                // Find a multi-part string literal entry, skip the '"' char and continue parse.
                 stream_.next();
             }
         } while (1);
 
         if (multipart_cnt == 1) {
-            std::cout << ">>> Normal string literal = [\n" << content << "\n];" << std::endl;
+            std::cout << ">>> String literal = [\n" << content << "\n];" << std::endl;
         }
         else if (multipart_cnt > 1) {
             std::cout << ">>> Multi-part (" << multipart_cnt << " parts) string literal = "
                       << "[\n" << content << "\n];" << std::endl;
         }
         else {
-            std::cout << ">>> Error: String literal mismatch \\\" !" << std::endl;
+            std::cout << ">>> Error: String literal is not completed. (mismatch \\\") !" << std::endl;
         }
         return (ec == ErrorCode::OK);
     }
 
-    bool parseLiteral(Token & token, ErrorCode & ec) {
+    bool parseLiteral(std::string & content, Token & token, ErrorCode & ec) {
         bool parse_ok;
         Token::Type tokenType;
         StreamMarker marker(stream_);
@@ -1348,12 +1366,12 @@ public:
         if (stream_.get() == '\"') {
             // String literal or single char literal
             stream_.next();
-            return parseStringLiteral(token, ec);
+            return parseStringLiteral(content, token, ec);
         }
         else if (stream_.get() == '\'') {
             // Single character literal
             stream_.next();
-            return parseSingleCharLiteral(token, ec);
+            return parseSingleCharLiteral(content, token, ec);
         }
         return false;
     }
@@ -1380,7 +1398,7 @@ public:
         switch (sectionType) {
         case Token::Align:
             {
-                // Skip the leading whitespace character first
+                // Skip the leading whitespace character first.
                 skipWhiteSpace();
 
                 uint8_t ch = stream_.getu();
@@ -1390,7 +1408,7 @@ ParseAlignBytes_start:
                     if (parserDecimalNumber(alignedBytes, ec)) {
                         uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
                         if (newAlignedBytes != alignedBytes) {
-                            // Have changed to newAlignedBytes from alignedBytes
+                            // Have changed to newAlignedBytes from alignedBytes.
                             std::cout << ">>> Section [.align]: alignedBytes have changed to " << newAlignedBytes;
                             std::cout << " from " << alignedBytes << " bytes" << std::endl;
                         }
@@ -1402,7 +1420,7 @@ ParseAlignBytes_start:
                     std::string identName;
                     Token identToken;
                     parseIdentifier(identName, identToken);
-                    if (identName == "default") {   // Setting default align bytes
+                    if (identName == "default") {   // Setting default align bytes.
                         skipWhiteSpace();
                         uint8_t ch = stream_.getu();
                         if (likely(isNumber(ch))) {
@@ -1410,7 +1428,7 @@ ParseAlignBytes_start:
                         }
                         else {
                             // Got Errors, expect to decimal integer.
-                            ec = ErrorCode::Unknown;
+                            ec = ErrorCode::UnknownError;
                         }
                     }
                 }
@@ -1427,15 +1445,53 @@ ParseAlignBytes_start:
                     stream_.next();
                     skipWhiteSpaces();
 
+ParseStringSectionEntry:
                     std::string identName;
                     bool isIdentifier = parseIdentifierStrict(identName, token, ec);
                     if (isIdentifier) {
                         skipWhiteSpace();
+
+                        ch = stream_.getu();
+                        if (likely(ch == '\"')) {
+                            stream_.next();
+
+                            std::string stringValue;
+                            bool parseOK = parseStringLiteral(stringValue, token, ec);
+                            if (parseOK) {
+                                skipWhiteSpaces();
+
+                                // Parse next string or end of sign '}'.
+                                ch = stream_.getu();
+                                if (likely(isIdentifierFirst(ch))) {
+                                    // Next string identifier
+                                    goto ParseStringSectionEntry;
+                                }
+                                else if (likely(ch == '}')) {
+                                    // End of string section
+                                }
+                                else {
+                                    // Got a error, illegal string section.
+                                    ec = ErrorCode::IllegalStringSection;
+                                }
+                            }
+                            else {
+                                // Got a error, illegal string literal.
+                                ec = ErrorCode::IllegalStringLiteral;
+                            }
+                        }
+                        else {
+                            // Got a error, expect to '"'.
+                            ec = ErrorCode::UnknownError;
+                        }
+                    }
+                    else {
+                        // Got a error, illegal string section.
+                        ec = ErrorCode::IllegalStringSection;
                     }
                 }
                 else {
-                    // Got Errors, expect to '{'.
-                    ec = ErrorCode::Unknown;
+                    // Got a error, expect to '{'.
+                    ec = ErrorCode::UnknownError;
                 }
             }
             break;
@@ -1874,20 +1930,26 @@ ParseAlignBytes_start:
                 break;
 
             case '\'':  // Single character literal
-                stream_.next();
-                success = parseSingleCharLiteral(token, ec);
-                if (unlikely(!success)) {
-                    marker.rewind();
+                {
                     stream_.next();
+                    std::string singelChar;
+                    success = parseSingleCharLiteral(singelChar, token, ec);
+                    if (unlikely(!success)) {
+                        marker.rewind();
+                        stream_.next();
+                    }
                 }
                 break;
 
             case '\"':  // String literal or single char literal
-                stream_.next();
-                success = parseStringLiteral(token, ec);
-                if (unlikely(!success)) {
-                    marker.rewind();
+                {
                     stream_.next();
+                    std::string stringLiteral;
+                    success = parseStringLiteral(stringLiteral, token, ec);
+                    if (unlikely(!success)) {
+                        marker.rewind();
+                        stream_.next();
+                    }
                 }
                 break;
 

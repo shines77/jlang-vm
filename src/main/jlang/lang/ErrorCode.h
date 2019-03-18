@@ -82,6 +82,13 @@ public:
         UnknownEscapedChar,
         UnknownUnescapedChar,
 
+        // String literal
+        IllegalStringLiteral,
+        IllegalStringLiteralIsNotCompleted,
+
+        // String section
+        IllegalStringSection,
+
         // Standard errors
         Error_NullPtr,
 
@@ -94,7 +101,7 @@ public:
         BinaryFile_Read_Failed,
 
         // Standard errors
-        Unknown = -2,
+        UnknownError = -2,
         Failed = -1,
         OK = 0,
         Success = OK,
@@ -107,7 +114,7 @@ private:
     Type ec_;
 
 public:
-    ErrorCode() : ec_(Type::Unknown) {}
+    ErrorCode() : ec_(Type::UnknownError) {}
     ErrorCode(Type ec) : ec_(ec) {}
     ErrorCode(int32_t ec) : ec_(static_cast<Type>(ec)) {}
     ErrorCode(uint32_t ec) : ec_(static_cast<Type>(ec)) {}
@@ -209,7 +216,7 @@ public:
 
     static const char * toString(Type ec) {
         switch (ec) {
-            case Type::Unknown:
+            case Type::UnknownError:
                 return "Unknown";
             default:
                 break;
