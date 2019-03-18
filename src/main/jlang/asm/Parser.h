@@ -455,7 +455,7 @@ public:
         Token::Type tokenType = Token::Unknown;
         ec = ErrorCode::OK;
         StreamMarker marker(stream_);
-        marker.set_mark();
+        marker.setmark();
         skipReservedKeyword();
         intptr_t keyword_length = marker.length();
         if (keyword_length > 0) {
@@ -1312,7 +1312,7 @@ public:
         bool parse_ok;
         Token::Type tokenType;
         StreamMarker marker(stream_);
-        marker.set_mark();
+        marker.setmark();
         // Starting with numbers: "[0-9]", or ".[0-9]"
         uint8_t ch = stream_.getu();
         if (isNumber(ch)) {
@@ -1385,7 +1385,7 @@ public:
 
                 uint8_t ch = stream_.getu();
                 if (likely(isNumber(ch))) {
-ParseAlignBytesNumber_start:
+ParseAlignBytes_start:
                     uint64_t alignedBytes = 0;
                     if (parserDecimalNumber(alignedBytes, ec)) {
                         uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
@@ -1406,7 +1406,7 @@ ParseAlignBytesNumber_start:
                         skipWhiteSpace();
                         uint8_t ch = stream_.getu();
                         if (likely(isNumber(ch))) {
-                            goto ParseAlignBytesNumber_start;
+                            goto ParseAlignBytes_start;
                         }
                         else {
                             // Got Errors, expect to decimal integer.
@@ -1424,8 +1424,14 @@ ParseAlignBytesNumber_start:
 
                 uint8_t ch = stream_.getu();
                 if (likely(ch == '{')) {
-                    //
+                    stream_.next();
                     skipWhiteSpaces();
+
+                    std::string identName;
+                    bool isIdentifier = parseIdentifierStrict(identName, token, ec);
+                    if (isIdentifier) {
+                        skipWhiteSpace();
+                    }
                 }
                 else {
                     // Got Errors, expect to '{'.
@@ -1489,7 +1495,7 @@ ParseAlignBytesNumber_start:
                 stream_.next();
                 success = parsePreprocessing(token, ec);
                 if (unlikely(!success)) {
-                    marker.restore();
+                    marker.rewind();
                     stream_.next();
                 }
                 break;
@@ -1871,7 +1877,7 @@ ParseAlignBytesNumber_start:
                 stream_.next();
                 success = parseSingleCharLiteral(token, ec);
                 if (unlikely(!success)) {
-                    marker.restore();
+                    marker.rewind();
                     stream_.next();
                 }
                 break;
@@ -1880,7 +1886,7 @@ ParseAlignBytesNumber_start:
                 stream_.next();
                 success = parseStringLiteral(token, ec);
                 if (unlikely(!success)) {
-                    marker.restore();
+                    marker.rewind();
                     stream_.next();
                 }
                 break;
