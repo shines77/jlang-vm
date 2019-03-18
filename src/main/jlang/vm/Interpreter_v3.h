@@ -26,6 +26,7 @@
 #include "jlang/vm/ArgsDefine.h"
 #include "jlang/vm/Interpreter.h"
 #include "jlang/lang/ErrorCode.h"
+#include "jlang/support/Console.h"
 
 #include <stdint.h>
 #include <stddef.h>

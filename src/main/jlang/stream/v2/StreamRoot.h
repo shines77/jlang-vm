@@ -1,6 +1,6 @@
 
-#ifndef JLANG_STREAM_STREAMROOT_H
-#define JLANG_STREAM_STREAMROOT_H
+#ifndef JLANG_STREAM_ISTREAMROOT_H
+#define JLANG_STREAM_ISTREAMROOT_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -336,4 +336,4 @@ public:
 
 } // namespace jlang
 
-#endif // JLANG_STREAM_STREAMROOT_H
+#endif // JLANG_STREAM_ISTREAMROOT_H

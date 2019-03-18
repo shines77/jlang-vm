@@ -11,8 +11,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include <stdarg.h>     // For va_start(), va_end()
-
 #include <cstdint>
 #include <list>
 #include <memory>
@@ -32,11 +30,6 @@
 
 //////////////////////////////////////////////////////////////
 
-#ifndef NDEBUG
-#define USE_DEBUG_PRINT         1
-#else
-#define USE_DEBUG_PRINT         0
-#endif
 #define USE_REGS_TEST           1
 
 //////////////////////////////////////////////////////////////
@@ -119,40 +112,6 @@ namespace jlang {
 typedef unsigned long   DWORD;
 typedef void *          HANDLE;
 #endif // !_WIN32
-
-class Console {
-public:
-    Console() {}
-    ~Console() {}
-
-    void print(const char * fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        this->vprint(fmt, args);
-        va_end(args);
-    }
-
-    void vprint(const char * fmt, va_list args) {
-        ::vprintf(fmt, args);
-    }
-
-    void trace(const char * fmt, ...) {
-#if USE_DEBUG_PRINT
-        va_list args;
-        va_start(args, fmt);
-        this->vprint(fmt, args);
-        va_end(args);
-#endif
-    }
-
-    void trace(const char * fmt, va_list args) {
-#if USE_DEBUG_PRINT
-        this->vprint(fmt, args);
-#endif
-    }
-};
-
-static Console console;
 
 // Base interface class
 template <typename BasicType>

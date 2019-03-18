@@ -163,6 +163,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordCategory.h">
       <Filter>src\asm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h">
+      <Filter>src\support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

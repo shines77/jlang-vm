@@ -1,0 +1,219 @@
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 1698751870, time: 601.229 ms
+CPU warm-up end   ...
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4829.641 ms
+
+--------------------------------------------
+  test_Interpreter_v2()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 3654909824, time: 601.372 ms
+CPU warm-up end   ...
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  5220.763 ms
+
+--------------------------------------------
+  test_Interpreter_v1()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 2846706034, time: 603.535 ms
+CPU warm-up end   ...
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  8164.176 ms
+
+
+----------------------------------------------
+
+jlang-vm: version 1.0
+
+--------------------------------------------
+  test_Fibonacci64()  [native]
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 4037561212, time: 602.100 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  303.654 ms
+
+--------------------------------------------
+  test_Interpreter_v3_inline()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 4037561212, time: 609.215 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  1717.329 ms
+
+--------------------------------------------
+  test_Interpreter_v4()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 2846706034, time: 603.446 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4318.240 ms
+
+--------------------------------------------
+  test_Interpreter_v3()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 125245304, time: 606.662 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  3864.416 ms
+
+--------------------------------------------
+  test_Interpreter_v2()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 1698751870, time: 608.114 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4432.468 ms
+
+--------------------------------------------
+  test_Interpreter_v1()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 2464054646, time: 605.042 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  9676.334 ms
+
+----------------------------------------------
+
+jlang-vm: version 1.0
+
+--------------------------------------------
+  test_Fibonacci64()  [native]
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 1698751870, time: 600.279 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  295.740 ms
+
+--------------------------------------------
+  test_Interpreter_v3_inline()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 2846706034, time: 605.851 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  1465.714 ms
+
+--------------------------------------------
+  test_Interpreter_v4()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 3612008810, time: 601.705 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4010.698 ms
+
+--------------------------------------------
+  test_Interpreter_v3()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 1698751870, time: 605.866 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4203.076 ms
+
+--------------------------------------------
+  test_Interpreter_v2()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 2081403258, time: 603.498 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  4602.193 ms
+
+--------------------------------------------
+  test_Interpreter_v1()
+--------------------------------------------
+
+n = ? 40
+
+CPU warm-up begin ...
+sum = 1698751870, time: 604.442 ms
+CPU warm-up end   ... 
+
+  fibonacci(40) = 102334155
+
+  elapsed time:  9219.351 ms
+
+--------------------------------------------------
+
+
