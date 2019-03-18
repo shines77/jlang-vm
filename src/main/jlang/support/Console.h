@@ -94,6 +94,11 @@ public:
         ::vprintf(fmt, args);
     }
 
+    void vfprintln(const char * fmt, va_list args) {
+        ::vprintf(fmt, args);
+        this->nextLine();
+    }
+
     void printf(const char * fmt, ...) {
         va_list args;
         va_start(args, fmt);

@@ -498,9 +498,9 @@ public:
         return is_ok;
     }
 
-    ErrorCode handlePreprocessingStatement(Token::Type preprocessingToken, const Token & token) {
+    ErrorCode handlePreprocessingStatement(Token::Type ppTokenType, const Token & token) {
         ErrorCode ec = ErrorCode::OK;
-        switch (preprocessingToken) {
+        switch (ppTokenType) {
         case Token::pp_if:
             //
             break;
