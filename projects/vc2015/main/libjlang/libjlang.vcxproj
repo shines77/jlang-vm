@@ -20,7 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Assembler.h" />
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initor.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\IdentInfo.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initializer.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Keyword.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordDef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordCategory.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jlang.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\jstd\Singleton.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\CharInfo.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h" />

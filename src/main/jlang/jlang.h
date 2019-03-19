@@ -13,7 +13,7 @@
 #include "jlang/asm/Keyword.h"
 #include "jlang/asm/Token.h"
 #include "jlang/lang/Global.h"
-#include "jlang/asm/Initor.h"
+#include "jlang/asm/Initializer.h"
 #include "jlang/system/System.h"
 
 #include "jlang/stream/InputStringStream.h"

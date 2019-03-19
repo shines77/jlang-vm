@@ -6,6 +6,7 @@
 #pragma once
 #endif
 
+#include "jlang/basic/stddef.h"
 #include "jlang/lang/Global.h"
 #include "jlang/lang/NonCopyable.h"
 #include "jlang/asm/KeywordCategory.h"
@@ -22,6 +23,9 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+
+#include <mutex>
+#include <memory>
 
 /* The word length of the keyword's hash code. */
 /* The value can choose: 0, 32 or 64. */
@@ -315,11 +319,13 @@ public:
     typedef std::unordered_map<std::string, Keyword> hashtable_type;
     typedef hashtable_type::iterator                 iterator;
     typedef hashtable_type::const_iterator           const_iterator;
+    typedef std::lock_guard<std::mutex>              lock_type;
 
 private:
     int root_;
     bool inited_;
     hashtable_type keywordMapping_;
+    std::mutex mutex_;
 
 public:
     KeywordMapping(int root = KeywordRoot::Default)
@@ -337,7 +343,16 @@ public:
     size_t size() const { return keywordMapping_.size(); }
 
     iterator begin() { return keywordMapping_.begin(); }
-    iterator end() { return keywordMapping_.end(); }
+    iterator end()   { return keywordMapping_.end(); }
+
+    void destroy() {
+        keywordMapping_.clear();
+    }
+
+    void _destroy() {
+        lock_type lock(mutex_);
+        destroy();
+    }
 
     void reserve(size_t max_count) {
         keywordMapping_.reserve(max_count);
@@ -398,82 +413,81 @@ private:
 };
 
 ///////////////////////////////////////////////////
-// class KeywordInitor
+// class KeywordInitializer
 ///////////////////////////////////////////////////
 
-class KeywordInitor : public lang::NonCopyable {
+class KeywordInitializer : public lang::NonCopyable {
 public:
-    static KeywordMapping * keyword_mapping;
-    static KeywordMapping * pp_keyword_mapping;
-    static KeywordMapping * section_mapping;
+    static std::unique_ptr<KeywordMapping> keyword_mapping;
+    static std::unique_ptr<KeywordMapping> pp_keyword_mapping;
+    static std::unique_ptr<KeywordMapping> section_mapping;
 
 public:
-    KeywordInitor() { KeywordInitor::init(); }
-    ~KeywordInitor() {}
+    KeywordInitializer() { KeywordInitializer::initialize(); }
+    ~KeywordInitializer() {}
 
     static bool inited() {
-        KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
-        KeywordMapping & ppKeywordMapping = KeywordInitor::getPPKeywordMapping();
-        KeywordMapping & SectionMapping = KeywordInitor::getSectionMapping();
+        return KeywordInitializer::initialize();
+    }
+
+    static bool initialize() {
+        KeywordMapping & keywordMapping = KeywordInitializer::getKeywordMapping();
+        assert(keywordMapping.inited());
+
+        KeywordMapping & ppKeywordMapping = KeywordInitializer::getPPKeywordMapping();
+        assert(ppKeywordMapping.inited());
+
+        KeywordMapping & SectionMapping = KeywordInitializer::getSectionMapping();
+        assert(SectionMapping.inited());
+
         return (keywordMapping.inited() && ppKeywordMapping.inited() && SectionMapping.inited());
     }
 
-    static void init() {
-        KeywordMapping & keywordMapping = KeywordInitor::getKeywordMapping();
-        assert(keywordMapping.inited());
-
-        KeywordMapping & ppKeywordMapping = KeywordInitor::getPPKeywordMapping();
-        assert(ppKeywordMapping.inited());
-
-        KeywordMapping & SectionMapping = KeywordInitor::getSectionMapping();
-        assert(SectionMapping.inited());
-    }
-
     static void finalize() {
-        KeywordInitor::destroyKeywordMapping();
-        KeywordInitor::destroyPPKeywordMapping();
-        KeywordInitor::destroySectionMapping();
+        KeywordInitializer::destroyKeywordMapping();
+        KeywordInitializer::destroyPPKeywordMapping();
+        KeywordInitializer::destroySectionMapping();
     }
 
     static KeywordMapping & getKeywordMapping() {
-        if (KeywordInitor::keyword_mapping == nullptr) {
-            KeywordInitor::keyword_mapping = new KeywordMapping(KeywordRoot::Default);
+        if (unlikely(KeywordInitializer::keyword_mapping.get() == nullptr)) {
+            KeywordInitializer::keyword_mapping.reset(new KeywordMapping(KeywordRoot::Default));
         }
-        return *KeywordInitor::keyword_mapping;
+        return *KeywordInitializer::keyword_mapping;
     }
 
     static KeywordMapping & getPPKeywordMapping() {
-        if (KeywordInitor::pp_keyword_mapping == nullptr) {
-            KeywordInitor::pp_keyword_mapping = new KeywordMapping(KeywordRoot::Preprocessing);
+        if (unlikely(KeywordInitializer::pp_keyword_mapping.get() == nullptr)) {
+            KeywordInitializer::pp_keyword_mapping.reset(new KeywordMapping(KeywordRoot::Preprocessing));
         }
-        return *KeywordInitor::pp_keyword_mapping;
+        return *KeywordInitializer::pp_keyword_mapping;
     }
 
     static KeywordMapping & getSectionMapping() {
-        if (KeywordInitor::section_mapping == nullptr) {
-            KeywordInitor::section_mapping = new KeywordMapping(KeywordRoot::Section);
+        if (unlikely(KeywordInitializer::section_mapping.get() == nullptr)) {
+            KeywordInitializer::section_mapping.reset(new KeywordMapping(KeywordRoot::Section));
         }
-        return *KeywordInitor::section_mapping;
+        return *KeywordInitializer::section_mapping;
     }
 
     static void destroyKeywordMapping() {
-        if (keyword_mapping) {
-            delete keyword_mapping;
-            keyword_mapping = nullptr;
+        if (KeywordInitializer::keyword_mapping.get() != nullptr) {
+            KeywordInitializer::keyword_mapping->destroy();
+            KeywordInitializer::keyword_mapping.reset();
         }
     }
 
     static void destroyPPKeywordMapping() {
-        if (pp_keyword_mapping) {
-            delete pp_keyword_mapping;
-            pp_keyword_mapping = nullptr;
+        if (KeywordInitializer::pp_keyword_mapping.get() != nullptr) {
+            KeywordInitializer::pp_keyword_mapping->destroy();
+            KeywordInitializer::pp_keyword_mapping.reset();
         }
     }
 
     static void destroySectionMapping() {
-        if (section_mapping) {
-            delete section_mapping;
-            section_mapping = nullptr;
+        if (KeywordInitializer::section_mapping.get() != nullptr) {
+            KeywordInitializer::section_mapping->destroy();
+            KeywordInitializer::section_mapping.reset();
         }
     }
 };

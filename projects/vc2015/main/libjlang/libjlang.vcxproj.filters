@@ -142,9 +142,6 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h">
       <Filter>src\jstd</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initor.h">
-      <Filter>src\asm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\Scanner.h">
       <Filter>src\stream</Filter>
     </ClInclude>
@@ -165,6 +162,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h">
       <Filter>src\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\IdentInfo.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initializer.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\jstd\Singleton.h">
+      <Filter>src\jstd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

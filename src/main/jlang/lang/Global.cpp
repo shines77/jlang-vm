@@ -4,19 +4,47 @@
 
 #include <assert.h>
 
+#include <mutex>
+#include <memory>
+
 using namespace jlang;
 
-jasm::KeywordMapping * jasm::KeywordInitor::keyword_mapping    = nullptr;
-jasm::KeywordMapping * jasm::KeywordInitor::pp_keyword_mapping = nullptr;
-jasm::KeywordMapping * jasm::KeywordInitor::section_mapping    = nullptr;
-LastError *            Global::last_error                      = nullptr;
+std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::keyword_mapping     = nullptr;
+std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::pp_keyword_mapping  = nullptr;
+std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::section_mapping     = nullptr;
+
+LastError * Global::last_error = nullptr;
+std::mutex  Global::s_mutex;
+
+///////////////////////////////////////////////////
+// Global::init()
+///////////////////////////////////////////////////
+
+void Global::initialize() {
+    lock_type lock(s_mutex);
+
+    jasm::KeywordInitializer::initialize();
+    LastError & _lastError = Global::lastError();
+    assert(_lastError.isSuccess());
+}
+
+///////////////////////////////////////////////////
+// Global::finalize()
+///////////////////////////////////////////////////
+
+void Global::finalize() {
+    lock_type lock(s_mutex);
+
+    jasm::KeywordInitializer::finalize();
+    Global::destroyLastError();
+}
 
 ///////////////////////////////////////////////////
 // Global::getKeywordMapping()
 ///////////////////////////////////////////////////
 
 jasm::KeywordMapping & Global::getKeywordMapping() {
-    return jasm::KeywordInitor::getKeywordMapping();
+    return jasm::KeywordInitializer::getKeywordMapping();
 }
 
 ///////////////////////////////////////////////////
@@ -24,7 +52,7 @@ jasm::KeywordMapping & Global::getKeywordMapping() {
 ///////////////////////////////////////////////////
 
 jasm::KeywordMapping & Global::getPPKeywordMapping() {
-    return jasm::KeywordInitor::getPPKeywordMapping();
+    return jasm::KeywordInitializer::getPPKeywordMapping();
 }
 
 ///////////////////////////////////////////////////
@@ -32,7 +60,7 @@ jasm::KeywordMapping & Global::getPPKeywordMapping() {
 ///////////////////////////////////////////////////
 
 jasm::KeywordMapping & Global::getSectionMapping() {
-    return jasm::KeywordInitor::getSectionMapping();
+    return jasm::KeywordInitializer::getSectionMapping();
 }
 
 ///////////////////////////////////////////////////
@@ -55,23 +83,4 @@ void Global::destroyLastError() {
         delete Global::last_error;
         Global::last_error = nullptr;
     }
-}
-
-///////////////////////////////////////////////////
-// Global::init()
-///////////////////////////////////////////////////
-
-void Global::init() {
-    jasm::KeywordInitor::init();
-    LastError & _lastError = Global::lastError();
-    assert(_lastError.isSuccess());
-}
-
-///////////////////////////////////////////////////
-// Global::finalize()
-///////////////////////////////////////////////////
-
-void Global::finalize() {
-    jasm::KeywordInitor::finalize();
-    Global::destroyLastError();
 }

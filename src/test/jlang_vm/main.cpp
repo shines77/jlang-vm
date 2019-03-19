@@ -459,7 +459,7 @@ int main(int argc, char * argv[])
 {
     print_version();
 
-    jasm::Initor initor;
+    jasm::Initializer initializer;
 
     test_Assembler();
 

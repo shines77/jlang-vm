@@ -9,8 +9,10 @@
 #include "jlang/lang/NonCopyable.h"
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/asm/Keyword.h"
+#include "jlang/jstd/Singleton.h"
 
 #include <stdint.h>
+#include <mutex>
 
 namespace jlang {
 
@@ -37,14 +39,17 @@ public:
 
 class Global : public lang::NonCopyable {
 private:
+    typedef std::lock_guard<std::mutex> lock_type;
+
     static LastError * last_error;
+    static std::mutex  s_mutex;
 
 public:
     Global() {}
     ~Global() {}
 
-    // Global::init() implementation in Keyword.h file.
-    static void init();
+    // Global::initialize() implementation in Keyword.h file.
+    static void initialize();
 
     // Global::finalize() implementation in Keyword.h file.
     static void finalize();

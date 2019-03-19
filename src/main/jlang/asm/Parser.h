@@ -14,13 +14,14 @@
 
 #include <string>
 
+#include "jlang/jstd/min_max.h"
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/lang/CharInfo.h"
 #include "jlang/asm/Keyword.h"
 #include "jlang/asm/Token.h"
 #include "jlang/stream/StreamMarker.h"
 #include "jlang/asm/ParserHelper.h"
-#include "jlang/jstd/min_max.h"
+#include "jlang/asm/IdentInfo.h"
 #include "jlang/support/HashAlgorithm.h"
 
 namespace jstd {
@@ -347,46 +348,40 @@ private:
     }
 
 public:
-    void parseIdentifier(std::string & identName, Token & token) {
+    void parseIdentifier(IdentInfo & identInfo, Token & token) {
         StreamMarker marker(stream_);
-        marker.remark();
+        marker.setmark();
         skipIdentifier();
-        intptr_t identLength = marker.length();
-        intptr_t identStart = marker.start();
-        intptr_t identEnd = marker.end();
-        assert(identLength > 0);
-        marker.append_string(identName);
-        token.setToken(Token::Identifier, identStart, identLength);
+        assert(marker.length() > 0);
+
+        marker.append_ident(identInfo);
+        token.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
-    void parseIdentifierBody(char firstChar, std::string & identName, Token & token) {
+    void parseIdentifierBody(char firstChar, IdentInfo & identInfo, Token & token) {
         assert(firstChar == stream_.get(-1));
         StreamMarker marker(stream_);
-        marker.remark();
+        marker.setmark(-1);
         skipIdentifier();
-        intptr_t identLength = marker.length() + 1;
-        intptr_t identStart = marker.start() - 1;
-        intptr_t identEnd = marker.end();
+        assert(marker.length() > 1);
 
-        identName = firstChar;
-        marker.append_string(identName);
-        token.setToken(Token::Identifier, identStart, identLength);
+        marker.append_ident(identInfo);
+        token.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
-    ErrorCode parseIdentifierStrict(std::string & identName, Token & token) {
+    ErrorCode parseIdentifierStrict(IdentInfo & identInfo, Token & token) {
         ErrorCode ec;
         StreamMarker marker(stream_);
-        marker.remark();
+        marker.setmark();
         skipIdentifier();
-        intptr_t identLength = marker.length();
-        intptr_t identStart = marker.start();
-        intptr_t identEnd = marker.end();
-        if (identLength > 0) {
-            marker.append_string(identName);
-            token.setToken(Token::Identifier, identStart, identLength);
+        assert(marker.length() > 0);
+
+        marker.append_ident(identInfo);
+        if (identInfo.length() > 0) {
+            token.setToken(Token::Identifier, identInfo.start(), identInfo.length());
         }
         else {
-            token.setToken(Token::Unrecognized, identStart, identLength);
+            token.setToken(Token::Unrecognized, identInfo.start(), identInfo.length());
             ec = ErrorCode::IllegalIdentifer;
         }
         return ec;
@@ -1514,10 +1509,10 @@ ParseAlignBytes_start:
                     skipWhiteSpaces();
                 }
                 else if (likely(isAlphabet(ch))) {
-                    std::string identName;
+                    IdentInfo identInfo;
                     Token identToken;
-                    parseIdentifier(identName, identToken);
-                    if (identName == "default") {   // Setting default align bytes.
+                    parseIdentifier(identInfo, identToken);
+                    if (identInfo.name() == "default") {   // Setting default align bytes.
                         skipWhiteSpace();
                         uint8_t ch = stream_.getu();
                         if (likely(isNumber(ch))) {
@@ -1547,8 +1542,8 @@ ParseAlignBytes_start:
                     skipWhiteSpaces();
 
 ParseStringSection_Entry:
-                    std::string identName;
-                    ec = parseIdentifierStrict(identName, token);
+                    IdentInfo identInfo;
+                    ec = parseIdentifierStrict(identInfo, token);
                     if (ec.isOK()) {
                         skipWhiteSpace();
 
@@ -1694,9 +1689,9 @@ ParseStringSection_Entry:
             case '_':
                 {
                     // Identifier or keywords
-                    std::string identName;
-                    parseIdentifier(identName, token);
-                    std::cout << ">>> Identifier name = [" << identName.c_str() << "]" << std::endl;
+                    IdentInfo identInfo;
+                    parseIdentifier(identInfo, token);
+                    std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
                 }
                 break;
 
@@ -1753,11 +1748,12 @@ ParseStringSection_Entry:
                     ch = stream_.get();
                     if (isAlphabet(ch)) {
                         // It's a section declare
-                        std::string sectionName = ".";
-                        parseIdentifier(sectionName, token);
+                        IdentInfo sectionInfo;
+                        sectionInfo.setName(".");
+                        parseIdentifier(sectionInfo, token);
 
                         KeywordMapping & sectionMapping = Global::getSectionMapping();
-                        auto iter = sectionMapping.find(sectionName);
+                        auto iter = sectionMapping.find(sectionInfo.name());
                         if (iter != sectionMapping.end()) {
                             Keyword section = iter->second;
                             ec = handleSectionStatement(section.getType(), token);
