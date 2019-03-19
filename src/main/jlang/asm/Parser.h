@@ -294,8 +294,8 @@ public:
         marker.remark();
         skipIdentifier();
         intptr_t identLength = marker.length();
-        intptr_t identStart = marker.start_pos();
-        intptr_t identEnd = marker.end_pos();
+        intptr_t identStart = marker.start();
+        intptr_t identEnd = marker.end();
         assert(identLength > 0);
         marker.append_string(identName);
         token.setToken(Token::Identifier, identStart, identLength);
@@ -307,8 +307,8 @@ public:
         marker.remark();
         skipIdentifier();
         intptr_t identLength = marker.length() + 1;
-        intptr_t identStart = marker.start_pos() - 1;
-        intptr_t identEnd = marker.end_pos();
+        intptr_t identStart = marker.start() - 1;
+        intptr_t identEnd = marker.end();
 
         identName = firstChar;
         marker.append_string(identName);
@@ -321,8 +321,8 @@ public:
         marker.remark();
         skipIdentifier();
         intptr_t identLength = marker.length();
-        intptr_t identStart = marker.start_pos();
-        intptr_t identEnd = marker.end_pos();
+        intptr_t identStart = marker.start();
+        intptr_t identEnd = marker.end();
         if (identLength > 0) {
             marker.append_string(identName);
             token.setToken(Token::Identifier, identStart, identLength);
@@ -340,8 +340,8 @@ public:
         skipReservedKeyword();
         intptr_t keywordLength = marker.length();
         if (keywordLength > 0) {
-            intptr_t keywordStart = marker.start_pos();
-            intptr_t keywordEnd = marker.end_pos();
+            intptr_t keywordStart = marker.start();
+            intptr_t keywordEnd = marker.end();
             char keywordName[MAX_IDENTIFIER_LEN];
             marker.copy_string(keywordName);
 
@@ -368,8 +368,8 @@ public:
 
                     identifierMarker.remark();
                     skipIdentifier();
-                    identifier_start = identifierMarker.start_pos();
-                    identifier_end = identifierMarker.end_pos();
+                    identifier_start = identifierMarker.start();
+                    identifier_end = identifierMarker.end();
                     assert(identifier_end > identifier_start);
                     identifierMarker.copy_string(identifier_name);
 
@@ -395,8 +395,8 @@ public:
                             skipWhiteSpace();
                             identifierMarker.remark();
                             skipIdentifier();
-                            identifier_start = identifierMarker.start_pos();
-                            identifier_end = identifierMarker.end_pos();
+                            identifier_start = identifierMarker.start();
+                            identifier_end = identifierMarker.end();
                             if (identifier_end <= identifier_start) {
                                 // Type-list define failure
                                 std::cout << "*** Error: Type-list define failure. *** ";
@@ -460,7 +460,7 @@ public:
         skipReservedKeyword();
         intptr_t keyword_length = marker.length();
         if (keyword_length > 0) {
-            char * keyword_start = marker.start();
+            char * keyword_start = marker.start_ptr();
             std::string keyword_name(keyword_start, (size_t)keyword_length);
             KeywordMapping & ppKeyMapping = Global::getPPKeywordMapping();
             KeywordMapping::iterator iter = ppKeyMapping.find(keyword_name);
@@ -468,7 +468,7 @@ public:
                 Keyword & keyword = iter->second;
                 assert(keyword.getCategory() == KeywordCategory::Preprocessing);
                 tokenType = keyword.getType();
-                token.setStartPos(marker.start_pos());
+                token.setStartPos(marker.start());
                 token.setLength(keyword_length);
                 ec = handlePreprocessingStatement(tokenType, token);
                 if (ec.isOK()) {
@@ -491,10 +491,10 @@ public:
             ec = ErrorCode::IllegalPreprocessingKeyword;
         }
         if (tokenType != Token::Unknown) {
-            token.setToken(tokenType, marker.start_pos(), marker.length());
+            token.setToken(tokenType, marker.start(), marker.length());
         }
         else {
-            token.setToken(tokenType, marker.start_pos(), 0);
+            token.setToken(tokenType, marker.start(), 0);
         }
         return is_ok;
     }
@@ -1358,7 +1358,7 @@ parseExit:
                 uint64_t number;
                 ec = parseRadixNumber(tokenType, radix, number);
                 if (ec.isOK()) {
-                    token.setToken(tokenType, marker.start_pos(), marker.length());
+                    token.setToken(tokenType, marker.start(), marker.length());
                 }
                 return ec;
             }
@@ -1371,7 +1371,7 @@ parseExit:
         bool is_float;
         ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
         if (ec.isOK()) {
-            token.setToken(tokenType, marker.start_pos(), marker.length());
+            token.setToken(tokenType, marker.start(), marker.length());
         }
 
         return ec;
@@ -1465,7 +1465,7 @@ ParseAlignBytes_start:
                             goto ParseAlignBytes_start;
                         }
                         else {
-                            // Got Errors, expect to decimal integer.
+                            // Got Errors, expect to a decimal integer.
                             ec = ErrorCode::UnknownError;
                         }
                     }
@@ -1650,7 +1650,7 @@ ParseStringSection_Entry:
                         uint64_t number;
                         ec = parseRadixNumber(tokenType, radix, number);
                         if (ec.isOK()) {
-                            token.setToken(tokenType, marker.start_pos(), marker.length());
+                            token.setToken(tokenType, marker.start(), marker.length());
                             return true;
                         }
                     }
@@ -1662,7 +1662,7 @@ ParseStringSection_Entry:
                     bool is_float;
                     ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
                     if (ec.isOK()) {
-                        token.setToken(tokenType, marker.start_pos(), marker.length());
+                        token.setToken(tokenType, marker.start(), marker.length());
                         return true;
                     }
 
@@ -1681,7 +1681,7 @@ ParseStringSection_Entry:
                     bool is_float;
                     ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
                     if (ec.isOK()) {
-                        token.setToken(tokenType, marker.start_pos(), marker.length());
+                        token.setToken(tokenType, marker.start(), marker.length());
                         return true;
                     }
                     token.setType(Token::IntegerLiteral);
@@ -1713,7 +1713,7 @@ ParseStringSection_Entry:
                         int exponent;
                         ec = parseRealNumberSuffix(tokenType, fractional, exponent);
                         if (ec.isOK()) {
-                            token.setToken(tokenType, marker.start_pos(), marker.length());
+                            token.setToken(tokenType, marker.start(), marker.length());
                             return true;
                         }
                     }
@@ -2006,7 +2006,7 @@ ParseStringSection_Entry:
                 break;
             }
 
-            token.setStartPos(marker.start_pos());
+            token.setStartPos(marker.start());
             token.setLength(marker.length());
             assert(token.getLength() > 0);
             if (token.getType() != Token::Unknown &&

@@ -233,27 +233,27 @@ public:
             && (this->marker_ <= this->stream_.tail()));
     }
 
-    char * start() const {
+    char * start_ptr() const {
         assert(this->marker_ != nullptr);
         assert(this->is_marked());
         assert(this->marker_ >= this->stream_.head());
         return (this->marker_);
     }
 
-    char * end() const {
+    char * end_ptr() const {
         assert(this->marker_ != nullptr);
         assert(this->is_marked());
         return this->stream_.current();
     }
 
-    intptr_t start_pos() const {
+    intptr_t start() const {
         assert(this->marker_ != nullptr);
         assert(this->is_marked());
         assert(this->marker_ >= this->stream_.head());
         return (this->marker_ - this->stream_.head());
     }
 
-    intptr_t end_pos() const {
+    intptr_t end() const {
         assert(this->marker_ != nullptr);
         assert(this->is_marked());
         return (this->stream_.current() - this->stream_.head());
@@ -266,8 +266,8 @@ public:
         return (this->stream_.current() - this->marker_);
     }
 
-    char * get_marker() const { return this->start(); }
-    char * get_current() const { return this->end(); }
+    char * get_marker() const { return this->start_ptr(); }
+    char * get_current() const { return this->end_ptr(); }
 
     void set_current(char * position) {
         assert(position >= this->stream_.head() || position < this->stream_.tail());
@@ -310,9 +310,9 @@ public:
 
     intptr_t copy_string(char * substr, size_t size) {
         assert(substr != nullptr);
-        assert(this->end() >= this->start());
+        assert(this->end_ptr() >= this->start_ptr());
         if (likely(this->is_marked())) {
-            return StringUtils::sub_str(substr, size, this->start(), this->end());
+            return StringUtils::sub_str(substr, size, this->start_ptr(), this->end_ptr());
         }
         else {
             *substr = '\0';
@@ -327,7 +327,7 @@ public:
 
     intptr_t copy_string(std::string & substr) {
         if (likely(this->is_marked())) {
-            return StringUtils::sub_str(substr, this->start(), this->end());
+            return StringUtils::sub_str(substr, this->start_ptr(), this->end_ptr());
         }
         else {
             substr.clear();
@@ -337,7 +337,7 @@ public:
 
     intptr_t append_string(std::string & substr) {
         if (likely(this->is_marked())) {
-            return StringUtils::append(substr, this->start(), this->end());
+            return StringUtils::append(substr, this->start_ptr(), this->end_ptr());
         }
         else {
             substr.clear();
