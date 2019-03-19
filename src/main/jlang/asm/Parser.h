@@ -20,7 +20,65 @@
 #include "jlang/asm/Token.h"
 #include "jlang/stream/StreamMarker.h"
 #include "jlang/asm/ParserHelper.h"
+#include "jlang/jstd/min_max.h"
 #include "jlang/support/HashAlgorithm.h"
+
+namespace jstd {
+
+struct do_nothing_t {};
+
+static do_nothing_t do_nothing;
+
+} // namespace jstd
+
+namespace jlang {
+
+template <std::size_t Capacity, typename CharTy = char>
+class alignas(8) SmallString {
+public:
+    typedef CharTy          char_type;
+    typedef std::size_t     size_type;
+
+    typedef CharTy *        pointer;
+    typedef const CharTy *  const_pointer;
+
+    static const std::size_t kCapacity = Capacity;
+
+protected:
+    char_type data_[kCapacity];
+    size_type size_;
+
+public:
+    SmallString() : size_(0) {
+        this->data_[0] = static_cast<char_type>('\0');
+    }
+
+    SmallString(const jstd::do_nothing_t &) {
+    }
+
+    SmallString(const SmallString & src) {
+        this->clone(src);
+    }
+
+    pointer data() { return &(this->data_[0]); }
+    pointer c_str() { return this->data(); }
+
+    const_pointer data() const { return &(this->data_[0]); }
+    const_pointer c_str() const { return this->data(); }
+
+    size_type size() const { return this->size_; }
+    size_type capacity() const { return kCapacity; }
+
+    void clone(const SmallString & src) {
+        static_assert(kCapacity > 0, "Capacity must be greater than 0.");
+        size_type copySize = jstd::minimum(kCapacity - 1, src.size());
+        ::memcpy(this->data_, src.data_, copySize);
+        this->data_[copySize] = static_cast<char_type>('\0');
+        this->size_ = src.size_;
+    }
+};
+
+} // namespace jlang
 
 namespace jlang {
 namespace jasm {
@@ -336,23 +394,24 @@ public:
 
     bool parseReservedKeyword(ErrorCode & ec) {
         StreamMarker marker(stream_);
-        marker.remark();
+        marker.setmark();
         skipReservedKeyword();
         intptr_t keywordLength = marker.length();
         if (keywordLength > 0) {
             intptr_t keywordStart = marker.start();
             intptr_t keywordEnd = marker.end();
-            char keywordName[MAX_IDENTIFIER_LEN];
-            marker.copy_string(keywordName);
+            //char keywordName[MAX_IDENTIFIER_LEN];
+            SmallString<MAX_IDENTIFIER_LEN> keywordName;
+            marker.copy_string(keywordName.c_str(), keywordName.capacity());
 
 #if (KEYWORD_HASHCODE_WORDLEN == 32)
-            uint32_t hash32 = getHash32(keywordName, (size_t)keywordLength);
+            uint32_t hash32 = getHash32(keywordName.c_str(), (size_t)keywordLength);
 #elif (KEYWORD_HASHCODE_WORDLEN == 64)
-            uint64_t hash64 = getHash64(keywordName, (size_t)keywordLength);
+            uint64_t hash64 = getHash64(keywordName.c_str(), (size_t)keywordLength);
 #endif
             KeywordMapping & keyMapping = Global::getKeywordMapping();
             assert(keyMapping.inited());
-            KeywordMapping::iterator iter = keyMapping.find(keywordName, (size_t)keywordLength);
+            KeywordMapping::iterator iter = keyMapping.find(keywordName.c_str(), keywordName.size(), (size_t)keywordLength);
             if (iter != keyMapping.end()) {
                 Keyword keyword = iter->second;
                 if (keyword.getCategory() == KeywordCategory::Pod ||
@@ -363,15 +422,15 @@ public:
                     skipWhiteSpace();
 
                     char identifier_name[MAX_IDENTIFIER_LEN];
-                    StreamMarker identifierMarker(stream_);
+                    StreamMarker identMarker(stream_);
                     intptr_t identifier_start, identifier_end;
 
-                    identifierMarker.remark();
+                    identMarker.setmark();
                     skipIdentifier();
-                    identifier_start = identifierMarker.start();
-                    identifier_end = identifierMarker.end();
+                    identifier_start = identMarker.start();
+                    identifier_end = identMarker.end();
                     assert(identifier_end > identifier_start);
-                    identifierMarker.copy_string(identifier_name);
+                    identMarker.copy_string(identifier_name);
 
                     skipWhiteSpace();
 
@@ -393,17 +452,17 @@ public:
                         do {
                             stream_.next();
                             skipWhiteSpace();
-                            identifierMarker.remark();
+                            identMarker.remark();
                             skipIdentifier();
-                            identifier_start = identifierMarker.start();
-                            identifier_end = identifierMarker.end();
+                            identifier_start = identMarker.start();
+                            identifier_end = identMarker.end();
                             if (identifier_end <= identifier_start) {
                                 // Type-list define failure
                                 std::cout << "*** Error: Type-list define failure. *** ";
                                 return false;
                             }
                             assert(identifier_end > identifier_start);
-                            identifierMarker.copy_string(identifier_name);
+                            identMarker.copy_string(identifier_name);
                             skipWhiteSpace();
 
                             //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
@@ -811,7 +870,7 @@ public:
         return ec;
     }
 
-    ErrorCode parserDecimalNumber(uint64_t & number) {
+    ErrorCode parseDecimalNumber(uint64_t & number) {
         bool is_valid = parseRadixNumberImpl<10>(number);
         if (is_valid)
             return ErrorCode::OK;
@@ -1442,7 +1501,7 @@ parseExit:
                 if (likely(isNumber(ch))) {
 ParseAlignBytes_start:
                     uint64_t alignedBytes = 0;
-                    ec = parserDecimalNumber(alignedBytes);
+                    ec = parseDecimalNumber(alignedBytes);
                     if (ec.isOK()) {
                         uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
                         if (newAlignedBytes != alignedBytes) {

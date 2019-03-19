@@ -308,11 +308,11 @@ public:
         }
     }
 
-    intptr_t copy_string(char * substr, size_t size) {
+    intptr_t copy_string(char * substr, size_t capacity) {
         assert(substr != nullptr);
         assert(this->end_ptr() >= this->start_ptr());
         if (likely(this->is_marked())) {
-            return StringUtils::sub_str(substr, size, this->start_ptr(), this->end_ptr());
+            return StringUtils::sub_str(substr, capacity, this->start_ptr(), this->end_ptr());
         }
         else {
             *substr = '\0';
