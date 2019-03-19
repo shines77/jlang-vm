@@ -57,6 +57,7 @@ public:
 
         // Constant errors
         IllegalNumber,
+        IllegalRadixNumber,
         IllegalRadix2Number,
         IllegalRadix8Number,
         IllegalRadix10Number,
@@ -83,11 +84,20 @@ public:
         UnknownUnescapedChar,
 
         // String literal
+        ExpectingStringLiteral,
         IllegalStringLiteral,
         IllegalStringLiteralIsNotCompleted,
 
         // String section
+        UnknownSectionStatement,
         IllegalStringSection,
+        ExpectingStringSectionBeginning,
+        ExpectingStringSectionEnding,
+        IllegalStringSectionIdentifier,
+        IllegalStringSectionStringLiteral,
+
+        // Identifer
+        IllegalIdentifer,
 
         // Standard errors
         Error_NullPtr,
@@ -114,7 +124,7 @@ private:
     Type ec_;
 
 public:
-    ErrorCode() : ec_(Type::UnknownError) {}
+    ErrorCode() : ec_(Type::OK) {}
     ErrorCode(Type ec) : ec_(ec) {}
     ErrorCode(int32_t ec) : ec_(static_cast<Type>(ec)) {}
     ErrorCode(uint32_t ec) : ec_(static_cast<Type>(ec)) {}
@@ -129,6 +139,10 @@ public:
 
     bool isSuccess() const {
         return (this->ec_ == Type::Success);
+    }
+
+    bool hasErrors() const {
+        return (this->ec_ != Type::OK);
     }
 
     bool isEquals(ErrorCode ec) const    { return (this->value() == ec.value()); }

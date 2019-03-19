@@ -301,7 +301,7 @@ public:
         token.setToken(Token::Identifier, identStart, identLength);
     }
 
-    void parseIdentifierBody(char firstChar, std::string & identName, Token & token, ErrorCode & ec) {
+    void parseIdentifierBody(char firstChar, std::string & identName, Token & token) {
         assert(firstChar == stream_.get(-1));
         StreamMarker marker(stream_);
         marker.remark();
@@ -315,7 +315,8 @@ public:
         token.setToken(Token::Identifier, identStart, identLength);
     }
 
-    bool parseIdentifierStrict(std::string & identName, Token & token, ErrorCode & ec) {
+    ErrorCode parseIdentifierStrict(std::string & identName, Token & token) {
+        ErrorCode ec;
         StreamMarker marker(stream_);
         marker.remark();
         skipIdentifier();
@@ -325,12 +326,12 @@ public:
         if (identLength > 0) {
             marker.append_string(identName);
             token.setToken(Token::Identifier, identStart, identLength);
-            return true;
         }
         else {
             token.setToken(Token::Unrecognized, identStart, identLength);
-            return false;
+            ec = ErrorCode::IllegalIdentifer;
         }
+        return ec;
     }
 
     bool parseReservedKeyword(ErrorCode & ec) {
@@ -684,7 +685,7 @@ public:
     }
 
     template <uint32_t radix = 10>
-    bool parseRadixNumber(uint64_t & value) {
+    bool parseRadixNumberImpl(uint64_t & value) {
         bool is_valid;
         value = 0;
         const char * marker = stream_.current();
@@ -762,67 +763,66 @@ public:
         return is_valid;
     }
 
-    bool parseRadixNumber(Token::Type & tokenType, ErrorCode & ec,
-                          int & radix, uint64_t & number) {
-        bool parse_ok = true;
+    ErrorCode parseRadixNumber(Token::Type & tokenType,
+                               int & radix, uint64_t & number) {
+        ErrorCode ec;
         bool is_valid;
         char ch1 = stream_.get(1);
-        if (ch1 == 'x' || ch1 == 'X') {
+        if (likely(ch1 == 'x' || ch1 == 'X')) {
             radix = 16;
             stream_.next(2);
-            is_valid = parseRadixNumber<16>(number);
+            is_valid = parseRadixNumberImpl<16>(number);
             tokenType = Token::HexLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix16Number;
             }
         }
-        else if (ch1 == 'o' || ch1 == 'O') {
+        else if (likely(ch1 == 'o' || ch1 == 'O')) {
             radix = 8;
             stream_.next(2);
-            is_valid = parseRadixNumber<8>(number);
+            is_valid = parseRadixNumberImpl<8>(number);
             tokenType = Token::OcxLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix8Number;
             }
         }
-        else if (ch1 == 'b' || ch1 == 'B') {
+        else if (likely(ch1 == 'b' || ch1 == 'B')) {
             radix = 2;
             stream_.next(2);
-            is_valid = parseRadixNumber<2>(number);
+            is_valid = parseRadixNumberImpl<2>(number);
             tokenType = Token::BinaryLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix2Number;
             }
         }
-        else if (ch1 == 'd' || ch1 == 'D') {
+        else if (likely(ch1 == 'd' || ch1 == 'D')) {
             radix = 10;
             stream_.next(2);
-            is_valid = parseRadixNumber<10>(number);
+            is_valid = parseRadixNumberImpl<10>(number);
             tokenType = Token::DecLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix10Number;
             }
         }
         else {
-            // It's not a based number, re-parse from old place.
-            parse_ok = false;
-            is_valid = false;
+            // It's not a based radix number, re-parse from old place.
+            ec = ErrorCode::IllegalRadixNumber;
         }
-        return parse_ok;
+        return ec;
     }
 
-    bool parserDecimalNumber(uint64_t & number, ErrorCode & ec) {
-        bool is_valid = parseRadixNumber<10>(number);
-        if (!is_valid) {
-            ec = ErrorCode::IllegalRadix10Number;
-        }
-        return is_valid;
+    ErrorCode parserDecimalNumber(uint64_t & number) {
+        bool is_valid = parseRadixNumberImpl<10>(number);
+        if (is_valid)
+            return ErrorCode::OK;
+        else
+            return ErrorCode::IllegalRadix10Number;
     }
 
-    bool parseRealNumber(Token::Type & tokenType, ErrorCode & ec,
-                         uint64_t & integer, uint64_t & fractional,
-                         int & exponent, bool & is_float) {
-        bool is_ok;
+    ErrorCode parseRealNumber(Token::Type & tokenType,
+                              uint64_t & integer, uint64_t & fractional,
+                              int & exponent, bool & is_float) {
+        ErrorCode ec;
         int integer_len = 0;
         int fractional_len = 0;
         integer = 0;
@@ -868,7 +868,7 @@ public:
                 else if (ch == '.') {
                     // Found the second decimal point, exit now.
                     ec = ErrorCode::IllegalFloatNumber;
-                    break;
+                    goto parseExit;
                 }
                 else {
                     break;
@@ -907,20 +907,24 @@ public:
                 if (exponent_cnt > 10 || (exponent_cnt == 10 && exponent_num < 1000000000)) {
                     // Exponent part is overflow
                     ec = ErrorCode::ErrorExponentPartOverflow;
+                    goto parseExit;
                 }
                 else if (exponent_cnt <= 0) {
                     // Does not contain the exponential number, it's a illegal error.
                     ec = ErrorCode::IllegalExponentPart;
+                    goto parseExit;
                 }
                 else {
                     // The exponent is smaller than -2147483648 or bigger than 2147483647 !
                     if ((exponent_sign != -1 && exponent_num > 2147483647) ||
                         (exponent_sign == -1 && exponent_num > 2147483648)) {
                         ec = ErrorCode::ErrorNegativeExponentPartOverflow;
+                        goto parseExit;
                     }
                     // The exponent of the long double range is (1.2e-4932 ~ 1.2e+4932)
                     else if (exponent_num > 4932) {
                         ec = ErrorCode::ErrorExponentPartOutOfRange;
+                        goto parseExit;
                     } 
                     exponent = (exponent_sign != -1) ? (int)exponent_num : -(int)exponent_num;
                     hasExponent = true;
@@ -944,11 +948,13 @@ public:
         if (fractional_len > 20 || (fractional_len == 20 && fractional < 0xDE0B6B3A7640000ULL)) {
             // Fractional part is overflow
             ec = ErrorCode::ErrorFractionalPartOverflow;
+            goto parseExit;
         }
         // Same to fractional part
         if (integer_len > 20 || (integer_len == 20 && integer < 0xDE0B6B3A7640000ULL)) {
             // Integer part is overflow
             ec = ErrorCode::ErrorIntegerPartOverflow;
+            goto parseExit;
         }
 
         if (ec == ErrorCode::OK) {
@@ -958,17 +964,15 @@ public:
             else {
                 tokenType = Token::IntegerLiteral;
             }
-            is_ok = true;
         }
-        else {
-            is_ok = false;
-        }
-        return is_ok;
+
+parseExit:
+        return ec;
     }
 
-    bool parseRealNumberSuffix(Token::Type & tokenType, ErrorCode & ec,
-                               uint64_t & fractional, int & exponent) {
-        bool is_ok;
+    ErrorCode parseRealNumberSuffix(Token::Type & tokenType,
+                                    uint64_t & fractional, int & exponent) {
+        ErrorCode ec;
         int fractional_len = 0;
         fractional = 0;
         exponent = 0;
@@ -990,7 +994,7 @@ public:
             else if (ch == '.') {
                 // Found the second decimal point, exit now.
                 ec = ErrorCode::IllegalFloatingNumber;
-                break;
+                goto parseExit;
             }
             else {
                 break;
@@ -1028,20 +1032,24 @@ public:
                 if (exponent_cnt > 10 || (exponent_cnt == 10 && exponent_num < 1000000000)) {
                     // Exponent part is overflow
                     ec = ErrorCode::ErrorExponentPartOverflow;
+                    goto parseExit;
                 }
                 else if (exponent_cnt <= 0) {
                     // Does not contain the exponential number, it's a illegal error.
                     ec = ErrorCode::IllegalExponentPart;
+                    goto parseExit;
                 }
                 else {
                     // The exponent is smaller than -2147483648 or bigger than 2147483647 !
                     if ((exponent_sign != -1 && exponent_num > 2147483647) ||
                         (exponent_sign == -1 && exponent_num > 2147483648)) {
                         ec = ErrorCode::ErrorNegativeExponentPartOverflow;
+                        goto parseExit;
                     }
                     // The exponent of the long double range is (1.2e-4932 ~ 1.2e+4932)
                     else if (exponent_num > 4932) {
                         ec = ErrorCode::ErrorExponentPartOutOfRange;
+                        goto parseExit;
                     }
                     exponent = (exponent_sign != -1) ? (int)exponent_num : -(int)exponent_num;
                     hasExponent = true;
@@ -1063,13 +1071,15 @@ public:
         if (fractional_len > 20 || (fractional_len == 20 && fractional < 0xDE0B6B3A7640000ULL)) {
             // Fractional part is overflow
             ec = ErrorCode::ErrorFractionalPartOverflow;
+            goto parseExit;
         }
 
-        is_ok = (ec == ErrorCode::OK);
-        if (is_ok) {
+        if (ec == ErrorCode::OK) {
             tokenType = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
         }
-        return is_ok;
+
+parseExit:
+        return ec;
     }
 
     inline char toOcxChar(unsigned int ocx) const {
@@ -1121,7 +1131,7 @@ public:
     }
 
     int getUnescapedChar(StringStream & stream, unsigned char & ch) {
-        int skip;
+        int skip = 0;
         bool canUnescape = CharInfo::CanUnescape(ch);
         if (canUnescape) {
             bool isAdvencadUnescape = CharInfo::IsAdvancedUnescape(ch);
@@ -1171,35 +1181,35 @@ public:
                             }
                             else {
                                 // Unescape HexChar error: The second char is not a hex chars.
-                                skip = 0;
+                                skip = -1;
                             }
                         }
                         else {
                             // Unescape HexChar error: The first char is not a hex chars.
-                            skip = 0;
+                            skip = -2;
                         }
                     }
                     else {
                         // Unescape HexChar error: remain length less than 3.
-                        skip = 0;
+                        skip = -3;
                     }
                 }
                 else {
                     // Unknown unescape type
-                    skip = 0;
+                    skip = -4;
                 }
             }
         }
         else {
             // Unescape error
-            skip = 0;
+            skip = -5;
         }
         return skip;
     }
 
     // Single character literal
-    bool parseSingleCharLiteral(std::string & content, Token & token, ErrorCode & ec) {
-        ec = ErrorCode::OK;
+    ErrorCode parseSingleCharLiteral(std::string & content, Token & token) {
+        ErrorCode ec;
         unsigned char character;
         char ch = stream_.get();
         if (likely(ch != '\\')) {
@@ -1219,9 +1229,12 @@ public:
                 stream_.next(skip);
             }
             else {
+                // Get a unknown unescaped char
                 ec = ErrorCode::UnknownUnescapedChar;
+                goto parseExit;
             }
         }
+
         if (likely(stream_.get() == '\'')) {
             std::string escapedChars;
             getEscapedChars(character, escapedChars);
@@ -1231,17 +1244,20 @@ public:
         else {
             // It's a illegal single character format.
             ec = ErrorCode::IllegalSingleCharacterFormat;
+            goto parseExit;
         }
 
         if (ec == ErrorCode::OK) {
             content = character;
         }
-        return (ec == ErrorCode::OK);
+
+parseExit:
+        return ec;
     }
 
     // Normal string literal
-    bool parseStringLiteral(std::string & content, Token & token, ErrorCode & ec) {
-        ec = ErrorCode::OK;
+    ErrorCode parseStringLiteral(std::string & content, Token & token) {
+        ErrorCode ec;
         int multipart_cnt = 0;
         bool completed;
 
@@ -1323,57 +1339,75 @@ public:
         else {
             std::cout << ">>> Error: String literal is not completed. (mismatch \\\") !" << std::endl;
         }
-        return (ec == ErrorCode::OK);
+        return ec;
     }
 
-    bool parseLiteral(std::string & content, Token & token, ErrorCode & ec) {
-        bool parse_ok;
+    ErrorCode parseNumberLiteral(Token & token) {
+        ErrorCode ec;
         Token::Type tokenType;
         StreamMarker marker(stream_);
         marker.setmark();
-        // Starting with numbers: "[0-9]", or ".[0-9]"
-        uint8_t ch = stream_.getu();
-        if (isNumber(ch)) {
-            ec = ErrorCode::OK;
-            // It's a radix based number? like "0x", "0o", "0b", "0d" ...
-            char ch = stream_.get();
-            if (ch == '0') {
-                char ch1 = stream_.get(1);
-                if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
-                    // Determine the radix for the constant
-                    int radix;
-                    uint64_t number;
-                    parse_ok = parseRadixNumber(tokenType, ec, radix, number);
-                    if (parse_ok) {
-                        token.setToken(tokenType, marker.start_pos(), marker.length());
-                        return true;
-                    }
-                }
-            }
 
-            // It's a real number? Including integer, float or double number.
-            uint64_t integer;
-            uint64_t fractional;
-            int exponent;
-            bool is_float;
-            parse_ok = parseRealNumber(tokenType, ec, integer, fractional, exponent, is_float);
-            if (parse_ok) {
-                token.setToken(tokenType, marker.start_pos(), marker.length());
-                return true;
+        // It's a radix based number? like "0x", "0o", "0b", "0d" ...
+        char ch = stream_.get();
+        if (ch == '0') {
+            char ch1 = stream_.get(1);
+            if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
+                // Determine the radix for the constant
+                int radix;
+                uint64_t number;
+                ec = parseRadixNumber(tokenType, radix, number);
+                if (ec.isOK()) {
+                    token.setToken(tokenType, marker.start_pos(), marker.length());
+                }
+                return ec;
             }
         }
 
-        if (stream_.get() == '\"') {
+        // It's a real number? Including integer, float or double number.
+        uint64_t integer;
+        uint64_t fractional;
+        int exponent;
+        bool is_float;
+        ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+        if (ec.isOK()) {
+            token.setToken(tokenType, marker.start_pos(), marker.length());
+        }
+
+        return ec;
+    }
+
+    ErrorCode parseLiteral(std::string & content, Token & token) {
+        ErrorCode ec;
+        
+        uint8_t ch = stream_.getu();
+        if (likely(isNumber(ch))) {
+            // A integer or a real number.
+            // Starting with numbers: "[0-9]", or ".[0-9]"
+            return parseNumberLiteral(token);
+        }
+        else if (likely(stream_.get() == '\"')) {
             // String literal or single char literal
             stream_.next();
-            return parseStringLiteral(content, token, ec);
+            return parseStringLiteral(content, token);
         }
-        else if (stream_.get() == '\'') {
+        else if (likely(stream_.get() == '\'')) {
             // Single character literal
             stream_.next();
-            return parseSingleCharLiteral(content, token, ec);
+            return parseSingleCharLiteral(content, token);
         }
-        return false;
+        else if (likely(stream_.get() == '-')) {
+            // Negative sign
+            stream_.next();
+            return parseStringLiteral(content, token);
+        }
+        else if (likely(stream_.get() == '+')) {
+            // Positive sign
+            stream_.next();
+            return parseStringLiteral(content, token);
+        }
+
+        return ec;
     }
 
     uint64_t roundAlignedBytes(uint64_t alignedBytes) {
@@ -1393,11 +1427,14 @@ public:
         }
     }
 
-    int handleSectionStatement(Token::Type sectionType, Token & token, ErrorCode & ec) {
-        int result = 0;
+    ErrorCode handleSectionStatement(Token::Type sectionType, Token & token) {
+        ErrorCode ec;
+
         switch (sectionType) {
         case Token::Align:
             {
+                std::cout << ">>> Section [.align] begin." << std::endl;
+
                 // Skip the leading whitespace character first.
                 skipWhiteSpace();
 
@@ -1405,7 +1442,8 @@ public:
                 if (likely(isNumber(ch))) {
 ParseAlignBytes_start:
                     uint64_t alignedBytes = 0;
-                    if (parserDecimalNumber(alignedBytes, ec)) {
+                    ec = parserDecimalNumber(alignedBytes);
+                    if (ec.isOK()) {
                         uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
                         if (newAlignedBytes != alignedBytes) {
                             // Have changed to newAlignedBytes from alignedBytes.
@@ -1432,6 +1470,8 @@ ParseAlignBytes_start:
                         }
                     }
                 }
+
+                std::cout << ">>> Section [.align] end." << std::endl << std::endl;
             }
             break;
 
@@ -1443,12 +1483,14 @@ ParseAlignBytes_start:
                 uint8_t ch = stream_.getu();
                 if (likely(ch == '{')) {
                     stream_.next();
+
+                    std::cout << ">>> Section [.strings] begin." << std::endl;
                     skipWhiteSpaces();
 
-ParseStringSectionEntry:
+ParseStringSection_Entry:
                     std::string identName;
-                    bool isIdentifier = parseIdentifierStrict(identName, token, ec);
-                    if (isIdentifier) {
+                    ec = parseIdentifierStrict(identName, token);
+                    if (ec.isOK()) {
                         skipWhiteSpace();
 
                         ch = stream_.getu();
@@ -1456,22 +1498,23 @@ ParseStringSectionEntry:
                             stream_.next();
 
                             std::string stringValue;
-                            bool parseOK = parseStringLiteral(stringValue, token, ec);
-                            if (parseOK) {
+                            ec = parseStringLiteral(stringValue, token);
+                            if (ec.isOK()) {
                                 skipWhiteSpaces();
 
                                 // Parse next string or end of sign '}'.
                                 ch = stream_.getu();
                                 if (likely(isIdentifierFirst(ch))) {
                                     // Next string identifier
-                                    goto ParseStringSectionEntry;
+                                    goto ParseStringSection_Entry;
                                 }
                                 else if (likely(ch == '}')) {
                                     // End of string section
+                                    std::cout << ">>> Section [.strings] end." << std::endl << std::endl;
                                 }
                                 else {
-                                    // Got a error, illegal string section.
-                                    ec = ErrorCode::IllegalStringSection;
+                                    // Got a error, expect to '}', string section ending.
+                                    ec = ErrorCode::ExpectingStringSectionEnding;
                                 }
                             }
                             else {
@@ -1481,17 +1524,13 @@ ParseStringSectionEntry:
                         }
                         else {
                             // Got a error, expect to '"'.
-                            ec = ErrorCode::UnknownError;
+                            ec = ErrorCode::ExpectingStringLiteral;
                         }
-                    }
-                    else {
-                        // Got a error, illegal string section.
-                        ec = ErrorCode::IllegalStringSection;
                     }
                 }
                 else {
-                    // Got a error, expect to '{'.
-                    ec = ErrorCode::UnknownError;
+                    // Got a error, expect to '{', string section beginning.
+                    ec = ErrorCode::ExpectingStringSectionBeginning;
                 }
             }
             break;
@@ -1507,11 +1546,12 @@ ParseStringSectionEntry:
             {
                 // Unsupported section keyword
                 token.setType(Token::Unsupported);
-                result = -1;
+                ec = ErrorCode::UnknownSectionStatement;
             }
             break;
         }
-        return result;
+
+        return ec;
     }
 
     bool nextToken(Token & token, ErrorCode & ec_) {
@@ -1608,8 +1648,8 @@ ParseStringSectionEntry:
                         // Determine the radix for the constant
                         int radix;
                         uint64_t number;
-                        success = parseRadixNumber(tokenType, ec, radix, number);
-                        if (success) {
+                        ec = parseRadixNumber(tokenType, radix, number);
+                        if (ec.isOK()) {
                             token.setToken(tokenType, marker.start_pos(), marker.length());
                             return true;
                         }
@@ -1620,8 +1660,8 @@ ParseStringSectionEntry:
                     uint64_t fractional;
                     int exponent;
                     bool is_float;
-                    success = parseRealNumber(tokenType, ec, integer, fractional, exponent, is_float);
-                    if (success) {
+                    ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+                    if (ec.isOK()) {
                         token.setToken(tokenType, marker.start_pos(), marker.length());
                         return true;
                     }
@@ -1639,8 +1679,8 @@ ParseStringSectionEntry:
                     uint64_t fractional;
                     int exponent;
                     bool is_float;
-                    success = parseRealNumber(tokenType, ec, integer, fractional, exponent, is_float);
-                    if (success) {
+                    ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+                    if (ec.isOK()) {
                         token.setToken(tokenType, marker.start_pos(), marker.length());
                         return true;
                     }
@@ -1661,8 +1701,8 @@ ParseStringSectionEntry:
                         auto iter = sectionMapping.find(sectionName);
                         if (iter != sectionMapping.end()) {
                             Keyword section = iter->second;
-                            int result = handleSectionStatement(section.getType(), token, ec);
-                            if (result >= 0) {
+                            ec = handleSectionStatement(section.getType(), token);
+                            if (ec.isOK()) {
                                 // success
                             }
                         }
@@ -1671,8 +1711,8 @@ ParseStringSectionEntry:
                         // It's a float or double number.
                         uint64_t fractional;
                         int exponent;
-                        success = parseRealNumberSuffix(tokenType, ec, fractional, exponent);
-                        if (success) {
+                        ec = parseRealNumberSuffix(tokenType, fractional, exponent);
+                        if (ec.isOK()) {
                             token.setToken(tokenType, marker.start_pos(), marker.length());
                             return true;
                         }
@@ -1933,8 +1973,8 @@ ParseStringSectionEntry:
                 {
                     stream_.next();
                     std::string singelChar;
-                    success = parseSingleCharLiteral(singelChar, token, ec);
-                    if (unlikely(!success)) {
+                    ec = parseSingleCharLiteral(singelChar, token);
+                    if (unlikely(!ec.isOK())) {
                         marker.rewind();
                         stream_.next();
                     }
@@ -1945,8 +1985,8 @@ ParseStringSectionEntry:
                 {
                     stream_.next();
                     std::string stringLiteral;
-                    success = parseStringLiteral(stringLiteral, token, ec);
-                    if (unlikely(!success)) {
+                    ec = parseStringLiteral(stringLiteral, token);
+                    if (unlikely(!ec.isOK())) {
                         marker.rewind();
                         stream_.next();
                     }

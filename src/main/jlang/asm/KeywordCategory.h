@@ -34,6 +34,7 @@ struct KeywordCategory {
         Operator,
         Constant,
         Pod,
+        PodSign,
         TypeDef,
         InnerTypeDef,
         LogicFlow,

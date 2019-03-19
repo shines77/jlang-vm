@@ -44,8 +44,8 @@
     KEYWORD_DEF(Long,               long,           Pod)
     KEYWORD_DEF(Float,              float,          Pod)
     KEYWORD_DEF(Double,             double,         Pod)
-    KEYWORD_DEF(Signed,             signed,         TypeDef)
-    KEYWORD_DEF(Unsigned,           unsigned,       TypeDef)
+    KEYWORD_DEF(Signed,             signed,         PodSign)
+    KEYWORD_DEF(Unsigned,           unsigned,       PodSign)
 
     // Standard pod typedef (Alias)
     KEYWORD_DEF(Int8,               int8,           Pod)
