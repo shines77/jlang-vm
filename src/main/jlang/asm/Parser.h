@@ -53,12 +53,21 @@ public:
     SmallString() : size_(0) {
         this->data_[0] = static_cast<char_type>('\0');
     }
-
     SmallString(const jstd::do_nothing_t &) {
+        /* Do nothing ! */
+    }
+    SmallString(const std::string & src) {
+        data_
+    }
+    SmallString(const SmallString & src) {
+        this->copy(src);
+    }
+    ~SmallString() {
     }
 
-    SmallString(const SmallString & src) {
-        this->clone(src);
+    SmallString & operator = (const SmallString & rhs) {
+        this->copy(rhs);
+        return *this;
     }
 
     pointer data() { return &(this->data_[0]); }
@@ -70,12 +79,13 @@ public:
     size_type size() const { return this->size_; }
     size_type capacity() const { return kCapacity; }
 
-    void clone(const SmallString & src) {
+    template <typename U>
+    void copy(const U & src) {
         static_assert(kCapacity > 0, "Capacity must be greater than 0.");
         size_type copySize = jstd::minimum(kCapacity - 1, src.size());
-        ::memcpy(this->data_, src.data_, copySize);
+        ::memcpy(this->data_, src.data(), copySize);
         this->data_[copySize] = static_cast<char_type>('\0');
-        this->size_ = src.size_;
+        this->size_ = src.size();
     }
 };
 
@@ -239,22 +249,6 @@ private:
         }
     }
 
-    // Identifier keyword: parse priority order: 'abc_DEF', have no numbers.
-    inline bool isReservedKeyword(uint8_t ch) const {
-        return Helper::isReservedKeyword(ch);
-    }
-
-    // Skip the internal keyword.
-    void skipReservedKeyword() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isReservedKeyword(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
     bool isDigital(uint8_t ch) const {
         return Helper::isDigital(ch);
     }
@@ -387,26 +381,26 @@ public:
         return ec;
     }
 
-    bool parseReservedKeyword(ErrorCode & ec) {
+    ErrorCode parseReservedKeyword(Token & token) {
+        ErrorCode ec;
         StreamMarker marker(stream_);
         marker.setmark();
-        skipReservedKeyword();
-        intptr_t keywordLength = marker.length();
-        if (keywordLength > 0) {
-            intptr_t keywordStart = marker.start();
-            intptr_t keywordEnd = marker.end();
-            //char keywordName[MAX_IDENTIFIER_LEN];
-            SmallString<MAX_IDENTIFIER_LEN> keywordName;
-            marker.copy_string(keywordName.c_str(), keywordName.capacity());
+        skipIdentifier();
+        assert(marker.length() > 0);
+
+        IdentInfo keywordInfo;
+        marker.make_ident(keywordInfo);
+        if (keywordInfo.length() > 0) {
+            std::string & keywordName = keywordInfo.name();
 
 #if (KEYWORD_HASHCODE_WORDLEN == 32)
-            uint32_t hash32 = getHash32(keywordName.c_str(), (size_t)keywordLength);
+            uint32_t hash32 = getHash32(keywordInfo.name().c_str(), (size_t)keywordInfo.length());
 #elif (KEYWORD_HASHCODE_WORDLEN == 64)
-            uint64_t hash64 = getHash64(keywordName.c_str(), (size_t)keywordLength);
+            uint64_t hash64 = getHash64(keywordInfo.name().c_str(), (size_t)keywordInfo.length());
 #endif
             KeywordMapping & keyMapping = Global::getKeywordMapping();
             assert(keyMapping.inited());
-            KeywordMapping::iterator iter = keyMapping.find(keywordName.c_str(), keywordName.size(), (size_t)keywordLength);
+            KeywordMapping::iterator iter = keyMapping.find(keywordName);
             if (iter != keyMapping.end()) {
                 Keyword keyword = iter->second;
                 if (keyword.getCategory() == KeywordCategory::Pod ||
@@ -416,16 +410,13 @@ public:
                     }
                     skipWhiteSpace();
 
-                    char identifier_name[MAX_IDENTIFIER_LEN];
                     StreamMarker identMarker(stream_);
-                    intptr_t identifier_start, identifier_end;
-
                     identMarker.setmark();
                     skipIdentifier();
-                    identifier_start = identMarker.start();
-                    identifier_end = identMarker.end();
-                    assert(identifier_end > identifier_start);
-                    identMarker.copy_string(identifier_name);
+                    assert(identMarker.length() > 0);
+
+                    IdentInfo identInfo;
+                    identMarker.make_ident(identInfo);
 
                     skipWhiteSpace();
 
@@ -449,17 +440,16 @@ public:
                             skipWhiteSpace();
                             identMarker.remark();
                             skipIdentifier();
-                            identifier_start = identMarker.start();
-                            identifier_end = identMarker.end();
-                            if (identifier_end <= identifier_start) {
+                            
+                            identMarker.make_ident(identInfo);
+                            if (identInfo.length() <= 0) {
                                 // Type-list define failure
                                 std::cout << "*** Error: Type-list define failure. *** ";
                                 return false;
                             }
-                            assert(identifier_end > identifier_start);
-                            identMarker.copy_string(identifier_name);
-                            skipWhiteSpace();
+                            identMarker.make_ident(identInfo);
 
+                            skipWhiteSpace();
                             //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
                         } while (stream_.get() == ',');
 
@@ -493,9 +483,29 @@ public:
                     //LexerLog::traceIdentifier(keyword_start, keyword_end, keyword_name);
                 }
             }
-            return true;
         }
-        return false;
+        else {
+            ec = ErrorCode::IllegalIdentifer;
+        }
+
+        return ec;
+    }
+
+    ErrorCode parseIdentifierOrKeyword(Token & token) {
+        ErrorCode ec;
+        StreamMarker marker(stream_);
+        marker.setmark();
+
+        skipIdentifier();
+        assert(marker.length() > 0);
+
+        IdentInfo keywordInfo;
+        marker.make_ident(keywordInfo);
+        if (keywordInfo.length() > 0) {
+            std::cout << ">>> Identifier name = [" << keywordInfo.name().c_str() << "]" << std::endl;
+        }
+
+        return ec;
     }
 
     bool isPreprocessing() {
@@ -505,52 +515,52 @@ public:
             return false;
     }
 
-    bool parsePreprocessing(Token & token, ErrorCode & ec) {
-        bool is_ok = true;
+    ErrorCode parsePreprocessing(Token & token) {
+        ErrorCode ec;
         Token::Type tokenType = Token::Unknown;
-        ec = ErrorCode::OK;
         StreamMarker marker(stream_);
         marker.setmark();
-        skipReservedKeyword();
-        intptr_t keyword_length = marker.length();
-        if (keyword_length > 0) {
-            char * keyword_start = marker.start_ptr();
-            std::string keyword_name(keyword_start, (size_t)keyword_length);
+        skipIdentifier();
+
+        IdentInfo identInfo;
+        marker.make_ident(identInfo);
+
+        if (identInfo.length() > 0) {
             KeywordMapping & ppKeyMapping = Global::getPPKeywordMapping();
-            KeywordMapping::iterator iter = ppKeyMapping.find(keyword_name);
+            KeywordMapping::iterator iter = ppKeyMapping.find(identInfo.name());
             if (iter != ppKeyMapping.end()) {
                 Keyword & keyword = iter->second;
                 assert(keyword.getCategory() == KeywordCategory::Preprocessing);
+
                 tokenType = keyword.getType();
-                token.setStartPos(marker.start());
-                token.setLength(keyword_length);
+                token.setStartPos(identInfo.start());
+                token.setLength(identInfo.length());
+
                 ec = handlePreprocessingStatement(tokenType, token);
                 if (ec.isOK()) {
                     token.setType(tokenType);
                 }
                 else {
-                    // Have some errors.
-                    is_ok = false;
+                    // Got a error.
                 }
             }
             else {
                 // Error: It's a unknown preprocessing keyword.
-                is_ok = false;
                 ec = ErrorCode::UnknownPreprocessingKeyword;
             }
         }
         else {
-            // Error: It's not a normal preprocessing keyword.
-            is_ok = false;
+            // Error: It's not a preprocessing keyword.
             ec = ErrorCode::IllegalPreprocessingKeyword;
         }
+
         if (tokenType != Token::Unknown) {
             token.setToken(tokenType, marker.start(), marker.length());
         }
         else {
             token.setToken(tokenType, marker.start(), 0);
         }
-        return is_ok;
+        return ec;
     }
 
     ErrorCode handlePreprocessingStatement(Token::Type ppTokenType, const Token & token) {
@@ -1343,6 +1353,7 @@ parseExit:
                         }
                         else {
                             ec = ErrorCode::UnknownUnescapedChar;
+                            break;
                         }
                     }
                 }
@@ -1365,9 +1376,14 @@ parseExit:
 
             // If it reach the end of file and it's not completed, exit now.
             if (!completed) {
-                std::cout << ">>> Error: String literal is not completed!" << std::endl;
-                ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
-                return false;
+                if (ec.isOK()) {
+                    std::cout << ">>> Error: String literal is not completed!" << std::endl;
+                    ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
+                }
+                else {
+                    std::cout << ">>> Error: String literal unknown error!" << std::endl;
+                }
+                return ec;
             }
 
             // Skip the white spaces between the multi-part string literal.
@@ -1392,6 +1408,7 @@ parseExit:
         }
         else {
             std::cout << ">>> Error: String literal is not completed. (mismatch \\\") !" << std::endl;
+            ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
         }
         return ec;
     }
@@ -1494,7 +1511,7 @@ parseExit:
 
                 uint8_t ch = stream_.getu();
                 if (likely(isNumber(ch))) {
-ParseAlignBytes_start:
+ParseAlignBytes_Start:
                     uint64_t alignedBytes = 0;
                     ec = parseDecimalNumber(alignedBytes);
                     if (ec.isOK()) {
@@ -1516,7 +1533,7 @@ ParseAlignBytes_start:
                         skipWhiteSpace();
                         uint8_t ch = stream_.getu();
                         if (likely(isNumber(ch))) {
-                            goto ParseAlignBytes_start;
+                            goto ParseAlignBytes_Start;
                         }
                         else {
                             // Got Errors, expect to a decimal integer.
@@ -1614,7 +1631,6 @@ ParseStringSection_Entry:
         while (likely(stream_.has_next())) {
             marker.remark();
             Token::Type tokenType;
-            bool success;
             char ch;
             // For ppc or arm cpu, make sure to use "signed char or int8_t".
             int8_t cur = stream_.get();
@@ -1643,8 +1659,8 @@ ParseStringSection_Entry:
 
             case '#':   // Preprocessing statement, example: #include <stdio.h>
                 stream_.next();
-                success = parsePreprocessing(token, ec);
-                if (unlikely(!success)) {
+                ec = parsePreprocessing(token);
+                if (unlikely(!ec.isOK())) {
                     marker.rewind();
                     stream_.next();
                 }
@@ -1688,10 +1704,12 @@ ParseStringSection_Entry:
             case 'z':
             case '_':
                 {
-                    // Identifier or keywords
-                    IdentInfo identInfo;
-                    parseIdentifier(identInfo, token);
-                    std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
+                    // Identifier or keyword
+                    ec = parseIdentifierOrKeyword(token);
+                    if (unlikely(!ec.isOK())) {
+                        marker.rewind();
+                        stream_.next();
+                    }
                 }
                 break;
 
@@ -2049,14 +2067,17 @@ ParseStringSection_Entry:
                 break;
 
             default:    // Internal keywords
-                if (parseReservedKeyword(ec)) {
-                    //stream_.next();
-                    token.setType(Token::ReservedKeyword);
-                }
-                else {
-                    token.setType(Token::Unrecognized);
-                    if (marker.length() <= 0)
-                        stream_.next();
+                {
+                    ec = parseReservedKeyword(token);
+                    if (ec.isOK()) {
+                        //stream_.next();
+                        token.setType(Token::ReservedKeyword);
+                    }
+                    else {
+                        token.setType(Token::Unrecognized);
+                        if (marker.length() <= 0)
+                            stream_.next();
+                    }
                 }
                 break;
             }

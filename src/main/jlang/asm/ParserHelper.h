@@ -81,15 +81,6 @@ public:
 #endif
     }
 
-    // Reserved keyword: parse priority order is: 'abc_DEF', not include any numbers.
-    static inline bool isReservedKeyword(unsigned char ch) {
-#if USE_CHARINFO_MASK
-        return CharInfo::isReservedKeyword(ch);
-#else
-        return ((ch >= 'a' && ch <= 'z') || (ch == '_') || (ch >= 'A' && ch <= 'Z'));
-#endif
-    }
-
     static inline bool isDigital(unsigned char ch) {
 #if USE_CHARINFO_MASK
         return CharInfo::IsDigital(ch);

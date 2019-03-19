@@ -30,7 +30,7 @@ public:
         : name_(name), start_(0), length_(name.size()) {
     }
     IdentInfo(const IdentInfo & src) {
-        this->clone(src);
+        this->copy(src);
     }
     IdentInfo(IdentInfo && src) {
         this->swap(std::forward<IdentInfo>(src));
@@ -40,7 +40,7 @@ public:
     }
 
     IdentInfo & operator = (const IdentInfo & rhs) {
-        this->clone(rhs);
+        this->copy(rhs);
         return *this;
     }
 
@@ -72,7 +72,7 @@ public:
         this->length_ = length;
     }
 
-    void clone(const IdentInfo & src) {
+    void copy(const IdentInfo & src) {
         this->name_ = src.name_;
         this->start_ = src.start_;
         this->length_ = src.length_;

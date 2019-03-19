@@ -362,8 +362,8 @@ public:
         return keywordMapping_[keyword];
     }
 
-    iterator find(const char * keyword, size_t size, size_t length) {
-        length = jstd::minimum(length, size);
+    iterator find(const char * keyword, size_t capacity, size_t length) {
+        length = jstd::minimum(length, capacity);
         return keywordMapping_.find(std::string(keyword, length));
     }
 
