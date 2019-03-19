@@ -33,7 +33,7 @@ public:
         this->copy(src);
     }
     IdentInfo(IdentInfo && src) {
-        this->swap(std::forward<IdentInfo>(src));
+        this->swap(src);
     }
 
     ~IdentInfo() {
@@ -45,7 +45,7 @@ public:
     }
 
     IdentInfo & operator = (IdentInfo && rhs) {
-        this->swap(std::forward<IdentInfo>(rhs));
+        this->swap(rhs);
         return *this;
     }
 
