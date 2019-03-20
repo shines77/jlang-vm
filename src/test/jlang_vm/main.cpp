@@ -429,7 +429,7 @@ void test_Assembler()
 
     bool success = false;
     do {
-        success = parser.nextToken(token, ec);
+        success = parser.parseToken(token, ec);
         if (!success) {
             break;
         }
