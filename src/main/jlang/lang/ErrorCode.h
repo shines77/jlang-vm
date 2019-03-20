@@ -211,17 +211,17 @@ public:
 
     int32_t value() const { return static_cast<int32_t>(this->ec_); }
 
-    bool isEquals(ErrorCode ec) const    { return (this->value() == ec.value()); }
-    bool isLessThan(ErrorCode ec) const    { return (this->value() < ec.value()); }
-    bool isGreaterThan(ErrorCode ec) const { return (this->value() > ec.value()); }
+    bool isEquals(ErrorCode ec) const      { return (this->value() == ec.value()); }
+    bool isEquals(int32_t ec) const        { return (this->value() == ec); }
+    bool isEquals(int64_t ec) const        { return (this->value() == static_cast<int32_t>(ec)); }
 
-    bool isEquals(int32_t ec) const    { return (this->value() == ec); }
-    bool isLessThan(int32_t ec) const    { return (this->value() < ec); }
-    bool isGreaterThan(int32_t ec) const { return (this->value() > ec); }
+    bool isLessThan(ErrorCode ec) const    { return (this->value() <  ec.value()); }
+    bool isLessThan(int32_t ec) const      { return (this->value() <  ec); }
+    bool isLessThan(int64_t ec) const      { return (this->value() <  static_cast<int32_t>(ec)); }
 
-    bool isEquals(int64_t ec) const    { return (this->value() == static_cast<int>(ec)); }
-    bool isLessThan(int64_t ec) const    { return (this->value() < static_cast<int>(ec)); }
-    bool isGreaterThan(int64_t ec) const { return (this->value() > static_cast<int>(ec)); }
+    bool isGreaterThan(ErrorCode ec) const { return (this->value() >  ec.value()); }
+    bool isGreaterThan(int32_t ec) const   { return (this->value() >  ec); }
+    bool isGreaterThan(int64_t ec) const   { return (this->value() >  static_cast<int32_t>(ec)); }
 
     friend bool operator == (const ErrorCode & lhs, const ErrorCode & rhs) { return lhs.isEquals(rhs);   }
     friend bool operator <  (const ErrorCode & lhs, const ErrorCode & rhs) { return lhs.isLessThan(rhs); }
@@ -261,7 +261,7 @@ public:
     friend bool operator >= (const ErrorCode & lhs,           int64_t rhs) { return  lhs.isLessThan(rhs);    }
     friend bool operator >= (          int64_t lhs, const ErrorCode & rhs) { return  rhs.isGreaterThan(lhs); }
 
-    static const char * toString(Type ec) {
+    static const char * format(Type ec) {
         switch (ec) {
             case Type::UnknownError:
                 return "Unknown";
@@ -271,154 +271,22 @@ public:
         return "Undefined Error";
     }
 
-    char * toString() {
-        return (char *)ErrorCode::toString(this->ec_);
+    char * c_str() {
+        return (char *)ErrorCode::format(this->ec_);
     }
 
-    const char * toString() const {
-        return ErrorCode::toString(this->ec_);
+    const char * c_str() const {
+        return ErrorCode::format(this->ec_);
     }
 
-    void toString(std::string & str) {
-        str = this->toString();
+    std::string toString() {
+        return std::string(ErrorCode::format(this->ec_));
+    }
+
+    const std::string toString() const {
+        return std::string(ErrorCode::format(this->ec_));
     }
 };
-
-#if 0
-
-// operator == 
-
-inline bool operator == (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isEquals(rhs);
-}
-
-inline bool operator == (int lhs, const ErrorCode & rhs) {
-    return rhs.isEquals(lhs);
-}
-
-inline bool operator == (const ErrorCode & lhs, int rhs) {
-    return lhs.isEquals(rhs);
-}
-
-inline bool operator == (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isEquals(lhs);
-}
-
-inline bool operator == (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isEquals(rhs);
-}
-
-// operator !=
-
-inline bool operator != (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isNotEquals(rhs);
-}
-
-inline bool operator != (int lhs, const ErrorCode & rhs) {
-    return rhs.isNotEquals(lhs);
-}
-
-inline bool operator != (const ErrorCode & lhs, int rhs) {
-    return lhs.isNotEquals(rhs);
-}
-
-inline bool operator != (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isNotEquals(lhs);
-}
-
-inline bool operator != (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isNotEquals(rhs);
-}
-
-// operator <
-
-inline bool operator < (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isLessThan(rhs);
-}
-
-inline bool operator < (int lhs, const ErrorCode & rhs) {
-    return rhs.isLessThan(lhs);
-}
-
-inline bool operator < (const ErrorCode & lhs, int rhs) {
-    return lhs.isLessThan(rhs);
-}
-
-inline bool operator < (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isLessThan(lhs);
-}
-
-inline bool operator < (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isLessThan(rhs);
-}
-
-// operator >
-
-inline bool operator > (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isGreaterThan(rhs);
-}
-
-inline bool operator > (int lhs, const ErrorCode & rhs) {
-    return rhs.isGreaterThan(lhs);
-}
-
-inline bool operator > (const ErrorCode & lhs, int rhs) {
-    return lhs.isGreaterThan(rhs);
-}
-
-inline bool operator > (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isGreaterThan(lhs);
-}
-
-inline bool operator > (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isGreaterThan(rhs);
-}
-
-// operator <=
-
-inline bool operator <= (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isLessThanAndEqual(rhs);
-}
-
-inline bool operator <= (int lhs, const ErrorCode & rhs) {
-    return rhs.isLessThanAndEqual(lhs);
-}
-
-inline bool operator <= (const ErrorCode & lhs, int rhs) {
-    return lhs.isLessThanAndEqual(rhs);
-}
-
-inline bool operator <= (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isLessThanAndEqual(lhs);
-}
-
-inline bool operator <= (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isLessThanAndEqual(rhs);
-}
-
-// operator >=
-
-inline bool operator >= (const ErrorCode & lhs, const ErrorCode & rhs) {
-    return lhs.isGreaterThanAndEqual(rhs);
-}
-
-inline bool operator >= (int lhs, const ErrorCode & rhs) {
-    return rhs.isGreaterThanAndEqual(lhs);
-}
-
-inline bool operator >= (const ErrorCode & lhs, int rhs) {
-    return lhs.isGreaterThanAndEqual(rhs);
-}
-
-inline bool operator >= (int64_t lhs, const ErrorCode & rhs) {
-    return rhs.isGreaterThanAndEqual(lhs);
-}
-
-inline bool operator >= (const ErrorCode & lhs, int64_t rhs) {
-    return lhs.isGreaterThanAndEqual(rhs);
-}
-
-#endif
 
 } // namespace jlang
 

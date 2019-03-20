@@ -107,42 +107,6 @@ public:
         this->length_ = (intptr_t)length;
     }
 
-    bool isEquals(const Token & value) const {
-        return (this->type_ == value.type_);
-    }
-
-    bool isEquals(int32_t value) const {
-        return (this->type_ == value);
-    }
-
-    bool isEquals(int64_t value) const {
-        return (this->type_ == value);
-    }
-
-    bool isLessThan(const Token & value) const {
-        return (this->type_ < value.type_);
-    }
-
-    bool isLessThan(int32_t value) const {
-        return (this->type_ < value);
-    }
-
-    bool isLessThan(int64_t value) const {
-        return (this->type_ < value);
-    }
-
-    bool isGreaterThan(const Token & value) const {
-        return (this->type_ > value.type_);
-    }
-
-    bool isGreaterThan(int32_t value) const {
-        return (this->type_ > value);
-    }
-
-    bool isGreaterThan(int64_t value) const {
-        return (this->type_ > value);
-    }
-
     void copy(const Token & src) {
         this->type_ = src.type_;
         this->pos_ = src.pos_;
@@ -160,6 +124,18 @@ public:
         this->setStart(start_pos);
         this->setLength(length);
     }
+
+    bool isEquals(const Token & value) const { return (this->type_ == value.type_); }
+    bool isEquals(int32_t value) const       { return (this->type_ == value); }
+    bool isEquals(int64_t value) const       { return (this->type_ == value); }
+
+    bool isLessThan(const Token & value) const { return (this->type_ < value.type_); }
+    bool isLessThan(int32_t value) const       { return (this->type_ < value); }
+    bool isLessThan(int64_t value) const       { return (this->type_ < value); }
+
+    bool isGreaterThan(const Token & value) const { return (this->type_ > value.type_); }
+    bool isGreaterThan(int32_t value) const       { return (this->type_ > value); }
+    bool isGreaterThan(int64_t value) const       { return (this->type_ > value); }
 
     friend bool operator == (const Token & lhs, const Token & rhs) { return lhs.isEquals(rhs);   }
     friend bool operator <  (const Token & lhs, const Token & rhs) { return lhs.isLessThan(rhs); }
@@ -199,16 +175,20 @@ public:
     friend bool operator >= (const Token & lhs,       int64_t rhs) { return  lhs.isLessThan(rhs);    }
     friend bool operator >= (      int64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
 
-    char * toString() {
-        return (char *)Token::toString(this->type_);
+    char * c_str() {
+        return (char *)Token::format(this->type_);
     }
 
-    const char * toString() const {
-        return Token::toString(this->type_);
+    const char * c_str() const {
+        return Token::format(this->type_);
     }
 
-    void toString(std::string & str) {
-        str = this->toString();
+    std::string toString() {
+        return std::string(Token::format(this->type_));
+    }
+
+    const std::string toString() const {
+        return std::string(Token::format(this->type_));
     }
 
     #define TOKEN_TO_STRING(token)  #token
@@ -226,7 +206,7 @@ public:
                                         CASE_TOKEN(token)
     #define PREPROCESSING_DEF(keyword)  CASE_PREPROCESSING_TOKEN(keyword)
 
-    static const char * toString(Type token) {
+    static const char * format(Type token) {
         switch (token) {
             CASE_TOKEN(Unrecognized);
             CASE_TOKEN(Unknown);
@@ -243,47 +223,6 @@ public:
     #undef CASE_TOKEN
     #undef CASE_PREPROCESSING_TOKEN
 };
-
-
-#if 0
-
-// operator == 
-
-inline bool operator == (int32_t lhs, const Token & rhs) {
-    return rhs.isEquals(lhs);
-}
-
-inline bool operator == (const Token & lhs, int32_t rhs) {
-    return lhs.isEquals(rhs);
-}
-
-inline bool operator == (int64_t lhs, const Token & rhs) {
-    return rhs.isEquals(lhs);
-}
-
-inline bool operator == (const Token & lhs, int64_t rhs) {
-    return lhs.isEquals(rhs);
-}
-
-// operator !=
-
-inline bool operator != (int32_t lhs, const Token & rhs) {
-    return !rhs.isEquals(lhs);
-}
-
-inline bool operator != (const Token & lhs, int32_t rhs) {
-    return !lhs.isEquals(rhs);
-}
-
-inline bool operator != (int64_t lhs, const Token & rhs) {
-    return !rhs.isEquals(lhs);
-}
-
-inline bool operator != (const Token & lhs, int64_t rhs) {
-    return !lhs.isEquals(rhs);
-}
-
-#endif
 
 } // namespace jasm
 } // namespace jlang
