@@ -13,6 +13,8 @@
 #include <memory.h>
 
 #include <string>
+#include <vector>   // For std::vector<T>
+#include <utility>  // For std::pair<T1, T2>
 
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/lang/CharInfo.h"
@@ -348,12 +350,107 @@ public:
         return ec;
     }
 
-    ErrorCode parseFunctionDeclareName(const IdentInfo & funcType) {
+    typedef std::vector<std::pair<std::string, std::string>> ArgumentList;
+
+    ErrorCode parseFunctionArgumentList() {
         ErrorCode ec;
+        ArgumentList argList;
+
+        do {
+            // Argument type
+            IdentInfo argType;
+            parseIdentifier(argType);
+            if (likely(argType.length() > 0)) {
+                // Expect to skip one whitespace.
+                skipWhiteSpaces();
+
+                // Argument name
+                IdentInfo argName;
+                parseIdentifier(argName);
+                if (likely(argType.length() > 0)) {
+                    // Append the argument list
+                    argList.push_back(std::make_pair(argType.name(),
+                                                     argName.name()));
+
+                    // Expect to skip 0 whitespace.
+                    skipWhiteSpaces();
+
+                    uint8_t ch = stream_.getu();
+                    if (likely(ch == ',')) {        // Argument delimiter
+                        stream_.next();
+
+                        // Expect to skip one whitespace.
+                        skipWhiteSpaces();
+
+                        // Continue to parse next argument
+                        continue;
+                    }
+                    else if (likely(ch == ')')) {   // End of argument list.
+                        stream_.next();
+
+                        // Expect to skip N whitespace.
+                        skipWhiteSpaces();
+
+                        // ec = parseFunctionBody();
+                        
+                        break;
+                    }
+                    else {
+                        ec = ErrorCode::IllegalArgumentDelimiter;
+                        break;
+                    }
+                }
+                else {
+                    ec = ErrorCode::IllegalArgumentName;
+                    break;
+                }
+            }
+            else {
+                ec = ErrorCode::IllegalArgumentType;
+                break;
+            }
+        } while (1);
+
         return ec;
     }
 
-    ErrorCode parseFunctionDeclare(const Keyword & keyword, IdentInfo & identInfo) {
+    ErrorCode parseIdentifierDeclareName(const IdentInfo & identType) {
+        ErrorCode ec;
+
+        IdentInfo identName;
+        parseIdentifier(identName);
+
+        if (identName.length() > 0) {
+            // Skip whitespaces between identifier name and ['(' or '='].
+            skipWhiteSpaces();
+
+            uint8_t ch = stream_.getu();
+            if (likely(ch == '=')) {
+                // Expression assignment
+                stream_.next();
+                skipWhiteSpaces();
+
+                //ec = parseExpression();
+            }
+            else if (likely(ch == '(')) {
+                // Function argument list
+                stream_.next();
+                skipWhiteSpaces();
+
+                ec = parseFunctionArgumentList();
+            }
+            else {
+                // Error
+            }
+        }
+        else {
+            ec = ErrorCode::UnknownError;
+        }
+
+        return ec;
+    }
+
+    ErrorCode parseIdentifierDeclare(const Keyword & keyword, IdentInfo & identInfo) {
         ErrorCode ec;
         Token signToken(Token::Unknown);
 
@@ -396,8 +493,8 @@ public:
 
         skipWhiteSpaces();
 
-        // Parse function declare name
-        ec = parseFunctionDeclareName(identInfo);
+        // Parse function or identifier declare name
+        ec = parseIdentifierDeclareName(identInfo);
 
 Parse_Exit:
         return ec;
@@ -427,8 +524,8 @@ Parse_Exit:
                 if (iter != keyMapping.end()) {
                     const Keyword & keyword = iter->second;
                     if (likely((keyword.getCategory() & KeywordCategory::IsType) != 0)) {
-                        // Example: int fibonacci32(int n);
-                        ec = parseFunctionDeclare(keyword, identInfo);
+                        // Function or identifier declare.
+                        ec = parseIdentifierDeclare(keyword, identInfo);
                     }
                     else if (likely((keyword.getCategory() & KeywordCategory::IsKeyword) != 0)) {
                         // It's a keyword

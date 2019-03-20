@@ -104,6 +104,11 @@ public:
         // Identifer
         IllegalIdentifer,
 
+        // Argument list
+        IllegalArgumentType,
+        IllegalArgumentName,
+        IllegalArgumentDelimiter,
+
         // Standard errors
         Error_NullPtr,
 
