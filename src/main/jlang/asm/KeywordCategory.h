@@ -64,13 +64,13 @@ struct KeywordCategory {
         CategoryMask    = (int)0xFFFFFFFFFUL
     };
 
-    KeywordCategory(uint16_t kind = Type::Unknown) : kind_(kind) {
+    KeywordCategory(uint16_t category = Type::Unknown) : category_(category) {
     }
 
-    KeywordCategory(uint32_t kind) : kind_(static_cast<uint16_t>(kind)) {
+    KeywordCategory(uint32_t category) : category_(static_cast<uint32_t>(category)) {
     }
 
-    uint16_t kind_;
+    uint32_t category_;
 };
 
 } // namespace jasm

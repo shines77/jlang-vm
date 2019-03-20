@@ -435,7 +435,7 @@ void test_Assembler()
         }
     } while (token != Token::Eof);
 
-    if (success || token == Token::Eof) {
+    if (success || token <= Token::Eof) {
         printf(">>  Parser: success. [file = %s]\n", stream.filename().c_str());
     }
     else {
@@ -473,6 +473,8 @@ int main(int argc, char * argv[])
 
     test_Assembler();
 
+#if 0
+
 #ifdef NDEBUG
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
  || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
@@ -482,13 +484,13 @@ int main(int argc, char * argv[])
 #endif
 #endif
 
-#if 0
     //test_Interpreter_v4_inline();
     test_Interpreter_v3_inline();
     test_Interpreter_v4();
     test_Interpreter_v3();
     test_Interpreter_v2();
     test_Interpreter_v1();
+
 #endif
 
     printf("\n");

@@ -6,12 +6,11 @@
 #pragma once
 #endif
 
-#include <stdint.h>
 #include <stddef.h>
-#include <assert.h>
+#include <stdint.h>
 #include <string.h>
-
 #include <stdarg.h>     // For va_start(), va_end()
+#include <assert.h>
 
 #include <string>
 
@@ -47,18 +46,28 @@ public:
     Token() : type_(Type::Unknown), pos_(0), length_(0) {}
     Token(Type type) : type_(type), pos_(0), length_(0) {}
     Token(Type type, int length, intptr_t pos) : type_(type), pos_(pos), length_(length) {}
-    Token(uint16_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(uint16_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(uint32_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(uint32_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(uint64_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(uint64_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int16_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int16_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int32_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int32_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int64_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
+    Token(int64_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
     Token(const Token & src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
     Token(Token && src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
     ~Token() {}
 
     Token & operator = (const Token & rhs) {
         this->copy(rhs);
+        return *this;
+    }
+
+    Token & operator = (int32_t rhs) {
+        this->setType(rhs);
+        return *this;
+    }
+
+    Token & operator = (int64_t rhs) {
+        this->setType(rhs);
         return *this;
     }
 
@@ -71,7 +80,7 @@ public:
         this->type_ = type;
     }
 
-    void setType(int type) {
+    void setType(int32_t type) {
         this->type_ = (Type)type;
     }
 
