@@ -30,11 +30,14 @@ struct KeywordCategory {
         Keywords,
         Others,
 
+        // POD
+        Pod,
+        PodSign,
+
         // Normal
         Operator,
         Constant,
-        Pod,
-        PodSign,
+
         TypeDef,
         InnerTypeDef,
         LogicFlow,

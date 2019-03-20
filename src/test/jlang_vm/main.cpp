@@ -445,6 +445,15 @@ void test_Assembler()
     InputStringStream stream1;
     Scanner scanner(stream1);
 
+    jstd::SmallString<14> * smallString = new jstd::SmallString<14>();
+    printf("\n");
+    printf("alignof(jstd::SmallString<16>) = %d\n", (int)alignof(jstd::SmallString<16>));
+    printf("sizeof(jstd::SmallString<16>)  = %d\n", (int)sizeof(jstd::SmallString<16>));
+    printf("SmallString.data_[] offset = %d\n", (int)((char *)&smallString->data_[0] - (char *)smallString));
+    printf("SmallString.ch offset      = %d\n", (int)((char *)&smallString->ch - (char *)smallString));
+    printf("SmallString.size_ offset   = %d\n", (int)((char *)&smallString->size_ - (char *)smallString));
+    printf("SmallString.dbl offset     = %d\n", (int)((char *)&smallString->dbl - (char *)smallString));
+
     printf("\n");
 }
 
@@ -472,12 +481,14 @@ int main(int argc, char * argv[])
 #endif
 #endif
 
+#if 0
     //test_Interpreter_v4_inline();
     test_Interpreter_v3_inline();
     test_Interpreter_v4();
     test_Interpreter_v3();
     test_Interpreter_v2();
     test_Interpreter_v1();
+#endif
 
     printf("\n");
     System::pause();

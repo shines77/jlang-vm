@@ -19,8 +19,10 @@ struct do_nothing_t {};
 
 static do_nothing_t do_nothing;
 
+//#pragma pack(push, 2)
+
 template <std::size_t Capacity, typename CharTy = char>
-class alignas(8) SmallString {
+class /* alignas(4) */ SmallString {
 public:
     typedef CharTy          char_type;
     typedef std::size_t     size_type;
@@ -30,9 +32,11 @@ public:
 
     static const std::size_t kCapacity = Capacity;
 
-protected:
-    char_type data_[kCapacity];
+public:
+    /* alignas(8) */ char_type data_[kCapacity];
+    char ch;
     size_type size_;
+    double dbl;
 
 public:
     SmallString() : size_(0) {
@@ -73,6 +77,8 @@ public:
         this->size_ = src.size();
     }
 };
+
+//#pragma pack(pop)
 
 } // namespace jstd
 

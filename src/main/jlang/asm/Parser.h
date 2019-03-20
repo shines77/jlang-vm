@@ -276,6 +276,15 @@ private:
     }
 
 public:
+    void parseIdentifier(IdentInfo & identInfo) {
+        StreamMarker marker(stream_);
+        marker.setmark();
+        skipIdentifier();
+        assert(marker.length() > 0);
+
+        marker.append_ident(identInfo);
+    }
+
     void parseIdentifier(IdentInfo & identInfo, Token & token) {
         StreamMarker marker(stream_);
         marker.setmark();
@@ -284,6 +293,16 @@ public:
 
         marker.append_ident(identInfo);
         token.setToken(Token::Identifier, identInfo.start(), identInfo.length());
+    }
+
+    void parseIdentifierBody(char firstChar, IdentInfo & identInfo) {
+        assert(firstChar == stream_.get(-1));
+        StreamMarker marker(stream_);
+        marker.setmark(-1);
+        skipIdentifier();
+        assert(marker.length() > 1);
+
+        marker.append_ident(identInfo);
     }
 
     void parseIdentifierBody(char firstChar, IdentInfo & identInfo, Token & token) {
@@ -295,6 +314,20 @@ public:
 
         marker.append_ident(identInfo);
         token.setToken(Token::Identifier, identInfo.start(), identInfo.length());
+    }
+
+    ErrorCode parseIdentifierStrict(IdentInfo & identInfo) {
+        ErrorCode ec;
+        StreamMarker marker(stream_);
+        marker.setmark();
+        skipIdentifier();
+        assert(marker.length() > 0);
+
+        marker.append_ident(identInfo);
+        if (identInfo.length() <= 0) {
+            ec = ErrorCode::IllegalIdentifer;
+        }
+        return ec;
     }
 
     ErrorCode parseIdentifierStrict(IdentInfo & identInfo, Token & token) {
@@ -312,6 +345,102 @@ public:
             token.setToken(Token::Unrecognized, identInfo.start(), identInfo.length());
             ec = ErrorCode::IllegalIdentifer;
         }
+        return ec;
+    }
+
+    ErrorCode parseFunctionDeclareName(const IdentInfo & funcType) {
+        ErrorCode ec;
+        return ec;
+    }
+
+    ErrorCode parseFunctionDeclare(const Keyword & keyword, IdentInfo & identInfo) {
+        ErrorCode ec;
+        Token signToken(Token::Unknown);
+
+        if (keyword.getCategory() == KeywordCategory::PodSign) {
+            // If identifier is "signed"/"unsigned", continue parse a POD type.
+            signToken = keyword.getToken();
+            skipWhiteSpaces();
+
+            IdentInfo podIdentInfo;
+            parseIdentifier(podIdentInfo);
+            assert(podIdentInfo.length() > 0);
+
+            const std::string & podIdentName = podIdentInfo.name();
+
+            KeywordMapping & keyMapping = Global::getKeywordMapping();
+            KeywordMapping::iterator iter = keyMapping.find(podIdentName);
+            if (iter != keyMapping.end()) {
+                const Keyword & podKeyword = iter->second;
+                if (podKeyword.getCategory() == KeywordCategory::Pod ||
+                    podKeyword.getCategory() == KeywordCategory::TypeDef) {
+                    // Merge the sign type and POD type.
+                    bool merged = identInfo.merge(podIdentInfo);
+                    if (!merged) {
+                        ec = ErrorCode::IllegalPodType;
+                        goto Parse_Exit;
+                    }
+                }
+                else {
+                    // Error: After "signed"/"unsigned", it's a unsupport POD type.
+                    ec = ErrorCode::UnsupportPodType;
+                    goto Parse_Exit;
+                }
+            }
+            else {
+                // Error: After "signed"/"unsigned", it's a unknown type.
+                ec = ErrorCode::UnknownPodType;
+                goto Parse_Exit;
+            }
+        }
+
+        skipWhiteSpaces();
+
+        // Parse function declare name
+        ec = parseFunctionDeclareName(identInfo);
+
+Parse_Exit:
+        return ec;
+    }
+
+    ErrorCode handleReservedKeyword(const Keyword & keyword) {
+        ErrorCode ec;
+        return ec;
+    }
+
+    ErrorCode parseIdentifierOrKeyword(Token & token) {
+        ErrorCode ec;
+
+        IdentInfo identInfo;
+        parseIdentifier(identInfo);
+        assert(identInfo.length() > 0);
+
+        if (identInfo.length() > 0) {
+            std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
+
+            if (identInfo.length() > 0) {
+                const std::string & identName = identInfo.name();
+
+                KeywordMapping & keyMapping = Global::getKeywordMapping();
+                assert(keyMapping.inited());
+                KeywordMapping::iterator iter = keyMapping.find(identName);
+                if (iter != keyMapping.end()) {
+                    const Keyword & keyword = iter->second;
+                    if (keyword.getCategory() == KeywordCategory::Pod ||
+                        keyword.getCategory() == KeywordCategory::PodSign ||
+                        keyword.getCategory() == KeywordCategory::TypeDef ||
+                        keyword.getCategory() == KeywordCategory::UserDefine) {
+                        // Like: int fibonacci32(int n);
+                        ec = parseFunctionDeclare(keyword, identInfo);
+                    }
+                    else if (keyword.getCategory() == KeywordCategory::Keywords) {
+                        // It's a keyword
+                        ec = handleReservedKeyword(keyword);
+                    }
+                }
+            }
+        }
+
         return ec;
     }
 
@@ -420,23 +549,6 @@ public:
         }
         else {
             ec = ErrorCode::IllegalIdentifer;
-        }
-
-        return ec;
-    }
-
-    ErrorCode parseIdentifierOrKeyword(Token & token) {
-        ErrorCode ec;
-        StreamMarker marker(stream_);
-        marker.setmark();
-
-        skipIdentifier();
-        assert(marker.length() > 0);
-
-        IdentInfo identInfo;
-        marker.make_ident(identInfo);
-        if (identInfo.length() > 0) {
-            std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
         }
 
         return ec;

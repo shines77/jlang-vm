@@ -78,6 +78,11 @@ public:
 
         // String constant errors
 
+        // Pod type
+        IllegalPodType,
+        UnknownPodType,
+        UnsupportPodType,
+
         // Single character constant errors
         IllegalSingleCharacterFormat,
         UnknownEscapedChar,

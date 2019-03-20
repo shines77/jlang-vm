@@ -16,6 +16,9 @@
 #include "jlang/asm/Initializer.h"
 #include "jlang/system/System.h"
 
+#include "jlang/jstd/Singleton.h"
+#include "jlang/jstd/SmallString.h"
+
 #include "jlang/stream/InputStringStream.h"
 #include "jlang/stream/OutputStringStream.h"
 #include "jlang/stream/StringStream.h"

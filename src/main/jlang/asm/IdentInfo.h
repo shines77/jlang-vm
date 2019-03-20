@@ -83,6 +83,19 @@ public:
         std::swap(this->start_, src.start_);
         std::swap(this->length_, src.length_);
     }
+
+    bool merge(const IdentInfo & src) {
+        if (likely(src.start() >= (this->start() + this->length()))) {
+            this->name_ += " ";
+            this->name_ += src.name();
+
+            this->length_ = (src.start() - this->start()) + src.length();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 };
 
 } // namespace jasm
