@@ -20,9 +20,9 @@
 #include "jlang/lang/CharInfo.h"
 #include "jlang/asm/Keyword.h"
 #include "jlang/asm/Token.h"
-#include "jlang/stream/StreamMarker.h"
-#include "jlang/asm/ParserHelper.h"
+#include "jlang/asm/Char.h"
 #include "jlang/asm/IdentInfo.h"
+#include "jlang/stream/StreamMarker.h"
 #include "jlang/jstd/min_max.h"
 #include "jlang/jstd/SmallString.h"
 #include "jlang/support/HashAlgorithm.h"
@@ -32,8 +32,7 @@ namespace jasm {
 
 class Parser {
 public:
-    typedef Parser       this_type;
-    typedef ParserHelper Helper;
+    typedef Parser this_type;
 
 protected:
     StringStream stream_;
@@ -67,24 +66,16 @@ public:
     }
 
 private:
-    uint32_t getHash32(const char * keyword) const {
+    uint32_t getHashCode(const char * keyword) const {
         return HashAlgorithm::getHash(keyword);
     }
 
-    uint32_t getHash32(const char * keyword, size_t length) const {
+    uint32_t getHashCode(const char * keyword, size_t length) const {
         return HashAlgorithm::getHash(keyword, length);
     }
 
-    uint64_t getHash64(const char * keyword) const {
-        return HashAlgorithm::getHash64(keyword);
-    }
-
-    uint64_t getHash64(const char * keyword, size_t length) const {
-        return HashAlgorithm::getHash64(keyword, length);
-    }
-
     bool isWhiteSpace(uint8_t ch) const {
-        return Helper::isWhiteSpace(ch);
+        return Char::isWhiteSpace(ch);
     }
 
     void skipWhiteSpace() {
@@ -98,7 +89,7 @@ private:
     }
 
     bool isWhiteSpaces(uint8_t ch) {
-        return Helper::isWhiteSpaces(ch);
+        return Char::isWhiteSpaces(ch);
     }
 
     void skipWhiteSpaces() {
@@ -112,7 +103,7 @@ private:
     }
 
     bool isNewLine(uint8_t ch) {
-        return Helper::isNewLine(ch);
+        return Char::isNewLine(ch);
     }
 
     void skipNewLine() {
@@ -137,7 +128,7 @@ private:
 
     // Identifier first letter: can not be a number, parse priority order: 'abcDEF_'.
     bool isIdentifierFirst(uint8_t ch) {
-        return Helper::isIdentifierFirst(ch);
+        return Char::isIdentifierFirst(ch);
     }
 
     // Check if is identifier first letter and skip to next.
@@ -152,7 +143,7 @@ private:
 
     // Identifier body: include numbers, parse priority order: 'abc789_DEF'.
     inline bool isIdentifierBody(uint8_t ch) const {
-        return Helper::isIdentifierBody(ch);
+        return Char::isIdentifierBody(ch);
     }
 
     // Skip the identifier body.
@@ -186,7 +177,7 @@ private:
     }
 
     bool isDigital(uint8_t ch) const {
-        return Helper::isDigital(ch);
+        return Char::isDigital(ch);
     }
 
     // Starting with numbers: "[0-9]", or ".[0-9]"
@@ -232,15 +223,15 @@ private:
     }
 
     inline bool isAlphabet(uint8_t ch) const {
-        return Helper::isAlphabet(ch);
+        return Char::isAlphabet(ch);
     }
 
     inline bool isLowerAlphabet(uint8_t ch) const {
-        return Helper::isLowerAlphabet(ch);
+        return Char::isLowerAlphabet(ch);
     }
 
     inline bool isUpperAlphabet(uint8_t ch) const {
-        return Helper::isUpperAlphabet(ch);
+        return Char::isUpperAlphabet(ch);
     }
 
     void skipAlphabet() {
@@ -550,11 +541,8 @@ Parse_Exit:
         if (keywordInfo.length() > 0) {
             std::string & keywordName = keywordInfo.name();
 
-#if (KEYWORD_HASHCODE_WORDLEN == 32)
-            uint32_t hash32 = getHash32(keywordInfo.name().c_str(), (size_t)keywordInfo.length());
-#elif (KEYWORD_HASHCODE_WORDLEN == 64)
-            uint64_t hash64 = getHash64(keywordInfo.name().c_str(), (size_t)keywordInfo.length());
-#endif
+            uint32_t hashCode = getHashCode(keywordName.c_str(), keywordName.size());
+
             KeywordMapping & keyMapping = Global::getKeywordMapping();
             assert(keyMapping.inited());
             KeywordMapping::iterator iter = keyMapping.find(keywordName);
@@ -1765,7 +1753,7 @@ ParseStringSection_Entry:
         return ec;
     }
 
-    bool nextToken(Token & token, ErrorCode & ec_) {
+    bool parseToken(Token & token, ErrorCode & ec_) {
         ErrorCode ec = ErrorCode::OK;
         StreamMarker marker(stream_);
         while (likely(stream_.has_next())) {

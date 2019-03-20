@@ -154,9 +154,6 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h">
       <Filter>src\fs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\ParserHelper.h">
-      <Filter>src\asm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordCategory.h">
       <Filter>src\asm</Filter>
     </ClInclude>
@@ -174,6 +171,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\SmallString.h">
       <Filter>src\jstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Char.h">
+      <Filter>src\asm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

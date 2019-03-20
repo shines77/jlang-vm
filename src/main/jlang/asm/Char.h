@@ -21,10 +21,10 @@
 namespace jlang {
 namespace jasm {
 
-class ParserHelper : public lang::NonCopyable {
+class Char : public lang::NonCopyable {
 public:
-    ParserHelper() {}
-    ~ParserHelper() {}
+    Char() {}
+    ~Char() {}
 
     static inline bool isWhiteSpace(unsigned char ch) {
 #if USE_CHARINFO_MASK
