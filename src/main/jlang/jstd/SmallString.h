@@ -13,16 +13,25 @@
 #include <cstdint>  // For std::size_t
 #include <string>   // For std::string
 
+#ifndef PTR_SIZE
+#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
+ || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
+#define PTR_SIZE    8
+#else
+#define PTR_SIZE    4
+#endif
+#endif // PTR_SIZE
+
 namespace jstd {
 
 struct do_nothing_t {};
 
 static do_nothing_t do_nothing;
 
-//#pragma pack(push, 2)
+#pragma pack(push, PTR_SIZE)
 
 template <std::size_t Capacity, typename CharTy = char>
-class /* alignas(4) */ SmallString {
+class alignas(PTR_SIZE) SmallString {
 public:
     typedef CharTy          char_type;
     typedef std::size_t     size_type;
@@ -32,11 +41,9 @@ public:
 
     static const std::size_t kCapacity = Capacity;
 
-public:
-    /* alignas(8) */ char_type data_[kCapacity];
-    char ch;
+protected:
+    char_type data_[kCapacity];
     size_type size_;
-    double dbl;
 
 public:
     SmallString() : size_(0) {
@@ -78,7 +85,7 @@ public:
     }
 };
 
-//#pragma pack(pop)
+#pragma pack(pop)
 
 } // namespace jstd
 

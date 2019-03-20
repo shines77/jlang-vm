@@ -91,7 +91,7 @@
     // Preprocessing
     //
 
-    TOKEN_DEF(Utf8_BOM)                 // UTF8 byte-order-mark, (0xEF, 0xBB, 0xBF)
+    TOKEN_DEF(UTF8_BOM)                 // UTF8 byte-order-mark, (0xEF, 0xBB, 0xBF)
 
     #undef TOKEN_DEF
 

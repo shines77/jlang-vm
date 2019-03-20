@@ -60,23 +60,24 @@ class Keyword;
 
 struct KeywordInfoDef {
     uint16_t id;
-    uint16_t category;
     uint16_t token;
+    uint32_t category;
     uint16_t length;
-    char name[64 - sizeof(uint16_t) * 4];   // Alignment for 64 bytes.
+    char name[64 - sizeof(uint16_t) * 5];   // Alignment for 64 bytes.
 };
 
 class KeywordInfo {
 protected:
     uint16_t id_;
-    uint16_t category_;
     uint16_t token_;
+    uint32_t category_;
     uint16_t length_;
     std::string name_;
 
 public:
-    KeywordInfo() : id_(-1), category_(jasm::KeywordCategory::Unknown),
-                    token_(jasm::Token::Unknown), length_(0) {
+    KeywordInfo() : id_(-1), token_(jasm::Token::Unknown),
+                    category_(jasm::KeywordCategory::Unknown),
+                    length_(0) {
     }
     ~KeywordInfo() {}
 
@@ -86,14 +87,14 @@ public:
 #undef JLANG_KEYWORD_ID
 #undef JLANG_PREPROCESSING_ID
 
-#define JLANG_KEYWORD_ID(token, category)       jasm::KeywordId::token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)         jasm::KeywordId::pp_##keyword
+#define JLANG_KEYWORD_ID(token, category)   jasm::KeywordId::token##_##category
+#define JLANG_PREPROCESSING_ID(keyword)     jasm::KeywordId::pp_##keyword
 
 #define KEYWORD_DEF(token, keyword, category)  \
     { \
         (uint16_t)JLANG_KEYWORD_ID(token, category), \
-        (uint16_t)jasm::KeywordCategory::category, \
         (uint16_t)jasm::Token::token, \
+        (uint32_t)jasm::KeywordCategory::category, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
@@ -101,8 +102,8 @@ public:
 #define PREPROCESSING_DEF(keyword)  \
     { \
         (uint16_t)JLANG_PREPROCESSING_ID(keyword), \
-        (uint16_t)jasm::KeywordCategory::Preprocessing, \
         (uint16_t)jasm::Token::pp_##keyword, \
+        (uint16_t)jasm::KeywordCategory::Preprocessing, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
@@ -111,8 +112,8 @@ static const KeywordInfoDef gKeywordList[] = {
     #include "jlang/asm/KeywordDef.h"
     {
         (uint16_t)jasm::KeywordId::Type::MaxKeywordId,
-        (uint16_t)jasm::KeywordCategory::Unknown,
         (uint16_t)jasm::Token::Unknown,
+        (uint32_t)jasm::KeywordCategory::Unknown,
         0,
         ""
     }

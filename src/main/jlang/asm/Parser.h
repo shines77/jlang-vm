@@ -426,14 +426,11 @@ Parse_Exit:
                 KeywordMapping::iterator iter = keyMapping.find(identName);
                 if (iter != keyMapping.end()) {
                     const Keyword & keyword = iter->second;
-                    if (keyword.getCategory() == KeywordCategory::Pod ||
-                        keyword.getCategory() == KeywordCategory::PodSign ||
-                        keyword.getCategory() == KeywordCategory::TypeDef ||
-                        keyword.getCategory() == KeywordCategory::UserDefine) {
-                        // Like: int fibonacci32(int n);
+                    if (likely((keyword.getCategory() & KeywordCategory::IsType) != 0)) {
+                        // Example: int fibonacci32(int n);
                         ec = parseFunctionDeclare(keyword, identInfo);
                     }
-                    else if (keyword.getCategory() == KeywordCategory::Keywords) {
+                    else if (likely((keyword.getCategory() & KeywordCategory::IsKeyword) != 0)) {
                         // It's a keyword
                         ec = handleReservedKeyword(keyword);
                     }

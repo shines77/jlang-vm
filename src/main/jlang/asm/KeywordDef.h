@@ -58,7 +58,7 @@
     KEYWORD_DEF(UInt64,             uint64,         Pod)
 
     // Reserved keywords
-    KEYWORD_DEF(Namespace,          namespace,      Keywords)
+    KEYWORD_DEF(Namespace,          namespace,      Keyword)
 
     // Section
     KEYWORD_DEF(Align,              .align,         Section)
@@ -66,48 +66,44 @@
     KEYWORD_DEF(EntryPoint,         .entrypoint,    Section)
 
     // Operators
-    KEYWORD_DEF(Add,                add,            Operator)
-    KEYWORD_DEF(Sub,                sub,            Operator)
-    KEYWORD_DEF(Multiply,           mul,            Operator)
-    KEYWORD_DEF(Div,                div,            Operator)
-    KEYWORD_DEF(Mod,                mod,            Operator)
-    KEYWORD_DEF(Assignment,         assign,         Operator)
+    KEYWORD_DEF(Add,                add,            Keyword)
+    KEYWORD_DEF(Sub,                sub,            Keyword)
+    KEYWORD_DEF(Multiply,           mul,            Keyword)
+    KEYWORD_DEF(Div,                div,            Keyword)
+    KEYWORD_DEF(Mod,                mod,            Keyword)
+    KEYWORD_DEF(Assignment,         assign,         Keyword)
 
-    KEYWORD_DEF(AddEqual,           add_eq,         Operator)
-    KEYWORD_DEF(SubEqual,           sub_eq,         Operator)
-    KEYWORD_DEF(MultiplyEqual,      mul_eq,         Operator)
-    KEYWORD_DEF(DivEqual,           div_eq,         Operator)
-    KEYWORD_DEF(ModEqual,           mod_eq,         Operator)
+    KEYWORD_DEF(AddEqual,           add_eq,         Keyword)
+    KEYWORD_DEF(SubEqual,           sub_eq,         Keyword)
+    KEYWORD_DEF(MultiplyEqual,      mul_eq,         Keyword)
+    KEYWORD_DEF(DivEqual,           div_eq,         Keyword)
+    KEYWORD_DEF(ModEqual,           mod_eq,         Keyword)
 
     // Bitwise operators
-    KEYWORD_DEF(BitNot,             not,            Operator)
-    KEYWORD_DEF(BitAnd,             and,            Operator)
-    KEYWORD_DEF(BitOr,              or,             Operator)
-    KEYWORD_DEF(BitXor,             xor,            Operator)
-    KEYWORD_DEF(BoolNot,            bool_not,       Operator)   // (exclamation mark)
-    KEYWORD_DEF(BoolAnd,            bool_and,       Operator)
-    KEYWORD_DEF(BoolOr,             bool_or,        Operator)
-    KEYWORD_DEF(BoolXor,            bool_xor,       Operator)
-    KEYWORD_DEF(BitShiftLeft,       shl,            Operator)
-    KEYWORD_DEF(BitShiftRight,      shr,            Operator)
-    KEYWORD_DEF(BitRollShiftLeft,   ror,            Operator)
-    KEYWORD_DEF(BitRollShiftRight,  rol,            Operator)
+    KEYWORD_DEF(BitNot,             not,            Keyword)
+    KEYWORD_DEF(BitAnd,             and,            Keyword)
+    KEYWORD_DEF(BitOr,              or,             Keyword)
+    KEYWORD_DEF(BitXor,             xor,            Keyword)
+    KEYWORD_DEF(BoolNot,            bool_not,       Keyword)   // (exclamation mark)
+    KEYWORD_DEF(BoolAnd,            bool_and,       Keyword)
+    KEYWORD_DEF(BoolOr,             bool_or,        Keyword)
+    KEYWORD_DEF(BoolXor,            bool_xor,       Keyword)
+    KEYWORD_DEF(BitShiftLeft,       shl,            Keyword)
+    KEYWORD_DEF(BitShiftRight,      shr,            Keyword)
+    KEYWORD_DEF(BitRollShiftLeft,   ror,            Keyword)
+    KEYWORD_DEF(BitRollShiftRight,  rol,            Keyword)
 
-    KEYWORD_DEF(BitNotEqual,        not_eq,         Operator)
-    KEYWORD_DEF(AndEqual,           and_eq,         Operator)
-    KEYWORD_DEF(OrEqual,            or_eq,          Operator)
-    KEYWORD_DEF(XorEqual,           xor_eq,         Operator)
+    KEYWORD_DEF(BitNotEqual,        not_eq,         Keyword)
+    KEYWORD_DEF(AndEqual,           and_eq,         Keyword)
+    KEYWORD_DEF(OrEqual,            or_eq,          Keyword)
+    KEYWORD_DEF(XorEqual,           xor_eq,         Keyword)
 
-    KEYWORD_DEF(Increase,           inc,            Operator)
-    KEYWORD_DEF(Decrease,           dec,            Operator)
+    KEYWORD_DEF(Increase,           inc,            Keyword)
+    KEYWORD_DEF(Decrease,           dec,            Keyword)
 
     // Compare operators
     KEYWORD_DEF(Compare,            cmp,            LogicFlow)
     KEYWORD_DEF(Test,               test,           LogicFlow)
-
-    // Operators
-    KEYWORD_DEF(Equal,              =,              Operator)
-    KEYWORD_DEF(NotEqual,           !=,             Operator)
                  
     // Logic flow
     KEYWORD_DEF(JmpEqual,           je,             LogicFlow)
@@ -117,6 +113,10 @@
     KEYWORD_DEF(JmpGreaterThan,     jg,             LogicFlow)
     KEYWORD_DEF(JmpLessOrEqual,     jle,            LogicFlow)
     KEYWORD_DEF(JmpGreaterOrEqual,  jge,            LogicFlow)
+
+    // Operators
+    KEYWORD_DEF(Equal,              =,              Operator)
+    KEYWORD_DEF(NotEqual,           !=,             Operator)
 
     KEYWORD_DEF(Question,           ?,              Operator)
     KEYWORD_DEF(Colon,              :,              Operator)

@@ -445,14 +445,15 @@ void test_Assembler()
     InputStringStream stream1;
     Scanner scanner(stream1);
 
+    /*
     jstd::SmallString<14> * smallString = new jstd::SmallString<14>();
     printf("\n");
     printf("alignof(jstd::SmallString<16>) = %d\n", (int)alignof(jstd::SmallString<16>));
     printf("sizeof(jstd::SmallString<16>)  = %d\n", (int)sizeof(jstd::SmallString<16>));
+    printf("address_of(jstd::SmallString<16>) = 0x%p\n", smallString);
     printf("SmallString.data_[] offset = %d\n", (int)((char *)&smallString->data_[0] - (char *)smallString));
-    printf("SmallString.ch offset      = %d\n", (int)((char *)&smallString->ch - (char *)smallString));
     printf("SmallString.size_ offset   = %d\n", (int)((char *)&smallString->size_ - (char *)smallString));
-    printf("SmallString.dbl offset     = %d\n", (int)((char *)&smallString->dbl - (char *)smallString));
+    //*/
 
     printf("\n");
 }
