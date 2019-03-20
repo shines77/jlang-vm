@@ -38,7 +38,7 @@ public:
         LastToken
     };
 
-private:
+protected:
     Type type_;
     intptr_t pos_;
     intptr_t length_;
@@ -58,15 +58,13 @@ public:
     ~Token() {}
 
     Token & operator = (const Token & rhs) {
-        this->type_ = rhs.type_;
-        this->pos_ = rhs.pos_;
-        this->length_ = rhs.length_;
+        this->copy(rhs);
         return *this;
     }
 
     Type getType() const { return this->type_; }
-    intptr_t getStartPos() const { return this->pos_; }
-    intptr_t getEndPos() const { return (this->pos_ + this->length_); }
+    intptr_t getStart() const { return this->pos_; }
+    intptr_t getEnd() const { return (this->pos_ + this->length_); }
     intptr_t getLength() const { return this->length_; }
 
     void setType(Type type) {
@@ -81,16 +79,16 @@ public:
         this->type_ = (Type)type;
     }
 
-    void setStartPos(intptr_t pos) {
+    void setStart(intptr_t pos) {
         this->pos_ = pos;
     }
 
-    void setEndPos(intptr_t pos) {
+    void setEnd(intptr_t pos) {
         assert(pos > this->pos_);
         this->length_ = (int)(pos - this->pos_);
     }
 
-    void setLength(int length) {
+    void setLength(int32_t length) {
         assert(length >= 0);
         this->length_ = (intptr_t)length;
     }
@@ -104,41 +102,104 @@ public:
         return (this->type_ == value.type_);
     }
 
-    bool isNotEquals(const Token & value) const {
-        return (this->type_ != value.type_);
-    }
-
-    bool isEquals(int value) const {
+    bool isEquals(int32_t value) const {
         return (this->type_ == value);
-    }
-
-    bool isNotEquals(int value) const {
-        return (this->type_ != value);
     }
 
     bool isEquals(int64_t value) const {
         return (this->type_ == value);
     }
 
-    bool isNotEquals(int64_t value) const {
-        return (this->type_ != value);
+    bool isLessThan(const Token & value) const {
+        return (this->type_ < value.type_);
     }
 
-    Token copy() {
-        Token copyToken(*this);
-        return copyToken;
+    bool isLessThan(int32_t value) const {
+        return (this->type_ < value);
     }
 
-    void getToken(Type & tokenType, intptr_t & start_pos, intptr_t & length) {
+    bool isLessThan(int64_t value) const {
+        return (this->type_ < value);
+    }
+
+    bool isGreaterThan(const Token & value) const {
+        return (this->type_ > value.type_);
+    }
+
+    bool isGreaterThan(int32_t value) const {
+        return (this->type_ > value);
+    }
+
+    bool isGreaterThan(int64_t value) const {
+        return (this->type_ > value);
+    }
+
+    void copy(const Token & src) {
+        this->type_ = src.type_;
+        this->pos_ = src.pos_;
+        this->length_ = src.length_;
+    }
+
+    void getToken(Type & tokenType, intptr_t & start_pos, intptr_t & length) const {
         tokenType = this->getType();
-        start_pos = this->getStartPos();
+        start_pos = this->getStart();
         length    = this->getLength();
     }
 
     void setToken(const Type tokenType, intptr_t start_pos, intptr_t length) {
         this->setType(tokenType);
-        this->setStartPos(start_pos);
+        this->setStart(start_pos);
         this->setLength(length);
+    }
+
+    friend bool operator == (const Token & lhs, const Token & rhs) { return lhs.isEquals(rhs);   }
+    friend bool operator <  (const Token & lhs, const Token & rhs) { return lhs.isLessThan(rhs); }
+
+    friend bool operator != (const Token & lhs, const Token & rhs) { return !(lhs == rhs); }
+    friend bool operator >  (const Token & lhs, const Token & rhs) { return  (rhs <  lhs); }
+    friend bool operator <= (const Token & lhs, const Token & rhs) { return !(lhs >  rhs); }
+    friend bool operator >= (const Token & lhs, const Token & rhs) { return !(lhs <  rhs); }
+
+    friend bool operator == (const Token & lhs,       int32_t rhs) { return  lhs.isEquals(rhs); }
+    friend bool operator == (      int32_t lhs, const Token & rhs) { return  rhs.isEquals(lhs); }
+    friend bool operator == (const Token & lhs,       int64_t rhs) { return  lhs.isEquals(rhs); }
+    friend bool operator == (      int64_t lhs, const Token & rhs) { return  rhs.isEquals(lhs); }
+
+    friend bool operator != (const Token & lhs,       int32_t rhs) { return !lhs.isEquals(rhs); }
+    friend bool operator != (      int32_t lhs, const Token & rhs) { return !rhs.isEquals(lhs); }
+    friend bool operator != (const Token & lhs,       int64_t rhs) { return !lhs.isEquals(rhs); }
+    friend bool operator != (      int64_t lhs, const Token & rhs) { return !rhs.isEquals(lhs); }
+
+    friend bool operator <  (const Token & lhs,       int32_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator <  (      int32_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+    friend bool operator <  (const Token & lhs,       int64_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator <  (      int64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+
+    friend bool operator >  (const Token & lhs,       int32_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator >  (      int32_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+    friend bool operator >  (const Token & lhs,       int64_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator >  (      int64_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+
+    friend bool operator <= (const Token & lhs,       int32_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator <= (      int32_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+    friend bool operator <= (const Token & lhs,       int64_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator <= (      int64_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+
+    friend bool operator >= (const Token & lhs,       int32_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator >= (      int32_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+    friend bool operator >= (const Token & lhs,       int64_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator >= (      int64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+
+    char * toString() {
+        return (char *)Token::toString(this->type_);
+    }
+
+    const char * toString() const {
+        return Token::toString(this->type_);
+    }
+
+    void toString(std::string & str) {
+        str = this->toString();
     }
 
     #define TOKEN_TO_STRING(token)  #token
@@ -172,25 +233,12 @@ public:
     #undef TOKEN_TO_STRING
     #undef CASE_TOKEN
     #undef CASE_PREPROCESSING_TOKEN
-
-    char * toString() {
-        return (char *)Token::toString(this->type_);
-    }
-
-    const char * toString() const {
-        return Token::toString(this->type_);
-    }
-
-    void toString(std::string & str) {
-        str = this->toString();
-    }
 };
 
-// operator == 
 
-inline bool operator == (const Token & lhs, const Token & rhs) {
-    return lhs.isEquals(rhs);
-}
+#if 0
+
+// operator == 
 
 inline bool operator == (int32_t lhs, const Token & rhs) {
     return rhs.isEquals(lhs);
@@ -210,25 +258,23 @@ inline bool operator == (const Token & lhs, int64_t rhs) {
 
 // operator !=
 
-inline bool operator != (const Token & lhs, const Token & rhs) {
-    return lhs.isNotEquals(rhs);
-}
-
 inline bool operator != (int32_t lhs, const Token & rhs) {
-    return rhs.isNotEquals(lhs);
+    return !rhs.isEquals(lhs);
 }
 
 inline bool operator != (const Token & lhs, int32_t rhs) {
-    return lhs.isNotEquals(rhs);
+    return !lhs.isEquals(rhs);
 }
 
 inline bool operator != (int64_t lhs, const Token & rhs) {
-    return rhs.isNotEquals(lhs);
+    return !rhs.isEquals(lhs);
 }
 
 inline bool operator != (const Token & lhs, int64_t rhs) {
-    return lhs.isNotEquals(rhs);
+    return !lhs.isEquals(rhs);
 }
+
+#endif
 
 } // namespace jasm
 } // namespace jlang

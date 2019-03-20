@@ -20,14 +20,15 @@ namespace jasm {
 class IdentInfo {
 protected:
     std::string name_;
+    Token::Type token_;
     intptr_t start_;
     intptr_t length_;
 
 public:
-    IdentInfo() : start_(0), length_(0) {
+    IdentInfo() : token_(Token::Unknown), start_(0), length_(0) {
     }
     IdentInfo(const std::string & name, intptr_t start)
-        : name_(name), start_(0), length_(name.size()) {
+        : name_(name), token_(Token::Unknown), start_(0), length_(name.size()) {
     }
     IdentInfo(const IdentInfo & src) {
         this->copy(src);
@@ -54,6 +55,16 @@ public:
 
     void setName(const std::string & name) {
         this->name_ = name;
+    }
+
+    Token::Type getToken() const { return this->token_; }
+
+    void setToken(Token::Type type) {
+        this->token_ = type;
+    }
+
+    void setToken(Token token) {
+        this->token_ = token.getType();
     }
 
     intptr_t start() const { return this->start_; }

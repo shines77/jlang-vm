@@ -576,7 +576,7 @@ Parse_Exit:
                 assert(keyword.getCategory() == KeywordCategory::Preprocessing);
 
                 tokenType = keyword.getType();
-                token.setStartPos(identInfo.start());
+                token.setStart(identInfo.start());
                 token.setLength(identInfo.length());
 
                 ec = handlePreprocessingStatement(tokenType, token);
@@ -2131,7 +2131,7 @@ ParseStringSection_Entry:
                 break;
             }
 
-            token.setStartPos(marker.start());
+            token.setStart(marker.start());
             token.setLength(marker.length());
             assert(token.getLength() > 0);
             if (token.getType() != Token::Unknown &&
