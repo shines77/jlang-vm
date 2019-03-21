@@ -445,7 +445,7 @@ public:
         ErrorCode ec;
         Token signToken(Token::Unknown);
 
-        if (keyword.getCategory() == KeywordCategory::PodSign) {
+        if (keyword.getKind() == KeywordKind::PodSign) {
             // If identifier is "signed"/"unsigned", continue parse a POD type.
             signToken = keyword.getToken();
             skipWhiteSpaces();
@@ -460,8 +460,8 @@ public:
             KeywordMapping::iterator iter = keyMapping.find(podIdentName);
             if (iter != keyMapping.end()) {
                 const Keyword & podKeyword = iter->second;
-                if (podKeyword.getCategory() == KeywordCategory::Pod ||
-                    podKeyword.getCategory() == KeywordCategory::TypeDef) {
+                if (podKeyword.getKind() == KeywordKind::Pod ||
+                    podKeyword.getKind() == KeywordKind::TypeDef) {
                     // Merge the sign type and POD type.
                     bool merged = identInfo.merge(podIdentInfo);
                     if (!merged) {
@@ -514,11 +514,11 @@ Parse_Exit:
                 KeywordMapping::iterator iter = keyMapping.find(identName);
                 if (iter != keyMapping.end()) {
                     const Keyword & keyword = iter->second;
-                    if (likely((keyword.getCategory() & KeywordCategory::IsType) != 0)) {
+                    if (likely((keyword.getKind() & KeywordKind::IsType) != 0)) {
                         // Function or identifier declare.
                         ec = parseIdentifierDeclare(keyword, identInfo);
                     }
-                    else if (likely((keyword.getCategory() & KeywordCategory::IsKeyword) != 0)) {
+                    else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
                         // It's a keyword
                         ec = handleReservedKeyword(keyword);
                     }
@@ -548,9 +548,9 @@ Parse_Exit:
             KeywordMapping::iterator iter = keyMapping.find(keywordName);
             if (iter != keyMapping.end()) {
                 Keyword keyword = iter->second;
-                if (keyword.getCategory() == KeywordCategory::Pod ||
-                    keyword.getCategory() == KeywordCategory::TypeDef) {
-                    if (keyword.getCategory() != KeywordCategory::Pod) {
+                if (keyword.getKind() == KeywordKind::Pod ||
+                    keyword.getKind() == KeywordKind::TypeDef) {
+                    if (keyword.getKind() != KeywordKind::Pod) {
                         // Parse full type define
                     }
                     skipWhiteSpace();
@@ -607,7 +607,7 @@ Parse_Exit:
                         //
                     }
                 }
-                else if (keyword.getCategory() == KeywordCategory::UserDefine) {
+                else if (keyword.getKind() == KeywordKind::UserDefine) {
                     // User define function or variant
                     skipWhiteSpace();
                 }
@@ -658,7 +658,7 @@ Parse_Exit:
             KeywordMapping::iterator iter = ppKeyMapping.find(identInfo.name());
             if (iter != ppKeyMapping.end()) {
                 Keyword & keyword = iter->second;
-                assert(keyword.getCategory() == KeywordCategory::Preprocessing);
+                assert(keyword.getKind() == KeywordKind::Preprocessing);
 
                 token = keyword.getToken();
                 ti.setStart(identInfo.start());

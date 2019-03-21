@@ -24,7 +24,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initializer.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Keyword.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordDef.h" />
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordCategory.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordKind.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Parser.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Token.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenDef.h" />

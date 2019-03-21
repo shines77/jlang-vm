@@ -154,9 +154,6 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h">
       <Filter>src\fs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordCategory.h">
-      <Filter>src\asm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h">
       <Filter>src\support</Filter>
     </ClInclude>
@@ -176,6 +173,9 @@
       <Filter>src\lang</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenInfo.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordKind.h">
       <Filter>src\asm</Filter>
     </ClInclude>
   </ItemGroup>

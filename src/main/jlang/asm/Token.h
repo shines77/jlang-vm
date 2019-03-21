@@ -15,7 +15,7 @@
 #include <string>
 
 #include "jlang/lang/ErrorCode.h"
-#include "jlang/asm/KeywordCategory.h"
+#include "jlang/asm/KeywordKind.h"
 
 #define TOKEN_DEF(token)                        token,
 #define KEYWORD_DEF(token, keyword, category)   token,

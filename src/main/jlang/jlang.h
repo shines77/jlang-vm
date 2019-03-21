@@ -9,7 +9,7 @@
 #include "jlang/basic/stddef.h"
 #include "jlang/basic/coredef.h"
 #include "jlang/basic/ValueType.h"
-#include "jlang/asm/KeywordCategory.h"
+#include "jlang/asm/KeywordKind.h"
 #include "jlang/asm/Keyword.h"
 #include "jlang/asm/Token.h"
 #include "jlang/lang/Global.h"

@@ -9,7 +9,7 @@
 #include "jlang/basic/stddef.h"
 #include "jlang/lang/Global.h"
 #include "jlang/lang/NonCopyable.h"
-#include "jlang/asm/KeywordCategory.h"
+#include "jlang/asm/KeywordKind.h"
 #include "jlang/asm/Token.h"
 #include "jlang/jstd/min_max.h"
 #include "jlang/support/HashAlgorithm.h"
@@ -61,7 +61,7 @@ class Keyword;
 struct KeywordInfoDef {
     uint16_t id;
     uint16_t token;
-    uint32_t category;
+    uint32_t kind;
     uint16_t length;
     char name[64 - sizeof(uint16_t) * 5];   // Alignment for 64 bytes.
 };
@@ -70,13 +70,13 @@ class KeywordInfo {
 protected:
     uint16_t id_;
     uint16_t token_;
-    uint32_t category_;
+    uint32_t kind_;
     uint16_t length_;
     std::string name_;
 
 public:
     KeywordInfo() : id_(-1), token_(jasm::Token::Unknown),
-                    category_(jasm::KeywordCategory::Unknown),
+                    kind_(jasm::KeywordKind::Unknown),
                     length_(0) {
     }
     ~KeywordInfo() {}
@@ -87,14 +87,14 @@ public:
 #undef JLANG_KEYWORD_ID
 #undef JLANG_PREPROCESSING_ID
 
-#define JLANG_KEYWORD_ID(token, category)   jasm::KeywordId::token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)     jasm::KeywordId::pp_##keyword
+#define JLANG_KEYWORD_ID(token, kind)    jasm::KeywordId::token##_##kind
+#define JLANG_PREPROCESSING_ID(keyword)  jasm::KeywordId::pp_##keyword
 
-#define KEYWORD_DEF(token, keyword, category)  \
+#define KEYWORD_DEF(token, keyword, kind)  \
     { \
-        (uint16_t)JLANG_KEYWORD_ID(token, category), \
+        (uint16_t)JLANG_KEYWORD_ID(token, kind), \
         (uint16_t)jasm::Token::token, \
-        (uint32_t)jasm::KeywordCategory::category, \
+        (uint32_t)jasm::KeywordKind::kind, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
@@ -103,7 +103,7 @@ public:
     { \
         (uint16_t)JLANG_PREPROCESSING_ID(keyword), \
         (uint16_t)jasm::Token::pp_##keyword, \
-        (uint16_t)jasm::KeywordCategory::Preprocessing, \
+        (uint16_t)jasm::KeywordKind::Preprocessing, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
@@ -113,7 +113,7 @@ static const KeywordInfoDef gKeywordList[] = {
     {
         (uint16_t)jasm::KeywordId::Type::MaxKeywordId,
         (uint16_t)jasm::Token::Unknown,
-        (uint32_t)jasm::KeywordCategory::Unknown,
+        (uint32_t)jasm::KeywordKind::Unknown,
         0,
         ""
     }
@@ -221,7 +221,7 @@ public:
 
     Keyword(const KeywordInfoDef & src) {
         id_ = src.id;
-        category_ = src.category;
+        kind_ = src.kind;
         token_ = src.token;
         length_ = src.length;
         name_ = src.name;
@@ -232,7 +232,7 @@ public:
 
     Keyword(const KeywordInfo & src) {
         id_ = src.id_;
-        category_ = src.category_;
+        kind_ = src.kind_;
         token_ = src.token_;
         length_ = src.length_;
         name_ = src.name_;
@@ -252,11 +252,11 @@ public:
     std::string toString() { return this->name_; }
     const std::string toString() const { return this->name_; }
 
-    const jasm::KeywordCategory::Type getCategory() const { return jasm::KeywordCategory::Type(category_); }
+    const jasm::KeywordKind::Type getKind() const { return jasm::KeywordKind::Type(kind_); }
     const jasm::Token getToken() const { return jasm::Token(token_); }
     const jasm::Token::Type getType() const { return jasm::Token::Type(token_); }
 
-    void setCategory(uint16_t type) { category_ = type; }
+    void setKind(uint16_t type) { kind_ = type; }
     void setToken(const jasm::Token & token) { token_ = token.value(); }
 
     void setType(int16_t token) { token_ = static_cast<uint16_t>(token); }
@@ -389,7 +389,7 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() == jasm::KeywordCategory::Preprocessing) {
+                if (keyword.getKind() == jasm::KeywordKind::Preprocessing) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
@@ -398,7 +398,7 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() == jasm::KeywordCategory::Section) {
+                if (keyword.getKind() == jasm::KeywordKind::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }
@@ -407,8 +407,8 @@ private:
             for (size_t i = 0; i < gKeywordListSize; ++i) {
                 Keyword keyword(gKeywordList[i]);
                 const std::string & keywordName = keyword.getName();
-                if (keyword.getCategory() != jasm::KeywordCategory::Preprocessing &&
-                    keyword.getCategory() != jasm::KeywordCategory::Section) {
+                if (keyword.getKind() != jasm::KeywordKind::Preprocessing &&
+                    keyword.getKind() != jasm::KeywordKind::Section) {
                     keywordMapping_.insert(std::make_pair(keywordName, keyword));
                 }
             }

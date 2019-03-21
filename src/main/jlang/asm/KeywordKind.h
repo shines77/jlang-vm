@@ -20,7 +20,7 @@ struct KeywordMasks {
     };
 };
 
-struct KeywordCategory {
+struct KeywordKind {
     enum Type {
         Unknown         = 0,
 
@@ -61,13 +61,13 @@ struct KeywordCategory {
         IsOperator      = Operator,
         IsPreprocessing = Preprocessing,
 
-        CategoryMask    = (int)0xFFFFFFFFFUL
+        KindMask        = (int)0xFFFFFFFFFUL
     };
 
-    KeywordCategory(uint16_t category = Type::Unknown) : category_(category) {
+    KeywordKind(uint16_t category = Type::Unknown) : category_(category) {
     }
 
-    KeywordCategory(uint32_t category) : category_(static_cast<uint32_t>(category)) {
+    KeywordKind(uint32_t category) : category_(static_cast<uint32_t>(category)) {
     }
 
     uint32_t category_;
