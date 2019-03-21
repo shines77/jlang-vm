@@ -11,7 +11,7 @@
 namespace jlang {
 namespace jasm {
 
-struct KeywordMasks {
+struct KeywordCategory {
     enum {
         DefaultCategory     = 1 << 16,
         UserDefineCategory  = 2 << 16,
@@ -20,38 +20,39 @@ struct KeywordMasks {
     };
 };
 
-struct KeywordKind {
+class KeywordKind {
+private:
+    uint32_t kind_;
+
+public:
     enum Type {
         Unknown         = 0,
 
         // Standard
-        Default         = 0x00000001,
-        Section         = 0x00000002,
-        Keyword         = 0x00000004,
-        Others          = 0x00000008,
+        Default         = 1 << 0,
+        Section         = 1 << 1,
+        Keyword         = 1 << 2,
+        Others          = 1 << 3,
 
         // POD
-        Pod             = 0x00000010,
-        PodSign         = 0x00000020,
+        Pod             = 1 << 4,
+        PodSign         = 1 << 5,
 
         // Normal
-        Operator        = 0x00000040,
-        Constant        = 0x00000080,
+        Operator        = 1 << 6,
+        Constant        = 1 << 7,
 
-        TypeDef         = 0x000000100,
-        InnerTypeDef    = 0x000000200,
-        LogicFlow       = 0x000000400,
-        Classes         = 0x000000800,
+        TypeDef         = 1 << 8,
+        InnerTypeDef    = 1 << 9,
+        LogicFlow       = 1 << 10,
+        Classes         = 1 << 11,
 
         // UserDefine
-        UserDefine      = 0x000001000,
+        UserDefine      = 1 << 12,
 
         // Precompile
-        Preprocessing   = 0x000002000,
-        Macro           = 0x000004000,
-
-        // Others
-        MaxCategoryType = 0x000008000,
+        Preprocessing   = 1 << 13,
+        Macro           = 1 << 14,
 
         // Masks
         IsType          = Pod | PodSign | TypeDef | InnerTypeDef | UserDefine,
@@ -64,13 +65,16 @@ struct KeywordKind {
         KindMask        = (int)0xFFFFFFFFFUL
     };
 
-    KeywordKind(uint16_t category = Type::Unknown) : category_(category) {
+    KeywordKind(uint16_t kind) : kind_(static_cast<uint32_t>(kind)) {
+    }
+    KeywordKind(uint32_t kind = Type::Unknown) : kind_(kind) {
+    }
+    KeywordKind(uint64_t kind) : kind_(static_cast<uint32_t>(kind)) {
     }
 
-    KeywordKind(uint32_t category) : category_(static_cast<uint32_t>(category)) {
-    }
-
-    uint32_t category_;
+    uint32_t value() const   { return this->kind_; }
+    uint32_t getKind() const { return this->kind_; }
+    void setKind(uint32_t kind) { this->kind_ = kind; }
 };
 
 } // namespace jasm
