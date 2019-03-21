@@ -645,7 +645,7 @@ Parse_Exit:
 
     ErrorCode parsePreprocessing(TokenInfo & ti) {
         ErrorCode ec;
-        Token::Type tokenType = Token::Unknown;
+        Token token = Token::Unknown;
         StreamMarker marker(stream_);
         marker.setmark();
         skipIdentifier();
@@ -660,13 +660,13 @@ Parse_Exit:
                 Keyword & keyword = iter->second;
                 assert(keyword.getCategory() == KeywordCategory::Preprocessing);
 
-                tokenType = keyword.getType();
+                token = keyword.getToken();
                 ti.setStart(identInfo.start());
                 ti.setLength(identInfo.length());
 
-                ec = handlePreprocessingStatement(tokenType, ti);
+                ec = handlePreprocessingStatement(token, ti);
                 if (ec.isOK()) {
-                    ti.setToken(tokenType);
+                    ti.setToken(token);
                 }
                 else {
                     // Got a error.
@@ -682,18 +682,18 @@ Parse_Exit:
             ec = ErrorCode::IllegalPreprocessingKeyword;
         }
 
-        if (tokenType != Token::Unknown) {
-            ti.setToken(tokenType, marker.start(), marker.length());
+        if (token != Token::Unknown) {
+            ti.setToken(token, marker.start(), marker.length());
         }
         else {
-            ti.setToken(tokenType, marker.start(), 0);
+            ti.setToken(token, marker.start(), 0);
         }
         return ec;
     }
 
-    ErrorCode handlePreprocessingStatement(Token::Type ppTokenType, const TokenInfo & ti) {
+    ErrorCode handlePreprocessingStatement(Token ppToken, const TokenInfo & ti) {
         ErrorCode ec = ErrorCode::OK;
-        switch (ppTokenType) {
+        switch (ppToken.value()) {
         case Token::pp_if:
             //
             break;
@@ -955,7 +955,7 @@ Parse_Exit:
         return is_valid;
     }
 
-    ErrorCode parseRadixNumber(Token::Type & tokenType,
+    ErrorCode parseRadixNumber(Token & token,
                                int & radix, uint64_t & number) {
         ErrorCode ec;
         bool is_valid;
@@ -964,7 +964,7 @@ Parse_Exit:
             radix = 16;
             stream_.next(2);
             is_valid = parseRadixNumberImpl<16>(number);
-            tokenType = Token::HexLiteral;
+            token = Token::HexLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix16Number;
             }
@@ -973,7 +973,7 @@ Parse_Exit:
             radix = 8;
             stream_.next(2);
             is_valid = parseRadixNumberImpl<8>(number);
-            tokenType = Token::OcxLiteral;
+            token = Token::OcxLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix8Number;
             }
@@ -982,7 +982,7 @@ Parse_Exit:
             radix = 2;
             stream_.next(2);
             is_valid = parseRadixNumberImpl<2>(number);
-            tokenType = Token::BinaryLiteral;
+            token = Token::BinaryLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix2Number;
             }
@@ -991,7 +991,7 @@ Parse_Exit:
             radix = 10;
             stream_.next(2);
             is_valid = parseRadixNumberImpl<10>(number);
-            tokenType = Token::DecLiteral;
+            token = Token::DecLiteral;
             if (!is_valid) {
                 ec = ErrorCode::IllegalRadix10Number;
             }
@@ -1011,7 +1011,7 @@ Parse_Exit:
             return ErrorCode::IllegalRadix10Number;
     }
 
-    ErrorCode parseRealNumber(Token::Type & tokenType,
+    ErrorCode parseRealNumber(Token & token,
                               uint64_t & integer, uint64_t & fractional,
                               int & exponent, bool & is_float) {
         ErrorCode ec;
@@ -1151,10 +1151,10 @@ Parse_Exit:
 
         if (ec == ErrorCode::OK) {
             if (hasDots) {
-                tokenType = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
+                token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
             }
             else {
-                tokenType = Token::IntegerLiteral;
+                token = Token::IntegerLiteral;
             }
         }
 
@@ -1162,7 +1162,7 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode parseRealNumberSuffix(Token::Type & tokenType,
+    ErrorCode parseRealNumberSuffix(Token & token,
                                     uint64_t & fractional, int & exponent) {
         ErrorCode ec;
         int fractional_len = 0;
@@ -1267,7 +1267,7 @@ Parse_Exit:
         }
 
         if (ec == ErrorCode::OK) {
-            tokenType = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
+            token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
         }
 
 Parse_Exit:
@@ -1543,7 +1543,7 @@ Parse_Exit:
 
     ErrorCode parseNumberLiteral(TokenInfo & ti) {
         ErrorCode ec;
-        Token::Type tokenType;
+        Token token;
         StreamMarker marker(stream_);
         marker.setmark();
 
@@ -1555,9 +1555,9 @@ Parse_Exit:
                 // Determine the radix for the constant
                 int radix;
                 uint64_t number;
-                ec = parseRadixNumber(tokenType, radix, number);
+                ec = parseRadixNumber(token, radix, number);
                 if (ec.isOK()) {
-                    ti.setToken(tokenType, marker.start(), marker.length());
+                    ti.setToken(token, marker.start(), marker.length());
                 }
                 return ec;
             }
@@ -1568,9 +1568,9 @@ Parse_Exit:
         uint64_t fractional;
         int exponent;
         bool is_float;
-        ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+        ec = parseRealNumber(token, integer, fractional, exponent, is_float);
         if (ec.isOK()) {
-            ti.setToken(tokenType, marker.start(), marker.length());
+            ti.setToken(token, marker.start(), marker.length());
         }
 
         return ec;
@@ -1626,10 +1626,10 @@ Parse_Exit:
         }
     }
 
-    ErrorCode handleSectionStatement(Token::Type sectionType, TokenInfo & ti) {
+    ErrorCode handleSectionStatement(Token sectionToken, TokenInfo & ti) {
         ErrorCode ec;
 
-        switch (sectionType) {
+        switch (sectionToken.value()) {
         case Token::Align:
             {
                 std::cout << ">>> Section [.align] begin." << std::endl;
@@ -1758,7 +1758,7 @@ ParseStringSection_Entry:
         StreamMarker marker(stream_);
         while (likely(stream_.has_next())) {
             marker.remark();
-            Token::Type tokenType;
+            Token token;
             // For ppc or arm cpu, make sure to use "signed char or int8_t".
             uint8_t ch = stream_.getu();
             switch (ch) {
@@ -1853,9 +1853,9 @@ ParseStringSection_Entry:
                         // Determine the radix for the constant
                         int radix;
                         uint64_t number;
-                        ec = parseRadixNumber(tokenType, radix, number);
+                        ec = parseRadixNumber(token, radix, number);
                         if (ec.isOK()) {
-                            ti.setToken(tokenType, marker.start(), marker.length());
+                            ti.setToken(token, marker.start(), marker.length());
                             return true;
                         }
                     }
@@ -1865,9 +1865,9 @@ ParseStringSection_Entry:
                     uint64_t fractional;
                     int exponent;
                     bool is_float;
-                    ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+                    ec = parseRealNumber(token, integer, fractional, exponent, is_float);
                     if (ec.isOK()) {
-                        ti.setToken(tokenType, marker.start(), marker.length());
+                        ti.setToken(token, marker.start(), marker.length());
                         return true;
                     }
 
@@ -1884,9 +1884,9 @@ ParseStringSection_Entry:
                     uint64_t fractional;
                     int exponent;
                     bool is_float;
-                    ec = parseRealNumber(tokenType, integer, fractional, exponent, is_float);
+                    ec = parseRealNumber(token, integer, fractional, exponent, is_float);
                     if (ec.isOK()) {
-                        ti.setToken(tokenType, marker.start(), marker.length());
+                        ti.setToken(token, marker.start(), marker.length());
                         return true;
                     }
                     ti.setToken(Token::IntegerLiteral);
@@ -1917,9 +1917,9 @@ ParseStringSection_Entry:
                         // It's a float or double number.
                         uint64_t fractional;
                         int exponent;
-                        ec = parseRealNumberSuffix(tokenType, fractional, exponent);
+                        ec = parseRealNumberSuffix(token, fractional, exponent);
                         if (ec.isOK()) {
-                            ti.setToken(tokenType, marker.start(), marker.length());
+                            ti.setToken(token, marker.start(), marker.length());
                             return true;
                         }
                     }
