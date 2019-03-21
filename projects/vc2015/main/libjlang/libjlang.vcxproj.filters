@@ -172,7 +172,10 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\SmallString.h">
       <Filter>src\jstd</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\asm\Char.h">
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Char.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenInfo.h">
       <Filter>src\asm</Filter>
     </ClInclude>
   </ItemGroup>

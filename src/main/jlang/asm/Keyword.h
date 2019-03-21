@@ -257,8 +257,12 @@ public:
     const jasm::Token::Type getType() const { return jasm::Token::Type(token_); }
 
     void setCategory(uint16_t type) { category_ = type; }
-    void setToken(const jasm::Token & token) { token_ = token.getType(); }
-    void setType(uint16_t token) { token_ = token; }
+    void setToken(const jasm::Token & token) { token_ = token.value(); }
+
+    void setType(int16_t token) { token_ = static_cast<uint16_t>(token); }
+    void setType(int32_t token) { token_ = static_cast<uint16_t>(token); }
+    void setType(int64_t token) { token_ = static_cast<uint16_t>(token); }
+    void setType(jasm::Token::Type token) { token_ = static_cast<uint16_t>(token); }
 
     const std::string & getName() const { return name_; }
 

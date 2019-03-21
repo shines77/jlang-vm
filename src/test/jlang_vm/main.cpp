@@ -421,7 +421,7 @@ void test_Assembler()
     using namespace jlang::jasm;
 
     ErrorCode ec;
-    Token token = Token::Unknown;
+    TokenInfo ti(Token::Unknown);
     Parser parser;
 
     FileStringStream stream(JLANG_SCRIPT_PATH("asm/fibonacci.jasm"));
@@ -429,13 +429,13 @@ void test_Assembler()
 
     bool success = false;
     do {
-        success = parser.parseToken(token, ec);
+        success = parser.parseToken(ti, ec);
         if (!success) {
             break;
         }
-    } while (token != Token::Eof);
+    } while (ti.token() != Token::Eof);
 
-    if (success || token <= Token::Eof) {
+    if (success || ti.token() <= Token::Eof) {
         printf(">>  Parser: success. [file = %s]\n", stream.filename().c_str());
     }
     else {

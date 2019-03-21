@@ -38,22 +38,16 @@ public:
     };
 
 protected:
-    Type type_;
-    intptr_t pos_;
-    intptr_t length_;
+    Type token_;
 
 public:
-    Token() : type_(Type::Unknown), pos_(0), length_(0) {}
-    Token(Type type) : type_(type), pos_(0), length_(0) {}
-    Token(Type type, int length, intptr_t pos) : type_(type), pos_(pos), length_(length) {}
-    Token(int16_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(int16_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(int32_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(int32_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(int64_t type) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(int64_t type, int length, intptr_t pos) : type_(static_cast<Type>(type)), pos_(0), length_(0) {}
-    Token(const Token & src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
-    Token(Token && src) : type_(src.type_), pos_(src.pos_), length_(src.length_) {}
+    Token() : token_(Token::Unknown) {}
+    Token(Type token) : token_(token) {}
+    Token(int16_t token) : token_(static_cast<Type>(token)) {}
+    Token(int32_t token) : token_(static_cast<Type>(token)) {}
+    Token(int64_t token) : token_(static_cast<Type>(token)) {}
+    Token(const Token & src) : token_(src.token_) {}
+    Token(Token && src) : token_(src.token_) {}
     ~Token() {}
 
     Token & operator = (const Token & rhs) {
@@ -61,81 +55,46 @@ public:
         return *this;
     }
 
+    Token & operator = (int16_t rhs) {
+        this->set(rhs);
+        return *this;
+    }
+
     Token & operator = (int32_t rhs) {
-        this->setType(rhs);
+        this->set(rhs);
         return *this;
     }
 
     Token & operator = (int64_t rhs) {
-        this->setType(rhs);
+        this->set(rhs);
         return *this;
     }
 
-    Type getType() const { return this->type_; }
-    intptr_t getStart() const { return this->pos_; }
-    intptr_t getEnd() const { return (this->pos_ + this->length_); }
-    intptr_t getLength() const { return this->length_; }
+    Type get() const   { return this->token_; }
+    Type value() const { return this->token_; }
+    Type getType() const   { return this->token_; }
 
-    void setType(Type type) {
-        this->type_ = type;
-    }
-
-    void setType(int32_t type) {
-        this->type_ = (Type)type;
-    }
-
-    void setType(int64_t type) {
-        this->type_ = (Type)type;
-    }
-
-    void setStart(intptr_t pos) {
-        this->pos_ = pos;
-    }
-
-    void setEnd(intptr_t pos) {
-        assert(pos > this->pos_);
-        this->length_ = (int)(pos - this->pos_);
-    }
-
-    void setLength(int32_t length) {
-        assert(length >= 0);
-        this->length_ = (intptr_t)length;
-    }
-
-    void setLength(int64_t length) {
-        assert(length >= 0);
-        this->length_ = (intptr_t)length;
-    }
+    void set(Type token)     { this->token_ = token; }
+    void set(int16_t token)  { this->token_ = (Type)token; }
+    void set(int32_t token)  { this->token_ = (Type)token; }
+    void set(int64_t token)  { this->token_ = (Type)token; }
+    void setType(Type token) { this->token_ = token; }
 
     void copy(const Token & src) {
-        this->type_ = src.type_;
-        this->pos_ = src.pos_;
-        this->length_ = src.length_;
+        this->token_ = src.token_;
     }
 
-    void getToken(Type & tokenType, intptr_t & start_pos, intptr_t & length) const {
-        tokenType = this->getType();
-        start_pos = this->getStart();
-        length    = this->getLength();
-    }
+    bool isEquals(const Token & value) const { return (this->token_ == value.token_); }
+    bool isEquals(int32_t value) const       { return (this->token_ == value); }
+    bool isEquals(int64_t value) const       { return (this->token_ == value); }
 
-    void setToken(const Type tokenType, intptr_t start_pos, intptr_t length) {
-        this->setType(tokenType);
-        this->setStart(start_pos);
-        this->setLength(length);
-    }
+    bool isLessThan(const Token & value) const { return (this->token_ < value.token_); }
+    bool isLessThan(int32_t value) const       { return (this->token_ < value); }
+    bool isLessThan(int64_t value) const       { return (this->token_ < value); }
 
-    bool isEquals(const Token & value) const { return (this->type_ == value.type_); }
-    bool isEquals(int32_t value) const       { return (this->type_ == value); }
-    bool isEquals(int64_t value) const       { return (this->type_ == value); }
-
-    bool isLessThan(const Token & value) const { return (this->type_ < value.type_); }
-    bool isLessThan(int32_t value) const       { return (this->type_ < value); }
-    bool isLessThan(int64_t value) const       { return (this->type_ < value); }
-
-    bool isGreaterThan(const Token & value) const { return (this->type_ > value.type_); }
-    bool isGreaterThan(int32_t value) const       { return (this->type_ > value); }
-    bool isGreaterThan(int64_t value) const       { return (this->type_ > value); }
+    bool isGreaterThan(const Token & value) const { return (this->token_ > value.token_); }
+    bool isGreaterThan(int32_t value) const       { return (this->token_ > value); }
+    bool isGreaterThan(int64_t value) const       { return (this->token_ > value); }
 
     friend bool operator == (const Token & lhs, const Token & rhs) { return lhs.isEquals(rhs);   }
     friend bool operator <  (const Token & lhs, const Token & rhs) { return lhs.isLessThan(rhs); }
@@ -176,19 +135,19 @@ public:
     friend bool operator >= (      int64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
 
     char * c_str() {
-        return (char *)Token::format(this->type_);
+        return (char *)Token::format(this->token_);
     }
 
     const char * c_str() const {
-        return Token::format(this->type_);
+        return Token::format(this->token_);
     }
 
     std::string toString() {
-        return std::string(Token::format(this->type_));
+        return std::string(Token::format(this->token_));
     }
 
     const std::string toString() const {
-        return std::string(Token::format(this->type_));
+        return std::string(Token::format(this->token_));
     }
 
     #define TOKEN_TO_STRING(token)  #token
