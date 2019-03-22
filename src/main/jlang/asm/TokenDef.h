@@ -53,6 +53,7 @@
     TOKEN_DEF(Ampersand)                // &, [= and]
     TOKEN_DEF(Handle)                   // @
     TOKEN_DEF(Sharp)                    // #
+//  TOKEN_DEF(Dot)                      // .
 
     // Punctuation
     TOKEN_DEF(SingelQuote)              // '

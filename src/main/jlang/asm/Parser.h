@@ -348,8 +348,8 @@ public:
         assert(firstChar == stream_.getu(-1));
         StreamMarker marker(stream_);
         marker.setmark(-1);
-        skipIdentifier();
-        assert(marker.length() > 1);
+        skipIdentifierBody();
+        assert(marker.length() > 0);
 
         marker.append_ident(identInfo);
     }
@@ -358,8 +358,8 @@ public:
         assert(firstChar == stream_.getu(-1));
         StreamMarker marker(stream_);
         marker.setmark(-1);
-        skipIdentifier();
-        assert(marker.length() > 1);
+        skipIdentifierBody();
+        assert(marker.length() > 0);
 
         marker.append_ident(identInfo);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
@@ -412,57 +412,61 @@ public:
             IdentInfo identInfo;
             parseIdentifierBody(ch, identInfo);
 
+            // Expect to skip N whitespace.
+            skipWhiteSpace();
+
             ch = stream_.getu();
-            if (likely(Char::isWhiteSpace(ch))) {  // Expect to skip 1 whitespace.
+            if (likely(ch == '=')) {
+                // It's a assignment statement.
                 stream_.next();
+            }
+            else if (likely(ch == '+')) {
+                // cnt++; or x += 1;
+                stream_.next();
+            }
+            else if (likely(ch == '-')) {
+                // cnt--; or x -= 1;
+                stream_.next();
+            }
+            else if (likely(ch == '.')) {
+                // object.read();
+                stream_.next();
+            }
+            else if (likely(ch == '-')) {
+                // object->read();
+                stream_.next();
+            }
+            else if (likely(ch == '(')) {
+                // It's a function call.
+                stream_.next();
+            }
+            else if (likely(ch == ':')) {
+                ch = stream_.getu(1);
+                if (likely(ch == ':')) {
+                    // It's a identifier namespace.
+                    stream_.next(2);
+                }
+                else {
+                    // It's a label name.
+                    stream_.next();
 
-#if OBJECT_LANGUAGE == LANG_CPP
-                // Expect to skip 0 whitespace.
-                skipWhiteSpace_0();
-#else
-                // Expect to skip N whitespace.
-                skipWhiteSpace();
-#endif // OBJECT_LANGUAGE
-
-                ch = stream_.getu();
-                if (likely(ch == '=')) {
-                    // It's a assignment statement.
-                }
-                else if (likely(ch == '+')) {
-                    // cnt++; or x += 1;
-                }
-                else if (likely(ch == '-')) {
-                    // cnt--; or x -= 1;
-                }
-                else if (likely(ch == '.')) {
-                    // object.read();
-                }
-                else if (likely(ch == '-')) {
-                    // object->read();
-                }
-                else if (likely(ch == '(')) {
-                    // It's a function call.
-                }
-                else if (likely(ch == ':')) {
-                    ch = stream_.getu(1);
-                    if (likely(ch == ':')) {
-                        // It's a identifier namespace.
-                        stream_.next(2);
-                    }
-                    else {
-                        // It's a label name.
-                        stream_.next();
-
-                        // TODO: Append the label name.
-                    }
+                    // TODO: Append the label name.
                 }
             }
         }
+        else if (likely(Char::isWhiteSpace(ch))) {   // WhiteSpace
+            stream_.next();
+        }
+        else if (likely(Char::isDigital(ch))) {   // Digital
+            stream_.next();
+        }
         else if (likely(ch == '{')) {
             // Scope begin
+            stream_.next();
         }
         else if (likely(ch == '}')) {
             // Scope end
+            stream_.next();
         }
         else if (likely(ch == '+')) {   // ++cnt;
             stream_.next();
@@ -490,10 +494,37 @@ public:
                 ec = ErrorCode::UnknownError;
             }
         }
-        else if (likely(ch == ';')) {   // 
+        else if (likely(ch == '.')) {   // Dot
             stream_.next();
         }
+        else if (likely(ch == ',')) {   // Comma
+            stream_.next();
+        }
+        else if (likely(ch == '<')) {   // &lt;
+            stream_.next();
+        }
+        else if (likely(ch == '>')) {   // &gt;
+            stream_.next();
+        }
+        else if (likely(ch == '=')) {   // EqualSign
+            stream_.next();
+        }
+        else if (likely(ch == '(')) {   // (
+            stream_.next();
+        }
+        else if (likely(ch == ')')) {   // )
+            stream_.next();
+        }
+        else if (likely(ch == '?')) {   // Question
+            stream_.next();
+        }
+        else if (likely(ch == ';')) {   // Semicolon
+            stream_.next();
+
+            skipWhiteSpaces();
+        }
         else {
+            stream_.next();
             ec = ErrorCode::IllegalStatement;
         }
 
@@ -512,6 +543,7 @@ public:
             }
             else {
                 // End of function.
+                stream_.next();
                 break;
             }
         } while (1);
@@ -524,15 +556,19 @@ public:
         uint8_t ch = stream_.getu();
         if (likely(ch == '{')) {
             // It's a function body
+            stream_.next();
+
             ec = parseFunctionBody();
         }
         else if (likely(ch == ';')) {
             // It's a function declaration.
+            stream_.next();
 
             // TODO: Append the function declaration.
         }
         else {
             // Error
+            stream_.next();
             ec = ErrorCode::IllegalFunctionBody;
         }
         return ec;
@@ -1989,7 +2025,6 @@ ParseStringSection_Entry:
                 stream_.next();
                 ec = parsePreprocessing(ti);
                 if (unlikely(!ec.isOK())) {
-                    marker.rewind();
                     stream_.next();
                 }
                 break;
@@ -2035,15 +2070,8 @@ ParseStringSection_Entry:
                     // Identifier or keyword
                     ec = parseIdentifierOrKeyword(ti);
                     if (unlikely(!ec.isOK())) {
-                        marker.rewind();
                         stream_.next();
                     }
-                    
-                    IdentInfo identInfo;
-                    marker.make_ident(identInfo);
-
-                    jstd::SmallString<256> identName;
-                    identName.copy(identInfo.name());
                 }
                 break;
 
@@ -2382,7 +2410,6 @@ ParseStringSection_Entry:
                     std::string singelChar;
                     ec = parseSingleCharLiteral(singelChar, ti);
                     if (unlikely(!ec.isOK())) {
-                        marker.rewind();
                         stream_.next();
                     }
                 }
@@ -2394,7 +2421,6 @@ ParseStringSection_Entry:
                     std::string stringLiteral;
                     ec = parseStringLiteral(stringLiteral, ti);
                     if (unlikely(!ec.isOK())) {
-                        marker.rewind();
                         stream_.next();
                     }
                 }
