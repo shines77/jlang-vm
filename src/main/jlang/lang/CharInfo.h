@@ -12,37 +12,33 @@
 #include <assert.h>
 
 namespace jlang {
-
-///////////////////////////////////////////////////
-// namespace CharInfo
-///////////////////////////////////////////////////
-
 namespace CharInfo {
+
     // Use in mask[256]
     enum {
-        kNull               = 0x0001,   // '\0'
-        kWhiteSpace         = 0x0002,   // ' ', \t, \v, \f
-        kNewLine            = 0x0004,   // \r, \n
-        kAlphabet           = 0x0008,   // [A-Z] and [a-z]
-        kUnderLine          = 0x0010,   // [_]
-        kDigital            = 0x0020,   // [0-9]
-        kHexChar            = 0x0040,   // [0-9] and ([a-f] or [A-F])
-        kIncludeQuote       = 0x0080,   // " >
-        kOperator           = 0,        // Include: ! % & * + - : < = > ? ^ | ~
+        Null               = 0x0001,   // '\0'
+        WhiteSpace         = 0x0002,   // ' ', \t, \v, \f
+        NewLine            = 0x0004,   // \r, \n
+        Alphabet           = 0x0008,   // [A-Z] and [a-z]
+        UnderLine          = 0x0010,   // [_]
+        Digital            = 0x0020,   // [0-9]
+        HexChar            = 0x0040,   // [0-9] and ([a-f] or [A-F])
+        IncludeQuote       = 0x0080,   // " >
+        Operator           = 0,        // Include: ! % & * + - : < = > ? ^ | ~
         
-        kWhiteSpaces        = kWhiteSpace | kNewLine,           // ' ', \t, \v, \f and \r, \n
-        kIdentifierFirst    = kAlphabet | kUnderLine,           // [A-Z], [a-z], and [_]
-        kIdentifierBody     = kIdentifierFirst | kDigital,      // [A-Z], [a-z], [0-9] and [_]
-        kIdentifier         = kIdentifierFirst | kDigital,      // [A-Z], [a-z], [0-9] and [_]
+        WhiteSpaces        = WhiteSpace | NewLine,           // ' ', \t, \v, \f and \r, \n
+        IdentifierFirst    = Alphabet | UnderLine,           // [A-Z], [a-z], and [_]
+        IdentifierBody     = IdentifierFirst | Digital,      // [A-Z], [a-z], [0-9] and [_]
+        Identifier         = IdentifierFirst | Digital,      // [A-Z], [a-z], [0-9] and [_]
 
-        kIncludeEndOf       = kNull | kNewLine | kIncludeQuote, // '\0', '\n', '\r', ", >
+        IncludeEndOf       = Null | NewLine | IncludeQuote, // '\0', '\n', '\r', ", >
 
-        kMaskLast
+        MaskLast
     };
 
     static const uint8_t mask[256] = {
         /* 0x00 */
-            /* '\0'  00 */ kNull,               // Null
+            /* '\0'  00 */ Null,                // Null
             /* '\1'  01 */ 0,
             /* '\2'  02 */ 0,
             /* '\3'  03 */ 0,
@@ -51,11 +47,11 @@ namespace CharInfo {
             /* '\6'  06 */ 0,
             /* '\a'  07 */ 0,                   // Bell
             /* '\b'  08 */ 0,                   // Backspace
-            /* '\t'  09 */ 0 | kWhiteSpace,     // Tab
-            /* '\r'  0a */ 0 | kNewLine,        // LF
-            /* '\v'  0b */ 0 | kWhiteSpace,     // VT
-            /* '\f'  0c */ 0 | kWhiteSpace,     // FF
-            /* '\n'  0d */ 0 | kNewLine,        // CR
+            /* '\t'  09 */ 0 | WhiteSpace,      // Tab
+            /* '\r'  0a */ 0 | NewLine,         // LF
+            /* '\v'  0b */ 0 | WhiteSpace,      // VT
+            /* '\f'  0c */ 0 | WhiteSpace,      // FF
+            /* '\n'  0d */ 0 | NewLine,         // CR
             /* '\14' 0e */ 0,
             /* '\15' 0f */ 0,
         /* 0x10 */
@@ -76,106 +72,106 @@ namespace CharInfo {
             /* '\30' 1e */ 0,
             /* '\31' 1f */ 0,
         /* 0x20 */
-            /* ' ' 20 */ kWhiteSpace,
-            /* '!' 21 */ kOperator,
+            /* ' ' 20 */ WhiteSpace,
+            /* '!' 21 */ Operator,
             /* '"' 22 */ 0,
             /* '#' 23 */ 0,
             /* '$' 24 */ 0,
-            /* '%' 25 */ kOperator,
-            /* '&' 26 */ kOperator,
+            /* '%' 25 */ Operator,
+            /* '&' 26 */ Operator,
             /* ''' 27 */ 0,
             /* '(' 28 */ 0,
             /* ')' 29 */ 0,
-            /* '*' 2A */ kOperator,
-            /* '+' 2B */ kOperator,
+            /* '*' 2A */ Operator,
+            /* '+' 2B */ Operator,
             /* ',' 2C */ 0,
-            /* '-' 2D */ kOperator,
-            /* '.' 2E */ kOperator,
+            /* '-' 2D */ Operator,
+            /* '.' 2E */ Operator,
             /* '/' 2F */ 0,
         /* 0x30 */  
-            /* '0' 30 */ kDigital | kHexChar,
-            /* '1' 31 */ kDigital | kHexChar,
-            /* '2' 32 */ kDigital | kHexChar,
-            /* '3' 33 */ kDigital | kHexChar,
-            /* '4' 34 */ kDigital | kHexChar,
-            /* '5' 35 */ kDigital | kHexChar,
-            /* '6' 36 */ kDigital | kHexChar,
-            /* '7' 37 */ kDigital | kHexChar,
-            /* '8' 38 */ kDigital | kHexChar,
-            /* '9' 39 */ kDigital | kHexChar,
+            /* '0' 30 */ Digital | HexChar,
+            /* '1' 31 */ Digital | HexChar,
+            /* '2' 32 */ Digital | HexChar,
+            /* '3' 33 */ Digital | HexChar,
+            /* '4' 34 */ Digital | HexChar,
+            /* '5' 35 */ Digital | HexChar,
+            /* '6' 36 */ Digital | HexChar,
+            /* '7' 37 */ Digital | HexChar,
+            /* '8' 38 */ Digital | HexChar,
+            /* '9' 39 */ Digital | HexChar,
             /* ':' 3A */ 0,
             /* ';' 3B */ 0,
-            /* '<' 3C */ kOperator,
-            /* '=' 3D */ kOperator,
-            /* '>' 3E */ kOperator,
-            /* '?' 3F */ kOperator,
+            /* '<' 3C */ Operator,
+            /* '=' 3D */ Operator,
+            /* '>' 3E */ Operator,
+            /* '?' 3F */ Operator,
         /* 40 */
             /* '@' 40 */ 0,
-            /* 'A' 41 */ kAlphabet | kHexChar,
-            /* 'B' 42 */ kAlphabet | kHexChar,
-            /* 'C' 43 */ kAlphabet | kHexChar,
-            /* 'D' 44 */ kAlphabet | kHexChar,
-            /* 'E' 45 */ kAlphabet | kHexChar,
-            /* 'F' 46 */ kAlphabet | kHexChar,
-            /* 'G' 47 */ kAlphabet,
-            /* 'H' 48 */ kAlphabet,
-            /* 'I' 49 */ kAlphabet,
-            /* 'J' 4A */ kAlphabet,
-            /* 'K' 4B */ kAlphabet,
-            /* 'L' 4C */ kAlphabet,
-            /* 'M' 4D */ kAlphabet,
-            /* 'N' 4E */ kAlphabet,
-            /* 'O' 4F */ kAlphabet,            
+            /* 'A' 41 */ Alphabet | HexChar,
+            /* 'B' 42 */ Alphabet | HexChar,
+            /* 'C' 43 */ Alphabet | HexChar,
+            /* 'D' 44 */ Alphabet | HexChar,
+            /* 'E' 45 */ Alphabet | HexChar,
+            /* 'F' 46 */ Alphabet | HexChar,
+            /* 'G' 47 */ Alphabet,
+            /* 'H' 48 */ Alphabet,
+            /* 'I' 49 */ Alphabet,
+            /* 'J' 4A */ Alphabet,
+            /* 'K' 4B */ Alphabet,
+            /* 'L' 4C */ Alphabet,
+            /* 'M' 4D */ Alphabet,
+            /* 'N' 4E */ Alphabet,
+            /* 'O' 4F */ Alphabet,            
         /* 50 */
-            /* 'P' 50 */ kAlphabet,
-            /* 'Q' 51 */ kAlphabet,
-            /* 'R' 52 */ kAlphabet,
-            /* 'S' 53 */ kAlphabet,
-            /* 'T' 54 */ kAlphabet,
-            /* 'U' 55 */ kAlphabet,
-            /* 'V' 56 */ kAlphabet,
-            /* 'W' 57 */ kAlphabet,
-            /* 'X' 58 */ kAlphabet,
-            /* 'Y' 59 */ kAlphabet,
-            /* 'Z' 5A */ kAlphabet,
+            /* 'P' 50 */ Alphabet,
+            /* 'Q' 51 */ Alphabet,
+            /* 'R' 52 */ Alphabet,
+            /* 'S' 53 */ Alphabet,
+            /* 'T' 54 */ Alphabet,
+            /* 'U' 55 */ Alphabet,
+            /* 'V' 56 */ Alphabet,
+            /* 'W' 57 */ Alphabet,
+            /* 'X' 58 */ Alphabet,
+            /* 'Y' 59 */ Alphabet,
+            /* 'Z' 5A */ Alphabet,
             /* '[' 5B */ 0,
-            /* '\' 5C */ kOperator,
+            /* '\' 5C */ Operator,
             /* ']' 5D */ 0,
-            /* '^' 5E */ kOperator,
-            /* '_' 5F */ kUnderLine,
+            /* '^' 5E */ Operator,
+            /* '_' 5F */ UnderLine,
         /* 60 */
             /* '`' 60 */ 0,
-            /* 'a' 61 */ kAlphabet | kHexChar,
-            /* 'b' 62 */ kAlphabet | kHexChar,
-            /* 'c' 63 */ kAlphabet | kHexChar,
-            /* 'd' 64 */ kAlphabet | kHexChar,
-            /* 'e' 65 */ kAlphabet | kHexChar,
-            /* 'f' 66 */ kAlphabet | kHexChar,
-            /* 'g' 67 */ kAlphabet,
-            /* 'h' 68 */ kAlphabet,
-            /* 'i' 69 */ kAlphabet,
-            /* 'j' 6A */ kAlphabet,
-            /* 'k' 6B */ kAlphabet,
-            /* 'l' 6C */ kAlphabet,
-            /* 'm' 6D */ kAlphabet,
-            /* 'n' 6E */ kAlphabet,
-            /* 'o' 6F */ kAlphabet,
+            /* 'a' 61 */ Alphabet | HexChar,
+            /* 'b' 62 */ Alphabet | HexChar,
+            /* 'c' 63 */ Alphabet | HexChar,
+            /* 'd' 64 */ Alphabet | HexChar,
+            /* 'e' 65 */ Alphabet | HexChar,
+            /* 'f' 66 */ Alphabet | HexChar,
+            /* 'g' 67 */ Alphabet,
+            /* 'h' 68 */ Alphabet,
+            /* 'i' 69 */ Alphabet,
+            /* 'j' 6A */ Alphabet,
+            /* 'k' 6B */ Alphabet,
+            /* 'l' 6C */ Alphabet,
+            /* 'm' 6D */ Alphabet,
+            /* 'n' 6E */ Alphabet,
+            /* 'o' 6F */ Alphabet,
         /* 70 */
-            /* 'p' 70 */ kAlphabet,
-            /* 'q' 71 */ kAlphabet,
-            /* 'r' 72 */ kAlphabet,
-            /* 's' 73 */ kAlphabet,
-            /* 't' 74 */ kAlphabet,
-            /* 'u' 75 */ kAlphabet,
-            /* 'v' 76 */ kAlphabet,
-            /* 'w' 77 */ kAlphabet,
-            /* 'x' 78 */ kAlphabet,
-            /* 'y' 79 */ kAlphabet,
-            /* 'z' 7A */ kAlphabet,
+            /* 'p' 70 */ Alphabet,
+            /* 'q' 71 */ Alphabet,
+            /* 'r' 72 */ Alphabet,
+            /* 's' 73 */ Alphabet,
+            /* 't' 74 */ Alphabet,
+            /* 'u' 75 */ Alphabet,
+            /* 'v' 76 */ Alphabet,
+            /* 'w' 77 */ Alphabet,
+            /* 'x' 78 */ Alphabet,
+            /* 'y' 79 */ Alphabet,
+            /* 'z' 7A */ Alphabet,
             /* '{' 7B */ 0,
-            /* '|' 7C */ kOperator,
+            /* '|' 7C */ Operator,
             /* '}' 7D */ 0,
-            /* '~' 7E */ kOperator,
+            /* '~' 7E */ Operator,
             /*  ?  7F */ 0,                     // Delete
 
         //         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
@@ -190,9 +186,9 @@ namespace CharInfo {
     }; // mask[256]
 
     enum {
-        kOctEscapeChar  = 254,
-        kNonAscii       = 255,
-        kAdvancedEscape = kOctEscapeChar
+        OctEscapeChar  = 254,
+        NonAscii       = 255,
+        AdvancedEscape = OctEscapeChar
     };
 
     static const uint8_t escape_chars[256] = {
@@ -211,25 +207,25 @@ namespace CharInfo {
             /* '\v'  0b */ 'v',             // VT
             /* '\f'  0c */ 'f',             // FF
             /* '\n'  0d */ 'n',             // CR
-            /* '\14' 0e */ kOctEscapeChar,
-            /* '\15' 0f */ kOctEscapeChar,
+            /* '\14' 0e */ OctEscapeChar,
+            /* '\15' 0f */ OctEscapeChar,
         /* 0x10 */
-            /* '\16' 10 */ kOctEscapeChar,
-            /* '\17' 11 */ kOctEscapeChar,
-            /* '\18' 12 */ kOctEscapeChar,
-            /* '\19' 13 */ kOctEscapeChar,
-            /* '\20' 14 */ kOctEscapeChar,
-            /* '\21' 15 */ kOctEscapeChar,
-            /* '\22' 16 */ kOctEscapeChar,
-            /* '\23' 17 */ kOctEscapeChar,
-            /* '\24' 18 */ kOctEscapeChar,
-            /* '\25' 19 */ kOctEscapeChar,
-            /* '\26' 1a */ kOctEscapeChar,
-            /* '\27' 1b */ kOctEscapeChar,  // Escape
-            /* '\28' 1c */ kOctEscapeChar,
-            /* '\29' 1d */ kOctEscapeChar,
-            /* '\30' 1e */ kOctEscapeChar,
-            /* '\31' 1f */ kOctEscapeChar,
+            /* '\16' 10 */ OctEscapeChar,
+            /* '\17' 11 */ OctEscapeChar,
+            /* '\18' 12 */ OctEscapeChar,
+            /* '\19' 13 */ OctEscapeChar,
+            /* '\20' 14 */ OctEscapeChar,
+            /* '\21' 15 */ OctEscapeChar,
+            /* '\22' 16 */ OctEscapeChar,
+            /* '\23' 17 */ OctEscapeChar,
+            /* '\24' 18 */ OctEscapeChar,
+            /* '\25' 19 */ OctEscapeChar,
+            /* '\26' 1a */ OctEscapeChar,
+            /* '\27' 1b */ OctEscapeChar,   // Escape
+            /* '\28' 1c */ OctEscapeChar,
+            /* '\29' 1d */ OctEscapeChar,
+            /* '\30' 1e */ OctEscapeChar,
+            /* '\31' 1f */ OctEscapeChar,
         /* 0x20 */
             /* ' ' 20 */ 0,
             /* '!' 21 */ 0,
@@ -331,279 +327,279 @@ namespace CharInfo {
             /* '|' 7C */ 0,
             /* '}' 7D */ 0,
             /* '~' 7E */ 0,
-            /*  ?  7F */ kNonAscii,         // Delete
+            /*  ?  7F */ NonAscii,          // Delete
 
         //         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-        /* 0x80 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0x90 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xA0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xB0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xC0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xD0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xE0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-        /* 0xF0 */ kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii,
-                   kNonAscii, kNonAscii, kNonAscii, kNonAscii
+        /* 0x80 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0x90 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xA0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xB0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xC0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xD0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xE0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+        /* 0xF0 */ NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii,
+                   NonAscii, NonAscii, NonAscii, NonAscii
     }; // escape_chars[256]
 
     enum {
-        kUnescapeError = 255,
-        kOctUnescapeChar = 253,
-        kHexUnescapeChar = 254,
-        kAdvancedUnescape = kOctUnescapeChar
+        UnescapeError = 255,
+        OctUnescapeChar = 253,
+        HexUnescapeChar = 254,
+        AdvancedUnescape = OctUnescapeChar
     };
 
     static const uint8_t unescape_chars[256] = {
         /* 0x00 */
-            /* '\0'  00 */ kUnescapeError,          // Null
-            /* '\1'  01 */ kUnescapeError,
-            /* '\2'  02 */ kUnescapeError,
-            /* '\3'  03 */ kUnescapeError,
-            /* '\4'  04 */ kUnescapeError,
-            /* '\5'  05 */ kUnescapeError,
-            /* '\6'  06 */ kUnescapeError,
-            /* '\a'  07 */ kUnescapeError,          // Bell
-            /* '\b'  08 */ kUnescapeError,          // Backspace
-            /* '\t'  09 */ kUnescapeError,          // Tab
-            /* '\r'  0a */ kUnescapeError,          // LF
-            /* '\v'  0b */ kUnescapeError,          // VT
-            /* '\f'  0c */ kUnescapeError,          // FF
-            /* '\n'  0d */ kUnescapeError,          // CR
-            /* '\14' 0e */ kUnescapeError,
-            /* '\15' 0f */ kUnescapeError,
+            /* '\0'  00 */ UnescapeError,           // Null
+            /* '\1'  01 */ UnescapeError,
+            /* '\2'  02 */ UnescapeError,
+            /* '\3'  03 */ UnescapeError,
+            /* '\4'  04 */ UnescapeError,
+            /* '\5'  05 */ UnescapeError,
+            /* '\6'  06 */ UnescapeError,
+            /* '\a'  07 */ UnescapeError,           // Bell
+            /* '\b'  08 */ UnescapeError,           // Backspace
+            /* '\t'  09 */ UnescapeError,           // Tab
+            /* '\r'  0a */ UnescapeError,           // LF
+            /* '\v'  0b */ UnescapeError,           // VT
+            /* '\f'  0c */ UnescapeError,           // FF
+            /* '\n'  0d */ UnescapeError,           // CR
+            /* '\14' 0e */ UnescapeError,
+            /* '\15' 0f */ UnescapeError,
         /* 0x10 */
-            /* '\16' 10 */ kUnescapeError,
-            /* '\17' 11 */ kUnescapeError,
-            /* '\18' 12 */ kUnescapeError,
-            /* '\19' 13 */ kUnescapeError,
-            /* '\20' 14 */ kUnescapeError,
-            /* '\21' 15 */ kUnescapeError,
-            /* '\22' 16 */ kUnescapeError,
-            /* '\23' 17 */ kUnescapeError,
-            /* '\24' 18 */ kUnescapeError,
-            /* '\25' 19 */ kUnescapeError,
-            /* '\26' 1a */ kUnescapeError,
-            /* '\e'  1b */ kUnescapeError,          // Escape
-            /* '\28' 1c */ kUnescapeError,
-            /* '\29' 1d */ kUnescapeError,
-            /* '\30' 1e */ kUnescapeError,
-            /* '\31' 1f */ kUnescapeError,
+            /* '\16' 10 */ UnescapeError,
+            /* '\17' 11 */ UnescapeError,
+            /* '\18' 12 */ UnescapeError,
+            /* '\19' 13 */ UnescapeError,
+            /* '\20' 14 */ UnescapeError,
+            /* '\21' 15 */ UnescapeError,
+            /* '\22' 16 */ UnescapeError,
+            /* '\23' 17 */ UnescapeError,
+            /* '\24' 18 */ UnescapeError,
+            /* '\25' 19 */ UnescapeError,
+            /* '\26' 1a */ UnescapeError,
+            /* '\e'  1b */ UnescapeError,           // Escape
+            /* '\28' 1c */ UnescapeError,
+            /* '\29' 1d */ UnescapeError,
+            /* '\30' 1e */ UnescapeError,
+            /* '\31' 1f */ UnescapeError,
         /* 0x20 */
-            /* ' ' 20 */ kUnescapeError,
-            /* '!' 21 */ kUnescapeError,
+            /* ' ' 20 */ UnescapeError,
+            /* '!' 21 */ UnescapeError,
             /* '"' 22 */ '\"',
-            /* '#' 23 */ kUnescapeError,
-            /* '$' 24 */ kUnescapeError,
-            /* '%' 25 */ kUnescapeError,
-            /* '&' 26 */ kUnescapeError,
+            /* '#' 23 */ UnescapeError,
+            /* '$' 24 */ UnescapeError,
+            /* '%' 25 */ UnescapeError,
+            /* '&' 26 */ UnescapeError,
             /* ''' 27 */ '\'',
-            /* '(' 28 */ kUnescapeError,
-            /* ')' 29 */ kUnescapeError,
-            /* '*' 2A */ kUnescapeError,
-            /* '+' 2B */ kUnescapeError,
-            /* ',' 2C */ kUnescapeError,
-            /* '-' 2D */ kUnescapeError,
-            /* '.' 2E */ kUnescapeError,
-            /* '/' 2F */ kUnescapeError,
+            /* '(' 28 */ UnescapeError,
+            /* ')' 29 */ UnescapeError,
+            /* '*' 2A */ UnescapeError,
+            /* '+' 2B */ UnescapeError,
+            /* ',' 2C */ UnescapeError,
+            /* '-' 2D */ UnescapeError,
+            /* '.' 2E */ UnescapeError,
+            /* '/' 2F */ UnescapeError,
         /* 0x30 */  
-            /* '0' 30 */ kOctUnescapeChar,
-            /* '1' 31 */ kOctUnescapeChar,
-            /* '2' 32 */ kOctUnescapeChar,
-            /* '3' 33 */ kOctUnescapeChar,
-            /* '4' 34 */ kOctUnescapeChar,
-            /* '5' 35 */ kOctUnescapeChar,
-            /* '6' 36 */ kOctUnescapeChar,
-            /* '7' 37 */ kOctUnescapeChar,
-            /* '8' 38 */ kUnescapeError,
-            /* '9' 39 */ kUnescapeError,
-            /* ':' 3A */ kUnescapeError,
-            /* ';' 3B */ kUnescapeError,
-            /* '<' 3C */ kUnescapeError,
-            /* '=' 3D */ kUnescapeError,
-            /* '>' 3E */ kUnescapeError,
+            /* '0' 30 */ OctUnescapeChar,
+            /* '1' 31 */ OctUnescapeChar,
+            /* '2' 32 */ OctUnescapeChar,
+            /* '3' 33 */ OctUnescapeChar,
+            /* '4' 34 */ OctUnescapeChar,
+            /* '5' 35 */ OctUnescapeChar,
+            /* '6' 36 */ OctUnescapeChar,
+            /* '7' 37 */ OctUnescapeChar,
+            /* '8' 38 */ UnescapeError,
+            /* '9' 39 */ UnescapeError,
+            /* ':' 3A */ UnescapeError,
+            /* ';' 3B */ UnescapeError,
+            /* '<' 3C */ UnescapeError,
+            /* '=' 3D */ UnescapeError,
+            /* '>' 3E */ UnescapeError,
             /* '?' 3F */ '\?',
         /* 40 */
-            /* '@' 40 */ kUnescapeError,
-            /* 'A' 41 */ kUnescapeError,
-            /* 'B' 42 */ kUnescapeError,
-            /* 'C' 43 */ kUnescapeError,
-            /* 'D' 44 */ kUnescapeError,
-            /* 'E' 45 */ kUnescapeError,
-            /* 'F' 46 */ kUnescapeError,
-            /* 'G' 47 */ kUnescapeError,
-            /* 'H' 48 */ kUnescapeError,
-            /* 'I' 49 */ kUnescapeError,
-            /* 'J' 4A */ kUnescapeError,
-            /* 'K' 4B */ kUnescapeError,
-            /* 'L' 4C */ kUnescapeError,
-            /* 'M' 4D */ kUnescapeError,
-            /* 'N' 4E */ kUnescapeError,
-            /* 'O' 4F */ kUnescapeError,            
+            /* '@' 40 */ UnescapeError,
+            /* 'A' 41 */ UnescapeError,
+            /* 'B' 42 */ UnescapeError,
+            /* 'C' 43 */ UnescapeError,
+            /* 'D' 44 */ UnescapeError,
+            /* 'E' 45 */ UnescapeError,
+            /* 'F' 46 */ UnescapeError,
+            /* 'G' 47 */ UnescapeError,
+            /* 'H' 48 */ UnescapeError,
+            /* 'I' 49 */ UnescapeError,
+            /* 'J' 4A */ UnescapeError,
+            /* 'K' 4B */ UnescapeError,
+            /* 'L' 4C */ UnescapeError,
+            /* 'M' 4D */ UnescapeError,
+            /* 'N' 4E */ UnescapeError,
+            /* 'O' 4F */ UnescapeError,            
         /* 50 */
-            /* 'P' 50 */ kUnescapeError,
-            /* 'Q' 51 */ kUnescapeError,
-            /* 'R' 52 */ kUnescapeError,
-            /* 'S' 53 */ kUnescapeError,
-            /* 'T' 54 */ kUnescapeError,
-            /* 'U' 55 */ kUnescapeError,
-            /* 'V' 56 */ kUnescapeError,
-            /* 'W' 57 */ kUnescapeError,
-            /* 'X' 58 */ kUnescapeError,
-            /* 'Y' 59 */ kUnescapeError,
-            /* 'Z' 5A */ kUnescapeError,
-            /* '[' 5B */ kUnescapeError,
+            /* 'P' 50 */ UnescapeError,
+            /* 'Q' 51 */ UnescapeError,
+            /* 'R' 52 */ UnescapeError,
+            /* 'S' 53 */ UnescapeError,
+            /* 'T' 54 */ UnescapeError,
+            /* 'U' 55 */ UnescapeError,
+            /* 'V' 56 */ UnescapeError,
+            /* 'W' 57 */ UnescapeError,
+            /* 'X' 58 */ UnescapeError,
+            /* 'Y' 59 */ UnescapeError,
+            /* 'Z' 5A */ UnescapeError,
+            /* '[' 5B */ UnescapeError,
             /* '\' 5C */ '\\',
-            /* ']' 5D */ kUnescapeError,
-            /* '^' 5E */ kUnescapeError,
-            /* '_' 5F */ kUnescapeError,
+            /* ']' 5D */ UnescapeError,
+            /* '^' 5E */ UnescapeError,
+            /* '_' 5F */ UnescapeError,
         /* 60 */
-            /* '`' 60 */ kUnescapeError,
+            /* '`' 60 */ UnescapeError,
             /* 'a' 61 */ '\a',
             /* 'b' 62 */ '\b',
-            /* 'c' 63 */ kUnescapeError,
-            /* 'd' 64 */ kUnescapeError,
+            /* 'c' 63 */ UnescapeError,
+            /* 'd' 64 */ UnescapeError,
             /* 'e' 65 */ '\33',
             /* 'f' 66 */ '\f',
-            /* 'g' 67 */ kUnescapeError,
-            /* 'h' 68 */ kUnescapeError,
-            /* 'i' 69 */ kUnescapeError,
-            /* 'j' 6A */ kUnescapeError,
-            /* 'k' 6B */ kUnescapeError,
-            /* 'l' 6C */ kUnescapeError,
-            /* 'm' 6D */ kUnescapeError,
+            /* 'g' 67 */ UnescapeError,
+            /* 'h' 68 */ UnescapeError,
+            /* 'i' 69 */ UnescapeError,
+            /* 'j' 6A */ UnescapeError,
+            /* 'k' 6B */ UnescapeError,
+            /* 'l' 6C */ UnescapeError,
+            /* 'm' 6D */ UnescapeError,
             /* 'n' 6E */ '\n',
-            /* 'o' 6F */ kUnescapeError,
+            /* 'o' 6F */ UnescapeError,
         /* 70 */
-            /* 'p' 70 */ kUnescapeError,
-            /* 'q' 71 */ kUnescapeError,
+            /* 'p' 70 */ UnescapeError,
+            /* 'q' 71 */ UnescapeError,
             /* 'r' 72 */ '\r',
-            /* 's' 73 */ kUnescapeError,
+            /* 's' 73 */ UnescapeError,
             /* 't' 74 */ '\t',
-            /* 'u' 75 */ kUnescapeError,
+            /* 'u' 75 */ UnescapeError,
             /* 'v' 76 */ '\v',
-            /* 'w' 77 */ kUnescapeError,
-            /* 'x' 78 */ kHexUnescapeChar,
-            /* 'y' 79 */ kUnescapeError,
-            /* 'z' 7A */ kUnescapeError,
-            /* '{' 7B */ kUnescapeError,
-            /* '|' 7C */ kUnescapeError,
-            /* '}' 7D */ kUnescapeError,
-            /* '~' 7E */ kUnescapeError,
-            /*  ?  7F */ kUnescapeError,            // Delete
+            /* 'w' 77 */ UnescapeError,
+            /* 'x' 78 */ HexUnescapeChar,
+            /* 'y' 79 */ UnescapeError,
+            /* 'z' 7A */ UnescapeError,
+            /* '{' 7B */ UnescapeError,
+            /* '|' 7C */ UnescapeError,
+            /* '}' 7D */ UnescapeError,
+            /* '~' 7E */ UnescapeError,
+            /*  ?  7F */ UnescapeError,             // Delete
 
         //         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-        /* 0x80 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0x90 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xA0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xB0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xC0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xD0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xE0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-        /* 0xF0 */ kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError,
-                   kUnescapeError, kUnescapeError, kUnescapeError, kUnescapeError
+        /* 0x80 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0x90 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xA0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xB0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xC0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xD0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xE0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+        /* 0xF0 */ UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError,
+                   UnescapeError, UnescapeError, UnescapeError, UnescapeError
     }; // unescape_chars[256]
 
     enum {
-        kInvalidHex = 255
+        InvalidHex = 255
     };
 
     static const uint8_t hex_value[256] = {
         /* 0x00 */
-            /* '\0'  00 */ kInvalidHex,          // Null
-            /* '\1'  01 */ kInvalidHex,
-            /* '\2'  02 */ kInvalidHex,
-            /* '\3'  03 */ kInvalidHex,
-            /* '\4'  04 */ kInvalidHex,
-            /* '\5'  05 */ kInvalidHex,
-            /* '\6'  06 */ kInvalidHex,
-            /* '\a'  07 */ kInvalidHex,          // Bell
-            /* '\b'  08 */ kInvalidHex,          // Backspace
-            /* '\t'  09 */ kInvalidHex,          // Tab
-            /* '\r'  0a */ kInvalidHex,          // LF
-            /* '\v'  0b */ kInvalidHex,          // VT
-            /* '\f'  0c */ kInvalidHex,          // FF
-            /* '\n'  0d */ kInvalidHex,          // CR
-            /* '\14' 0e */ kInvalidHex,
-            /* '\15' 0f */ kInvalidHex,
+            /* '\0'  00 */ InvalidHex,          // Null
+            /* '\1'  01 */ InvalidHex,
+            /* '\2'  02 */ InvalidHex,
+            /* '\3'  03 */ InvalidHex,
+            /* '\4'  04 */ InvalidHex,
+            /* '\5'  05 */ InvalidHex,
+            /* '\6'  06 */ InvalidHex,
+            /* '\a'  07 */ InvalidHex,          // Bell
+            /* '\b'  08 */ InvalidHex,          // Backspace
+            /* '\t'  09 */ InvalidHex,          // Tab
+            /* '\r'  0a */ InvalidHex,          // LF
+            /* '\v'  0b */ InvalidHex,          // VT
+            /* '\f'  0c */ InvalidHex,          // FF
+            /* '\n'  0d */ InvalidHex,          // CR
+            /* '\14' 0e */ InvalidHex,
+            /* '\15' 0f */ InvalidHex,
         /* 0x10 */
-            /* '\16' 10 */ kInvalidHex,
-            /* '\17' 11 */ kInvalidHex,
-            /* '\18' 12 */ kInvalidHex,
-            /* '\19' 13 */ kInvalidHex,
-            /* '\20' 14 */ kInvalidHex,
-            /* '\21' 15 */ kInvalidHex,
-            /* '\22' 16 */ kInvalidHex,
-            /* '\23' 17 */ kInvalidHex,
-            /* '\24' 18 */ kInvalidHex,
-            /* '\25' 19 */ kInvalidHex,
-            /* '\26' 1a */ kInvalidHex,
-            /* '\e'  1b */ kInvalidHex,          // Escape
-            /* '\28' 1c */ kInvalidHex,
-            /* '\29' 1d */ kInvalidHex,
-            /* '\30' 1e */ kInvalidHex,
-            /* '\31' 1f */ kInvalidHex,
+            /* '\16' 10 */ InvalidHex,
+            /* '\17' 11 */ InvalidHex,
+            /* '\18' 12 */ InvalidHex,
+            /* '\19' 13 */ InvalidHex,
+            /* '\20' 14 */ InvalidHex,
+            /* '\21' 15 */ InvalidHex,
+            /* '\22' 16 */ InvalidHex,
+            /* '\23' 17 */ InvalidHex,
+            /* '\24' 18 */ InvalidHex,
+            /* '\25' 19 */ InvalidHex,
+            /* '\26' 1a */ InvalidHex,
+            /* '\e'  1b */ InvalidHex,          // Escape
+            /* '\28' 1c */ InvalidHex,
+            /* '\29' 1d */ InvalidHex,
+            /* '\30' 1e */ InvalidHex,
+            /* '\31' 1f */ InvalidHex,
         /* 0x20 */
-            /* ' ' 20 */ kInvalidHex,
-            /* '!' 21 */ kInvalidHex,
-            /* '"' 22 */ kInvalidHex,
-            /* '#' 23 */ kInvalidHex,
-            /* '$' 24 */ kInvalidHex,
-            /* '%' 25 */ kInvalidHex,
-            /* '&' 26 */ kInvalidHex,
-            /* ''' 27 */ kInvalidHex,
-            /* '(' 28 */ kInvalidHex,
-            /* ')' 29 */ kInvalidHex,
-            /* '*' 2A */ kInvalidHex,
-            /* '+' 2B */ kInvalidHex,
-            /* ',' 2C */ kInvalidHex,
-            /* '-' 2D */ kInvalidHex,
-            /* '.' 2E */ kInvalidHex,
-            /* '/' 2F */ kInvalidHex,
+            /* ' ' 20 */ InvalidHex,
+            /* '!' 21 */ InvalidHex,
+            /* '"' 22 */ InvalidHex,
+            /* '#' 23 */ InvalidHex,
+            /* '$' 24 */ InvalidHex,
+            /* '%' 25 */ InvalidHex,
+            /* '&' 26 */ InvalidHex,
+            /* ''' 27 */ InvalidHex,
+            /* '(' 28 */ InvalidHex,
+            /* ')' 29 */ InvalidHex,
+            /* '*' 2A */ InvalidHex,
+            /* '+' 2B */ InvalidHex,
+            /* ',' 2C */ InvalidHex,
+            /* '-' 2D */ InvalidHex,
+            /* '.' 2E */ InvalidHex,
+            /* '/' 2F */ InvalidHex,
         /* 0x30 */  
             /* '0' 30 */ 0,
             /* '1' 31 */ 1,
@@ -615,137 +611,137 @@ namespace CharInfo {
             /* '7' 37 */ 7,
             /* '8' 38 */ 8,
             /* '9' 39 */ 9,
-            /* ':' 3A */ kInvalidHex,
-            /* ';' 3B */ kInvalidHex,
-            /* '<' 3C */ kInvalidHex,
-            /* '=' 3D */ kInvalidHex,
-            /* '>' 3E */ kInvalidHex,
-            /* '?' 3F */ kInvalidHex,
+            /* ':' 3A */ InvalidHex,
+            /* ';' 3B */ InvalidHex,
+            /* '<' 3C */ InvalidHex,
+            /* '=' 3D */ InvalidHex,
+            /* '>' 3E */ InvalidHex,
+            /* '?' 3F */ InvalidHex,
         /* 40 */
-            /* '@' 40 */ kInvalidHex,
+            /* '@' 40 */ InvalidHex,
             /* 'A' 41 */ 10,
             /* 'B' 42 */ 11,
             /* 'C' 43 */ 12,
             /* 'D' 44 */ 13,
             /* 'E' 45 */ 14,
             /* 'F' 46 */ 15,
-            /* 'G' 47 */ kInvalidHex,
-            /* 'H' 48 */ kInvalidHex,
-            /* 'I' 49 */ kInvalidHex,
-            /* 'J' 4A */ kInvalidHex,
-            /* 'K' 4B */ kInvalidHex,
-            /* 'L' 4C */ kInvalidHex,
-            /* 'M' 4D */ kInvalidHex,
-            /* 'N' 4E */ kInvalidHex,
-            /* 'O' 4F */ kInvalidHex,            
+            /* 'G' 47 */ InvalidHex,
+            /* 'H' 48 */ InvalidHex,
+            /* 'I' 49 */ InvalidHex,
+            /* 'J' 4A */ InvalidHex,
+            /* 'K' 4B */ InvalidHex,
+            /* 'L' 4C */ InvalidHex,
+            /* 'M' 4D */ InvalidHex,
+            /* 'N' 4E */ InvalidHex,
+            /* 'O' 4F */ InvalidHex,            
         /* 50 */
-            /* 'P' 50 */ kInvalidHex,
-            /* 'Q' 51 */ kInvalidHex,
-            /* 'R' 52 */ kInvalidHex,
-            /* 'S' 53 */ kInvalidHex,
-            /* 'T' 54 */ kInvalidHex,
-            /* 'U' 55 */ kInvalidHex,
-            /* 'V' 56 */ kInvalidHex,
-            /* 'W' 57 */ kInvalidHex,
-            /* 'X' 58 */ kInvalidHex,
-            /* 'Y' 59 */ kInvalidHex,
-            /* 'Z' 5A */ kInvalidHex,
-            /* '[' 5B */ kInvalidHex,
-            /* '\' 5C */ kInvalidHex,
-            /* ']' 5D */ kInvalidHex,
-            /* '^' 5E */ kInvalidHex,
-            /* '_' 5F */ kInvalidHex,
+            /* 'P' 50 */ InvalidHex,
+            /* 'Q' 51 */ InvalidHex,
+            /* 'R' 52 */ InvalidHex,
+            /* 'S' 53 */ InvalidHex,
+            /* 'T' 54 */ InvalidHex,
+            /* 'U' 55 */ InvalidHex,
+            /* 'V' 56 */ InvalidHex,
+            /* 'W' 57 */ InvalidHex,
+            /* 'X' 58 */ InvalidHex,
+            /* 'Y' 59 */ InvalidHex,
+            /* 'Z' 5A */ InvalidHex,
+            /* '[' 5B */ InvalidHex,
+            /* '\' 5C */ InvalidHex,
+            /* ']' 5D */ InvalidHex,
+            /* '^' 5E */ InvalidHex,
+            /* '_' 5F */ InvalidHex,
         /* 60 */
-            /* '`' 60 */ kInvalidHex,
+            /* '`' 60 */ InvalidHex,
             /* 'a' 61 */ 10,
             /* 'b' 62 */ 11,
             /* 'c' 63 */ 12,
             /* 'd' 64 */ 13,
             /* 'e' 65 */ 14,
             /* 'f' 66 */ 15,
-            /* 'g' 67 */ kInvalidHex,
-            /* 'h' 68 */ kInvalidHex,
-            /* 'i' 69 */ kInvalidHex,
-            /* 'j' 6A */ kInvalidHex,
-            /* 'k' 6B */ kInvalidHex,
-            /* 'l' 6C */ kInvalidHex,
-            /* 'm' 6D */ kInvalidHex,
-            /* 'n' 6E */ kInvalidHex,
-            /* 'o' 6F */ kInvalidHex,
+            /* 'g' 67 */ InvalidHex,
+            /* 'h' 68 */ InvalidHex,
+            /* 'i' 69 */ InvalidHex,
+            /* 'j' 6A */ InvalidHex,
+            /* 'k' 6B */ InvalidHex,
+            /* 'l' 6C */ InvalidHex,
+            /* 'm' 6D */ InvalidHex,
+            /* 'n' 6E */ InvalidHex,
+            /* 'o' 6F */ InvalidHex,
         /* 70 */
-            /* 'p' 70 */ kInvalidHex,
-            /* 'q' 71 */ kInvalidHex,
-            /* 'r' 72 */ kInvalidHex,
-            /* 's' 73 */ kInvalidHex,
-            /* 't' 74 */ kInvalidHex,
-            /* 'u' 75 */ kInvalidHex,
-            /* 'v' 76 */ kInvalidHex,
-            /* 'w' 77 */ kInvalidHex,
-            /* 'x' 78 */ kInvalidHex,
-            /* 'y' 79 */ kInvalidHex,
-            /* 'z' 7A */ kInvalidHex,
-            /* '{' 7B */ kInvalidHex,
-            /* '|' 7C */ kInvalidHex,
-            /* '}' 7D */ kInvalidHex,
-            /* '~' 7E */ kInvalidHex,
-            /*  ?  7F */ kInvalidHex,            // Delete
+            /* 'p' 70 */ InvalidHex,
+            /* 'q' 71 */ InvalidHex,
+            /* 'r' 72 */ InvalidHex,
+            /* 's' 73 */ InvalidHex,
+            /* 't' 74 */ InvalidHex,
+            /* 'u' 75 */ InvalidHex,
+            /* 'v' 76 */ InvalidHex,
+            /* 'w' 77 */ InvalidHex,
+            /* 'x' 78 */ InvalidHex,
+            /* 'y' 79 */ InvalidHex,
+            /* 'z' 7A */ InvalidHex,
+            /* '{' 7B */ InvalidHex,
+            /* '|' 7C */ InvalidHex,
+            /* '}' 7D */ InvalidHex,
+            /* '~' 7E */ InvalidHex,
+            /*  ?  7F */ InvalidHex,            // Delete
 
         //         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-        /* 0x80 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0x90 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xA0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xB0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xC0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xD0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xE0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-        /* 0xF0 */ kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex,
-                   kInvalidHex, kInvalidHex, kInvalidHex, kInvalidHex
+        /* 0x80 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0x90 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xA0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xB0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xC0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xD0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xE0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+        /* 0xF0 */ InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex,
+                   InvalidHex, InvalidHex, InvalidHex, InvalidHex
     }; // hex_value[256]
 
     // Use in ext_mask[256]
     enum {
-        kNull2              = 0x0001,   // '\0'
-        kNewLine2           = 0x0002,   // '\n', '\r'
-        kWhiteSpace2        = 0,
-        kDigital2           = 0,
-        kHexChar2           = 0,
-        kUnderLine2         = 0,
-        kUpperCase          = 0x0004,   // [A-Z]
-        kLowerCase          = 0x0008,   // [a-z]
-        kDelimiter          = 0x0010,   // , ;
+        Null2              = 0x0001,   // '\0'
+        NewLine2           = 0x0002,   // '\n', '\r'
+        WhiteSpace2        = 0,
+        Digital2           = 0,
+        HexChar2           = 0,
+        UnderLine2         = 0,
+        UpperCase          = 0x0004,   // [A-Z]
+        LowerCase          = 0x0008,   // [a-z]
+        Delimiter          = 0x0010,   // , ;
 
-        kInvalidPath        = 0x0040,   // Include: [ : ? " * : < > | ]
-        kOperator2          = 0x0080,   // Include: ! % & * + - : < = > ? ^ | ~
+        InvalidPath        = 0x0040,   // Include: [ : ? " * : < > | ]
+        Operator2          = 0x0080,   // Include: ! % & * + - : < = > ? ^ | ~
 
-        kMaskLast2
+        MaskLast2
     };
 
     static const uint8_t ext_mask[256] = {
         /* 0x00 */
-            /* '\0'  00 */ kNull2,                      // Null
+            /* '\0'  00 */ Null2,                      // Null
             /* '\1'  01 */ 0,
             /* '\2'  02 */ 0,
             /* '\3'  03 */ 0,
@@ -754,11 +750,11 @@ namespace CharInfo {
             /* '\6'  06 */ 0,
             /* '\a'  07 */ 0,                           // Bell
             /* '\b'  08 */ 0,                           // Backspace
-            /* '\t'  09 */ kWhiteSpace2,                // Tab
-            /* '\r'  0a */ kNewLine2,                   // LF
-            /* '\v'  0b */ kWhiteSpace2,                // VT
-            /* '\f'  0c */ kWhiteSpace2,                // FF
-            /* '\n'  0d */ kNewLine2,                   // CR
+            /* '\t'  09 */ WhiteSpace2,                 // Tab
+            /* '\r'  0a */ NewLine2,                    // LF
+            /* '\v'  0b */ WhiteSpace2,                 // VT
+            /* '\f'  0c */ WhiteSpace2,                 // FF
+            /* '\n'  0d */ NewLine2,                    // CR
             /* '\14' 0e */ 0,
             /* '\15' 0f */ 0,
         /* 0x10 */
@@ -779,106 +775,106 @@ namespace CharInfo {
             /* '\30' 1e */ 0,
             /* '\31' 1f */ 0,
         /* 0x20 */
-            /* ' ' 20 */ kWhiteSpace2,
-            /* '!' 21 */ kOperator2,
-            /* '"' 22 */ kIncludeQuote,
+            /* ' ' 20 */ WhiteSpace2,
+            /* '!' 21 */ Operator2,
+            /* '"' 22 */ IncludeQuote,
             /* '#' 23 */ 0,
             /* '$' 24 */ 0,
-            /* '%' 25 */ kOperator2,
-            /* '&' 26 */ kOperator2,
+            /* '%' 25 */ Operator2,
+            /* '&' 26 */ Operator2,
             /* ''' 27 */ 0,
             /* '(' 28 */ 0,
             /* ')' 29 */ 0,
-            /* '*' 2A */ kOperator2,
-            /* '+' 2B */ kOperator2,
+            /* '*' 2A */ Operator2,
+            /* '+' 2B */ Operator2,
             /* ',' 2C */ 0,
-            /* '-' 2D */ kOperator2,
-            /* '.' 2E */ kOperator2,
+            /* '-' 2D */ Operator2,
+            /* '.' 2E */ Operator2,
             /* '/' 2F */ 0,
         /* 0x30 */  
-            /* '0' 30 */ kDigital2 | kHexChar2,
-            /* '1' 31 */ kDigital2 | kHexChar2,
-            /* '2' 32 */ kDigital2 | kHexChar2,
-            /* '3' 33 */ kDigital2 | kHexChar2,
-            /* '4' 34 */ kDigital2 | kHexChar2,
-            /* '5' 35 */ kDigital2 | kHexChar2,
-            /* '6' 36 */ kDigital2 | kHexChar2,
-            /* '7' 37 */ kDigital2 | kHexChar2,
-            /* '8' 38 */ kDigital2 | kHexChar2,
-            /* '9' 39 */ kDigital2 | kHexChar2,
+            /* '0' 30 */ Digital2 | HexChar2,
+            /* '1' 31 */ Digital2 | HexChar2,
+            /* '2' 32 */ Digital2 | HexChar2,
+            /* '3' 33 */ Digital2 | HexChar2,
+            /* '4' 34 */ Digital2 | HexChar2,
+            /* '5' 35 */ Digital2 | HexChar2,
+            /* '6' 36 */ Digital2 | HexChar2,
+            /* '7' 37 */ Digital2 | HexChar2,
+            /* '8' 38 */ Digital2 | HexChar2,
+            /* '9' 39 */ Digital2 | HexChar2,
             /* ':' 3A */ 0,
             /* ';' 3B */ 0,
-            /* '<' 3C */ kOperator2,
-            /* '=' 3D */ kOperator2,
-            /* '>' 3E */ kOperator2 | kIncludeQuote,
-            /* '?' 3F */ kOperator2,
+            /* '<' 3C */ Operator2,
+            /* '=' 3D */ Operator2,
+            /* '>' 3E */ Operator2 | IncludeQuote,
+            /* '?' 3F */ Operator2,
         /* 40 */
             /* '@' 40 */ 0,
-            /* 'A' 41 */ kUpperCase | kHexChar2,
-            /* 'B' 42 */ kUpperCase | kHexChar2,
-            /* 'C' 43 */ kUpperCase | kHexChar2,
-            /* 'D' 44 */ kUpperCase | kHexChar2,
-            /* 'E' 45 */ kUpperCase | kHexChar2,
-            /* 'F' 46 */ kUpperCase | kHexChar2,
-            /* 'G' 47 */ kUpperCase,
-            /* 'H' 48 */ kUpperCase,
-            /* 'I' 49 */ kUpperCase,
-            /* 'J' 4A */ kUpperCase,
-            /* 'K' 4B */ kUpperCase,
-            /* 'L' 4C */ kUpperCase,
-            /* 'M' 4D */ kUpperCase,
-            /* 'N' 4E */ kUpperCase,
-            /* 'O' 4F */ kUpperCase,            
+            /* 'A' 41 */ UpperCase | HexChar2,
+            /* 'B' 42 */ UpperCase | HexChar2,
+            /* 'C' 43 */ UpperCase | HexChar2,
+            /* 'D' 44 */ UpperCase | HexChar2,
+            /* 'E' 45 */ UpperCase | HexChar2,
+            /* 'F' 46 */ UpperCase | HexChar2,
+            /* 'G' 47 */ UpperCase,
+            /* 'H' 48 */ UpperCase,
+            /* 'I' 49 */ UpperCase,
+            /* 'J' 4A */ UpperCase,
+            /* 'K' 4B */ UpperCase,
+            /* 'L' 4C */ UpperCase,
+            /* 'M' 4D */ UpperCase,
+            /* 'N' 4E */ UpperCase,
+            /* 'O' 4F */ UpperCase,            
         /* 50 */
-            /* 'P' 50 */ kUpperCase,
-            /* 'Q' 51 */ kUpperCase,
-            /* 'R' 52 */ kUpperCase,
-            /* 'S' 53 */ kUpperCase,
-            /* 'T' 54 */ kUpperCase,
-            /* 'U' 55 */ kUpperCase,
-            /* 'V' 56 */ kUpperCase,
-            /* 'W' 57 */ kUpperCase,
-            /* 'X' 58 */ kUpperCase,
-            /* 'Y' 59 */ kUpperCase,
-            /* 'Z' 5A */ kUpperCase,
+            /* 'P' 50 */ UpperCase,
+            /* 'Q' 51 */ UpperCase,
+            /* 'R' 52 */ UpperCase,
+            /* 'S' 53 */ UpperCase,
+            /* 'T' 54 */ UpperCase,
+            /* 'U' 55 */ UpperCase,
+            /* 'V' 56 */ UpperCase,
+            /* 'W' 57 */ UpperCase,
+            /* 'X' 58 */ UpperCase,
+            /* 'Y' 59 */ UpperCase,
+            /* 'Z' 5A */ UpperCase,
             /* '[' 5B */ 0,
-            /* '\' 5C */ kOperator2,
+            /* '\' 5C */ Operator2,
             /* ']' 5D */ 0,
-            /* '^' 5E */ kOperator2,
-            /* '_' 5F */ kUnderLine2,
+            /* '^' 5E */ Operator2,
+            /* '_' 5F */ UnderLine2,
         /* 60 */
             /* '`' 60 */ 0,
-            /* 'a' 61 */ kLowerCase | kHexChar2,
-            /* 'b' 62 */ kLowerCase | kHexChar2,
-            /* 'c' 63 */ kLowerCase | kHexChar2,
-            /* 'd' 64 */ kLowerCase | kHexChar2,
-            /* 'e' 65 */ kLowerCase | kHexChar2,
-            /* 'f' 66 */ kLowerCase | kHexChar2,
-            /* 'g' 67 */ kLowerCase,
-            /* 'h' 68 */ kLowerCase,
-            /* 'i' 69 */ kLowerCase,
-            /* 'j' 6A */ kLowerCase,
-            /* 'k' 6B */ kLowerCase,
-            /* 'l' 6C */ kLowerCase,
-            /* 'm' 6D */ kLowerCase,
-            /* 'n' 6E */ kLowerCase,
-            /* 'o' 6F */ kLowerCase,
+            /* 'a' 61 */ LowerCase | HexChar2,
+            /* 'b' 62 */ LowerCase | HexChar2,
+            /* 'c' 63 */ LowerCase | HexChar2,
+            /* 'd' 64 */ LowerCase | HexChar2,
+            /* 'e' 65 */ LowerCase | HexChar2,
+            /* 'f' 66 */ LowerCase | HexChar2,
+            /* 'g' 67 */ LowerCase,
+            /* 'h' 68 */ LowerCase,
+            /* 'i' 69 */ LowerCase,
+            /* 'j' 6A */ LowerCase,
+            /* 'k' 6B */ LowerCase,
+            /* 'l' 6C */ LowerCase,
+            /* 'm' 6D */ LowerCase,
+            /* 'n' 6E */ LowerCase,
+            /* 'o' 6F */ LowerCase,
         /* 70 */
-            /* 'p' 70 */ kLowerCase,
-            /* 'q' 71 */ kLowerCase,
-            /* 'r' 72 */ kLowerCase,
-            /* 's' 73 */ kLowerCase,
-            /* 't' 74 */ kLowerCase,
-            /* 'u' 75 */ kLowerCase,
-            /* 'v' 76 */ kLowerCase,
-            /* 'w' 77 */ kLowerCase,
-            /* 'x' 78 */ kLowerCase,
-            /* 'y' 79 */ kLowerCase,
-            /* 'z' 7A */ kLowerCase,
+            /* 'p' 70 */ LowerCase,
+            /* 'q' 71 */ LowerCase,
+            /* 'r' 72 */ LowerCase,
+            /* 's' 73 */ LowerCase,
+            /* 't' 74 */ LowerCase,
+            /* 'u' 75 */ LowerCase,
+            /* 'v' 76 */ LowerCase,
+            /* 'w' 77 */ LowerCase,
+            /* 'x' 78 */ LowerCase,
+            /* 'y' 79 */ LowerCase,
+            /* 'z' 7A */ LowerCase,
             /* '{' 7B */ 0,
-            /* '|' 7C */ kOperator2,
+            /* '|' 7C */ Operator2,
             /* '}' 7D */ 0,
-            /* '~' 7E */ kOperator2,
+            /* '~' 7E */ Operator2,
             /*  ?  7F */ 0,                 // Delete
 
         /* 0x80 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -920,68 +916,68 @@ namespace CharInfo {
 
     /* CharInfo::mask[256] */
     static inline bool IsWhiteSpace(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kWhiteSpace) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::WhiteSpace) != 0);
     }
 
     static inline bool IsWhiteSpaces(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kWhiteSpaces) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::WhiteSpaces) != 0);
     }
 
     static inline bool IsNewLine(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kNewLine) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::NewLine) != 0);
     }
 
     static inline bool isAlphabet(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kAlphabet) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::Alphabet) != 0);
     }
 
     static inline bool IsUnderLine(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kUnderLine) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::UnderLine) != 0);
     }
 
     static inline bool IsDigital(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kDigital) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::Digital) != 0);
     }
 
     static inline bool IsHexChar(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kHexChar) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::HexChar) != 0);
     }
 
     static inline bool IsInvalidPath(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kInvalidPath) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::InvalidPath) != 0);
     }
 
     static inline bool IsOperator(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kOperator) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::Operator) != 0);
     }
 
     static inline bool IsIdentifierFirst(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kIdentifierFirst) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::IdentifierFirst) != 0);
     }
 
     static inline bool IsIdentifierBody(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kIdentifierBody) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::IdentifierBody) != 0);
     }
 
     static inline bool IsIdentifier(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kIdentifier) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::Identifier) != 0);
     }
 
     static inline bool IsIncludeEndOf(unsigned char ch) {
-        return ((CharInfo::mask[ch] & CharInfo::kIncludeEndOf) != 0);
+        return ((CharInfo::mask[ch] & CharInfo::IncludeEndOf) != 0);
     }
 
     /* CharInfo::ext_mask[256] */
     static inline bool IsUpperCase(unsigned char ch) {
-        return ((CharInfo::ext_mask[ch] & CharInfo::kUpperCase) != 0);
+        return ((CharInfo::ext_mask[ch] & CharInfo::UpperCase) != 0);
     }
 
     static inline bool IsLowerCase(unsigned char ch) {
-        return ((CharInfo::ext_mask[ch] & CharInfo::kLowerCase) != 0);
+        return ((CharInfo::ext_mask[ch] & CharInfo::LowerCase) != 0);
     }
 
     static inline bool IsDelimiter(unsigned char ch) {
-        return ((CharInfo::ext_mask[ch] & CharInfo::kDelimiter) != 0);
+        return ((CharInfo::ext_mask[ch] & CharInfo::Delimiter) != 0);
     }
 
     /* Escape char */
@@ -990,7 +986,7 @@ namespace CharInfo {
     }
 
     static inline bool IsAdvancedEscape(unsigned char ch) {
-        return (CharInfo::escape_chars[ch] >= CharInfo::kAdvancedEscape);
+        return (CharInfo::escape_chars[ch] >= CharInfo::AdvancedEscape);
     }
 
     static inline unsigned char GetEscapeChar(unsigned char ch) {
@@ -999,11 +995,11 @@ namespace CharInfo {
 
     /* Unescape char */
     static inline bool CanUnescape(unsigned char ch) {
-        return (CharInfo::unescape_chars[ch] != CharInfo::kUnescapeError);
+        return (CharInfo::unescape_chars[ch] != CharInfo::UnescapeError);
     }
 
     static inline bool IsAdvancedUnescape(unsigned char ch) {
-        return (CharInfo::unescape_chars[ch] >= CharInfo::kAdvancedUnescape);
+        return (CharInfo::unescape_chars[ch] >= CharInfo::AdvancedUnescape);
     }
 
     static inline unsigned char GetUnescapeChar(unsigned char ch) {
@@ -1012,14 +1008,14 @@ namespace CharInfo {
 
     /* HexValue */
     static inline bool IsHexChars(unsigned char ch) {
-        return (CharInfo::hex_value[ch] != CharInfo::kInvalidHex);
+        return (CharInfo::hex_value[ch] != CharInfo::InvalidHex);
     }
 
     static inline unsigned char GetHexValue(unsigned char ch) {
         return CharInfo::hex_value[ch];
     }
-};
 
+} // namespace CharInfo
 } // namespace jlang
 
 #endif // JLANG_LANG_CHARINFO_H

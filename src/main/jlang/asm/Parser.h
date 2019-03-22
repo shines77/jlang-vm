@@ -16,6 +16,7 @@
 #include <vector>   // For std::vector<T>
 #include <utility>  // For std::pair<T1, T2>
 
+#include "jlang/basic/stddef.h"
 #include "jlang/lang/ErrorCode.h"
 #include "jlang/lang/Char.h"
 #include "jlang/asm/Keyword.h"
@@ -81,7 +82,17 @@ private:
     void skipWhiteSpace() {
         do {
             uint8_t ch = stream_.getu();
-            if (isWhiteSpace(ch))
+            if (likely(isWhiteSpace(ch)))
+                stream_.next();
+            else
+                break;
+        } while (1);
+    }
+
+    void skipWhiteSpace_unlikely() {
+        do {
+            uint8_t ch = stream_.getu();
+            if (unlikely(isWhiteSpace(ch)))
                 stream_.next();
             else
                 break;
@@ -95,7 +106,17 @@ private:
     void skipWhiteSpaces() {
         do {
             uint8_t ch = stream_.getu();
-            if (isWhiteSpaces(ch))
+            if (likely(isWhiteSpaces(ch)))
+                stream_.next();
+            else
+                break;
+        } while (1);
+    }
+
+    void skipWhiteSpaces_unlikely() {
+        do {
+            uint8_t ch = stream_.getu();
+            if (unlikely(isWhiteSpaces(ch)))
                 stream_.next();
             else
                 break;
@@ -117,7 +138,7 @@ private:
     }
 
     void skipToNewLine() {
-        while (!stream_.is_eof()) {
+        while (!stream_.is_null()) {
             uint8_t ch = stream_.getu();
             if (!isNewLine(ch))
                 stream_.next();
@@ -1162,8 +1183,7 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode parseRealNumberSuffix(Token & token,
-                                    uint64_t & fractional, int & exponent) {
+    ErrorCode parseRealNumberSuffix(Token & token, uint64_t & fractional, int & exponent) {
         ErrorCode ec;
         int fractional_len = 0;
         fractional = 0;
@@ -1303,12 +1323,12 @@ Parse_Exit:
             }
             else {
                 unsigned char escapeType = CharInfo::GetEscapeChar(ch);
-                if (escapeType == CharInfo::kOctEscapeChar) {
+                if (escapeType == CharInfo::OctEscapeChar) {
                     chars = '\\';
                     chars.push_back(toOcxChar(ch / 8));
                     chars.push_back(toOcxChar(ch % 8));
                 }
-                else if (escapeType == CharInfo::kNonAscii) {
+                else if (escapeType == CharInfo::NonAscii) {
                     chars = "\\x";
                     chars.push_back(toUpperHexChar(ch / 16));
                     chars.push_back(toUpperHexChar(ch % 16));
@@ -1333,7 +1353,7 @@ Parse_Exit:
             }
             else {
                 unsigned char unescapeType = CharInfo::GetUnescapeChar(ch);
-                if (unescapeType == CharInfo::kOctUnescapeChar) {
+                if (unescapeType == CharInfo::OctUnescapeChar) {
                     // Oct: '\123'
                     unsigned char ch1 = stream.getu(1);
                     if (ch1 >= '0' && ch1 <= '7') {
@@ -1355,7 +1375,7 @@ Parse_Exit:
                         skip = 1;
                     }
                 }
-                else if (unescapeType == CharInfo::kHexUnescapeChar) {
+                else if (unescapeType == CharInfo::HexUnescapeChar) {
                     // Hex: '\xFF'
                     if ((stream.remain() >= 3)) {
                         // The first hexadecimal number
