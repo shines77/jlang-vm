@@ -101,13 +101,19 @@ public:
         IllegalStringSectionIdentifier,
         IllegalStringSectionStringLiteral,
 
+        // Statements
+        IllegalStatement,
+
         // Identifer
         IllegalIdentifer,
 
-        // Argument list
+        // Function argument list
         IllegalArgumentType,
         IllegalArgumentName,
         IllegalArgumentDelimiter,
+
+        // Function body
+        IllegalFunctionBody,
 
         // Standard errors
         Error_NullPtr,

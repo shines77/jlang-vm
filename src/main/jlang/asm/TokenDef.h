@@ -39,14 +39,12 @@
     TOKEN_DEF(Error)                    //
 
     // Keywords
-    TOKEN_DEF(ReservedKeyword)          // for reserved keywords
+    TOKEN_DEF(Keyword)                  // Reserved keyword
     TOKEN_DEF(Macro)                    // Macro
     TOKEN_DEF(MacroDefine)              // Macro define
     TOKEN_DEF(MacroBody)                // Macro body
 
     // Math operators
-    //TOKEN_DEF(Annotation)             // @
-
     TOKEN_DEF(Star)                     // *
     TOKEN_DEF(Slash)                    // /
     TOKEN_DEF(AntiSlash)                // '\'
@@ -57,10 +55,11 @@
     TOKEN_DEF(Sharp)                    // #
 
     // Punctuation
-    TOKEN_DEF(SQoute)                   // '
+    TOKEN_DEF(SingelQuote)              // '
+    TOKEN_DEF(DoubleQuote)              // "
     TOKEN_DEF(EqualSign)                // =
     TOKEN_DEF(Comma)                    // ,
-    TOKEN_DEF(Semi)                     // ;
+    TOKEN_DEF(Semicolon)                // ;
     TOKEN_DEF(LParen)                   // (
     TOKEN_DEF(RParen)                   // )
     TOKEN_DEF(LBracket)                 // [
@@ -77,6 +76,8 @@
     TOKEN_DEF(SquareBracketRight)       // ]
     TOKEN_DEF(StatementBlockStart)      // {
     TOKEN_DEF(StatementBlockEnd)        // }
+
+//  TOKEN_DEF(Annotation)               // @
 
     // Bitwise operators
 

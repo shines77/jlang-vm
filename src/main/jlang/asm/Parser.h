@@ -28,6 +28,11 @@
 #include "jlang/jstd/SmallString.h"
 #include "jlang/support/HashAlgorithm.h"
 
+#define LANG_ASM        0
+#define LANG_CPP        1
+
+#define OBJECT_LANGUAGE LANG_ASM
+
 namespace jlang {
 namespace jasm {
 
@@ -75,6 +80,8 @@ private:
         return HashAlgorithm::getHash(keyword, length);
     }
 
+    /* WhiteSpace */
+
     bool isWhiteSpace(uint8_t ch) const {
         return Char::isWhiteSpace(ch);
     }
@@ -89,15 +96,26 @@ private:
         } while (1);
     }
 
-    void skipWhiteSpace_unlikely() {
+    void skipWhiteSpace_0() {
         do {
             uint8_t ch = stream_.getu();
-            if (unlikely(isWhiteSpace(ch)))
-                stream_.next();
-            else
+            if (likely(!isWhiteSpace(ch)))
                 break;
+            else
+                stream_.next();
         } while (1);
     }
+
+    void skipWhiteSpace_1() {
+        uint8_t ch = stream_.getu();
+        if (likely(isWhiteSpace(ch))) {
+            stream_.next();
+            // Expect to skip 0 WhiteSpace char.
+            skipWhiteSpace_0();
+        }
+    }
+
+    /* WhiteSpaces */
 
     bool isWhiteSpaces(uint8_t ch) {
         return Char::isWhiteSpaces(ch);
@@ -113,15 +131,26 @@ private:
         } while (1);
     }
 
-    void skipWhiteSpaces_unlikely() {
+    void skipWhiteSpaces_0() {
         do {
             uint8_t ch = stream_.getu();
-            if (unlikely(isWhiteSpaces(ch)))
-                stream_.next();
-            else
+            if (likely(!isWhiteSpaces(ch)))
                 break;
+            else
+                stream_.next();
         } while (1);
     }
+
+    void skipWhiteSpaces_1() {
+        uint8_t ch = stream_.getu();
+        if (likely(isWhiteSpaces(ch))) {
+            stream_.next();
+            // Expect to skip 0 WhiteSpaces char.
+            skipWhiteSpaces_0();
+        }
+    }
+
+    /* NewLine */
 
     bool isNewLine(uint8_t ch) {
         return Char::isNewLine(ch);
@@ -146,6 +175,8 @@ private:
                 break;
         }
     }
+
+    /* Identifier */
 
     // Identifier first letter: can not be a number, parse priority order: 'abcDEF_'.
     bool isIdentifierFirst(uint8_t ch) {
@@ -197,6 +228,8 @@ private:
         }
     }
 
+    /* Number */
+
     bool isDigital(uint8_t ch) const {
         return Char::isDigital(ch);
     }
@@ -242,6 +275,8 @@ private:
         skipNumbers();
         return positive;
     }
+
+    /* Alphabet */
 
     inline bool isAlphabet(uint8_t ch) const {
         return Char::isAlphabet(ch);
@@ -309,8 +344,8 @@ public:
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
-    void parseIdentifierBody(char firstChar, IdentInfo & identInfo) {
-        assert(firstChar == stream_.get(-1));
+    void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo) {
+        assert(firstChar == stream_.getu(-1));
         StreamMarker marker(stream_);
         marker.setmark(-1);
         skipIdentifier();
@@ -319,8 +354,8 @@ public:
         marker.append_ident(identInfo);
     }
 
-    void parseIdentifierBody(char firstChar, IdentInfo & identInfo, TokenInfo & ti) {
-        assert(firstChar == stream_.get(-1));
+    void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo, TokenInfo & ti) {
+        assert(firstChar == stream_.getu(-1));
         StreamMarker marker(stream_);
         marker.setmark(-1);
         skipIdentifier();
@@ -362,6 +397,147 @@ public:
         return ec;
     }
 
+    ErrorCode parseStatements() {
+        ErrorCode ec;
+
+        // Skip the whitespaces at the beginning of the stream.
+        skipWhiteSpaces();
+
+        uint8_t ch = stream_.getu();
+
+        // Check first non-whitespace char.
+        if (likely(Char::isIdentifierFirst(ch))) {  // Identifier?
+            stream_.next();
+
+            IdentInfo identInfo;
+            parseIdentifierBody(ch, identInfo);
+
+            ch = stream_.getu();
+            if (likely(Char::isWhiteSpace(ch))) {  // Expect to skip 1 whitespace.
+                stream_.next();
+
+#if OBJECT_LANGUAGE == LANG_CPP
+                // Expect to skip 0 whitespace.
+                skipWhiteSpace_0();
+#else
+                // Expect to skip N whitespace.
+                skipWhiteSpace();
+#endif // OBJECT_LANGUAGE
+
+                ch = stream_.getu();
+                if (likely(ch == '=')) {
+                    // It's a assignment statement.
+                }
+                else if (likely(ch == '+')) {
+                    // cnt++; or x += 1;
+                }
+                else if (likely(ch == '-')) {
+                    // cnt--; or x -= 1;
+                }
+                else if (likely(ch == '.')) {
+                    // object.read();
+                }
+                else if (likely(ch == '-')) {
+                    // object->read();
+                }
+                else if (likely(ch == '(')) {
+                    // It's a function call.
+                }
+                else if (likely(ch == ':')) {
+                    ch = stream_.getu(1);
+                    if (likely(ch == ':')) {
+                        // It's a identifier namespace.
+                        stream_.next(2);
+                    }
+                    else {
+                        // It's a label name.
+                        stream_.next();
+
+                        // TODO: Append the label name.
+                    }
+                }
+            }
+        }
+        else if (likely(ch == '{')) {
+            // Scope begin
+        }
+        else if (likely(ch == '}')) {
+            // Scope end
+        }
+        else if (likely(ch == '+')) {   // ++cnt;
+            stream_.next();
+
+            ch = stream_.getu();
+            if (likely(ch == '+')) {
+                // It's a ++cnt;
+                stream_.next();
+            }
+            else {
+                // Error
+                ec = ErrorCode::UnknownError;
+            }
+        }
+        else if (likely(ch == '-')) {   // --cnt;
+            stream_.next();
+
+            ch = stream_.getu();
+            if (likely(ch == '-')) {
+                // It's a --cnt;
+                stream_.next();
+            }
+            else {
+                // Error
+                ec = ErrorCode::UnknownError;
+            }
+        }
+        else if (likely(ch == ';')) {   // 
+            stream_.next();
+        }
+        else {
+            ec = ErrorCode::IllegalStatement;
+        }
+
+        return ec;
+    }
+
+    ErrorCode parseFunctionBody() {
+        ErrorCode ec;
+
+        do {
+            uint8_t ch = stream_.getu();
+            if (likely(ch != '}')) {
+                ec = parseStatements();
+                if (!ec.isOK())
+                    break;
+            }
+            else {
+                // End of function.
+                break;
+            }
+        } while (1);
+
+        return ec;
+    }
+
+    ErrorCode parseFunctionBodyWrapper() {
+        ErrorCode ec;
+        uint8_t ch = stream_.getu();
+        if (likely(ch == '{')) {
+            // It's a function body
+            ec = parseFunctionBody();
+        }
+        else if (likely(ch == ';')) {
+            // It's a function declaration.
+
+            // TODO: Append the function declaration.
+        }
+        else {
+            // Error
+            ec = ErrorCode::IllegalFunctionBody;
+        }
+        return ec;
+    }
+
     typedef std::vector<std::pair<std::string, std::string>> ArgumentList;
 
     ErrorCode parseFunctionArgumentList() {
@@ -385,14 +561,14 @@ public:
                                                      argName.name()));
 
                     // Expect to skip 0 whitespace.
-                    skipWhiteSpaces();
+                    //skipWhiteSpaces_0();
 
                     uint8_t ch = stream_.getu();
                     if (likely(ch == ',')) {        // Argument delimiter
                         stream_.next();
 
-                        // Expect to skip one whitespace.
-                        skipWhiteSpaces();
+                        // Expect to skip 1 whitespace.
+                        skipWhiteSpaces_1();
 
                         // Continue to parse next argument
                         continue;
@@ -403,9 +579,14 @@ public:
                         // Expect to skip N whitespace.
                         skipWhiteSpaces();
 
-                        // ec = parseFunctionBody();
-                        
+                        ec = parseFunctionBodyWrapper();
                         break;
+                    }
+                    else if (likely(Char::isWhiteSpaces(ch))) {
+                        stream_.next();
+
+                        // Maybe have more than 1 WhiteSpaces.
+                        skipWhiteSpaces();
                     }
                     else {
                         ec = ErrorCode::IllegalArgumentDelimiter;
@@ -1769,13 +1950,13 @@ ParseStringSection_Entry:
             }
             break;
         }
-
         return ec;
     }
 
     bool parseToken(TokenInfo & ti, ErrorCode & ec_) {
         ErrorCode ec = ErrorCode::OK;
         StreamMarker marker(stream_);
+        // You can add [ !stream_.is_null() ].
         while (likely(stream_.has_next())) {
             marker.remark();
             Token token;
@@ -2162,7 +2343,7 @@ ParseStringSection_Entry:
 
             case ';':
                 stream_.next();
-                ti.setToken(Token::Semi);
+                ti.setToken(Token::Semicolon);
                 break;
 
             case '(':
@@ -2224,7 +2405,7 @@ ParseStringSection_Entry:
                     ec = parseReservedKeyword(ti);
                     if (ec.isOK()) {
                         //stream_.next();
-                        ti.setToken(Token::ReservedKeyword);
+                        ti.setToken(Token::Keyword);
                     }
                     else {
                         ti.setToken(Token::Unrecognized);
