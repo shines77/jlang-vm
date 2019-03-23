@@ -15,6 +15,7 @@
 #include <string>
 
 #include "jlang/asm/Token.h"
+#include "jlang/stream/StreamMarker.h"
 
 namespace jlang {
 namespace jasm {
@@ -60,16 +61,20 @@ public:
     }
 
     Token token() const { return this->token_; }
-    Token getToken() const { return this->token_; }
 
-    void setToken(Token type)   { this->token_ = type; }
-    void setToken(int16_t type) { this->token_ = type; }
-    void setToken(int32_t type) { this->token_ = type; }
-    void setToken(int64_t type) { this->token_ = type; }
+    Token getToken() const { return this->token(); }
+    void setToken(Token token)  { this->token_ = token; }
 
-    intptr_t getStart() const  { return this->pos_; }
-    intptr_t getEnd() const    { return (this->pos_ + this->length_); }
-    intptr_t getLength() const { return this->length_; }
+    int32_t value() const    { return this->token_.value(); }
+    Token::Type type() const { return this->token_.type(); }
+
+    void setType(int16_t type) { this->token_.setType(type); }
+    void setType(int32_t type) { this->token_.setType(type); }
+    void setType(int64_t type) { this->token_.setType(type); }
+
+    intptr_t start() const  { return this->pos_; }
+    intptr_t end() const    { return (this->pos_ + this->length_); }
+    intptr_t length() const { return this->length_; }
 
     void setStart(intptr_t pos) {
         this->pos_ = pos;
@@ -98,14 +103,21 @@ public:
 
     void getToken(Token & token, intptr_t & start_pos, intptr_t & length) const {
         token     = this->getToken();
-        start_pos = this->getStart();
-        length    = this->getLength();
+        start_pos = this->start();
+        length    = this->length();
     }
 
     void setToken(Token token, intptr_t start_pos, intptr_t length) {
         this->setToken(token);
         this->setStart(start_pos);
         this->setLength(length);
+    }
+
+    void setToken(Token token, const StreamMarker & marker) {
+        this->setToken(token);
+        this->setStart(marker.start());
+        this->setLength(marker.length());
+        assert(this->length() > 0);
     }
 
     bool isEquals(const TokenInfo & value) const { return (this->token_ == value.token_); }

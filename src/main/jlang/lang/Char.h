@@ -20,10 +20,7 @@
 
 namespace jlang {
 
-class Char : public NonCopyable {
-public:
-    Char() {}
-    ~Char() {}
+struct Char : public NonCopyable {
 
     static inline bool isWhiteSpace(unsigned char ch) {
 #if USE_CHARINFO_MASK

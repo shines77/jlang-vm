@@ -6,9 +6,13 @@
 #pragma once
 #endif
 
-#include "jlang/lang/NonCopyable.h"
-#include "jlang/asm/Keyword.h"
-#include "jlang/lang/Global.h"
+#include <stdint.h>
+#include <string>
+#include <utility>  // For std::swap()
+
+#include "jlang/basic/stddef.h"
+#include "jlang/asm/Token.h"
+#include "jlang/stream/StreamMarker.h"
 
 namespace jlang {
 namespace jasm {
@@ -64,7 +68,7 @@ public:
     }
 
     void setToken(Token token) {
-        this->token_ = token.getType();
+        this->token_ = token.type();
     }
 
     intptr_t start() const { return this->start_; }
@@ -93,6 +97,26 @@ public:
         this->name_.swap(src.name_);
         std::swap(this->start_, src.start_);
         std::swap(this->length_, src.length_);
+    }
+
+    void makeName(const StreamMarker & marker) {
+        if (likely(marker.is_marked())) {
+            intptr_t length = StringUtils::sub_str(this->name_, marker.start_ptr(), marker.end_ptr());
+        }
+        else {
+            this->name_.clear();
+        }
+        this->setPosition(marker.start(), marker.length());
+    }
+
+    void appendName(const StreamMarker & marker) {
+        if (likely(marker.is_marked())) {
+            intptr_t length = StringUtils::append(this->name_, marker.start_ptr(), marker.end_ptr());
+        }
+        else {
+            this->name_.clear();
+        }
+        this->setPosition(marker.start(), marker.length());
     }
 
     bool merge(const IdentInfo & src) {

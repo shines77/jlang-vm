@@ -10,7 +10,6 @@
 #include "jlang/stream/OutputStringStream.h"
 #include "jlang/stream/StringStream.h"
 #include "jlang/stream/MemoryStream.h"
-#include "jlang/asm/IdentInfo.h"
 #include "jlang/support/StringUtils.h"
 
 #include <stddef.h>
@@ -344,26 +343,6 @@ public:
             substr.clear();
             return 0;
         }
-    }
-
-    void make_ident(jasm::IdentInfo & identInfo) {
-        if (likely(this->is_marked())) {
-            intptr_t length = StringUtils::sub_str(identInfo.name(), this->start_ptr(), this->end_ptr());
-        }
-        else {
-            identInfo.name().clear();
-        }
-        identInfo.setPosition(this->start(), this->length());
-    }
-
-    void append_ident(jasm::IdentInfo & identInfo) {
-        if (likely(this->is_marked())) {
-            intptr_t length = StringUtils::append(identInfo.name(), this->start_ptr(), this->end_ptr());
-        }
-        else {
-            identInfo.name().clear();
-        }
-        identInfo.setPosition(this->start(), this->length());
     }
 };
 

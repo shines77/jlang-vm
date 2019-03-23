@@ -36,6 +36,14 @@
 namespace jlang {
 namespace jasm {
 
+enum SkipMasks {
+    kSkipNone           = 0,
+    kSkipWhiteSpace     = 1 << 0,
+    kSkipNewLine        = 1 << 1,
+    kSkipWhiteSpaces    = kSkipWhiteSpace | kSkipNewLine,
+    kSkipDefault        = kSkipWhiteSpaces
+};
+
 class Parser {
 public:
     typedef Parser this_type;
@@ -331,7 +339,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
     }
 
     void parseIdentifier(IdentInfo & identInfo, TokenInfo & ti) {
@@ -340,7 +348,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
@@ -351,7 +359,7 @@ public:
         skipIdentifierBody();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
     }
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo, TokenInfo & ti) {
@@ -361,7 +369,7 @@ public:
         skipIdentifierBody();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
@@ -372,7 +380,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
         if (identInfo.length() <= 0) {
             ec = Error::IllegalIdentifer;
         }
@@ -386,7 +394,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        marker.append_ident(identInfo);
+        identInfo.appendName(marker);
         if (identInfo.length() > 0) {
             ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
         }
@@ -775,7 +783,7 @@ Parse_Exit:
         assert(marker.length() > 0);
 
         IdentInfo keywordInfo;
-        marker.make_ident(keywordInfo);
+        keywordInfo.makeName(marker);
         if (keywordInfo.length() > 0) {
             std::string & keywordName = keywordInfo.name();
 
@@ -799,7 +807,7 @@ Parse_Exit:
                     assert(identMarker.length() > 0);
 
                     IdentInfo identInfo;
-                    identMarker.make_ident(identInfo);
+                    identInfo.makeName(identMarker);
 
                     skipWhiteSpace();
 
@@ -824,13 +832,13 @@ Parse_Exit:
                             identMarker.remark();
                             skipIdentifier();
                             
-                            identMarker.make_ident(identInfo);
+                            identInfo.makeName(identMarker);
                             if (identInfo.length() <= 0) {
                                 // Type-list define failure
                                 std::cout << "*** Error: Type-list define failure. *** ";
                                 return false;
                             }
-                            identMarker.make_ident(identInfo);
+                            identInfo.makeName(identMarker);
 
                             skipWhiteSpace();
                             //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
@@ -889,7 +897,7 @@ Parse_Exit:
         skipIdentifier();
 
         IdentInfo identInfo;
-        marker.make_ident(identInfo);
+        identInfo.makeName(marker);
 
         if (identInfo.length() > 0) {
             KeywordMapping & ppKeyMapping = Global::getPPKeywordMapping();
@@ -1989,14 +1997,490 @@ ParseStringSection_Entry:
         return ec;
     }
 
+    template <size_t Property = kSkipWhiteSpaces>
+    bool nextToken(TokenInfo & ti) {
+        bool success = true;
+        Error ec;
+        StreamMarker marker(stream_);
+
+        // We needn't use [ !stream_.is_null() ].
+        if (likely(stream_.has_next())) {
+NextToken_Continue:
+            Token token;
+            marker.remark();
+            uint8_t ch = stream_.getu();
+            switch (ch) {
+            case '\0':
+                // Set 'Eof' token's position first.
+                ti.setToken(Token::Eof, stream_.tell(), 0);
+                return false;
+
+            case '\t':  // Whitespace chars and next line
+            case '\v':
+            case '\f':
+            case ' ':
+                stream_.next();
+                skipWhiteSpace();
+                if ((Property & kSkipWhiteSpace) != 0)
+                    goto NextToken_Continue;
+                else
+                    ti.setToken(Token::WhiteSpace, marker);
+                break;
+
+            case '\n':
+            case '\r':
+                stream_.next();
+                skipNewLine();
+                if ((Property & kSkipWhiteSpace) != 0)
+                    goto NextToken_Continue;
+                else
+                    ti.setToken(Token::NewLine, marker);
+                break;
+
+            case '#':   // Preprocessing statement, example: #include <stdio.h>
+                stream_.next();
+                ec = parsePreprocessing(ti);
+                if (unlikely(!ec.isOK())) {
+                    success = false;
+                }
+                break;
+
+            case '/':   // Line comment or block comment
+                {
+                    stream_.next();
+                    bool is_comments = parseComment(ti, ec);
+                    if (likely(is_comments)) {
+                        if (!ec.isOK()) {
+                            //getEngine().diagnosisComment(ec, stream_, token);
+                            return false;
+                        }
+                    }
+                    else {
+                        if (likely(stream_.get() != '=')) {
+                            // Div token, operator: /
+                            ti.setToken(Token::Div);
+                        }
+                        else {
+                            // DivEqual token, operator: /=
+                            stream_.next();
+                            ti.setToken(Token::DivEqual, marker);
+                        }
+                    }
+                }
+                break;
+
+            case 'A': case 'B': case 'C': case 'D': case 'E':
+            case 'F': case 'G': case 'H': case 'I': case 'J':
+            case 'K': case 'L': case 'M': case 'N': case 'O':
+            case 'P': case 'Q': case 'R': case 'S': case 'T':
+            case 'U': case 'V': case 'W': case 'X': case 'Y':
+            case 'Z':
+            case 'a': case 'b': case 'c': case 'd': case 'e':
+            case 'f': case 'g': case 'h': case 'i': case 'j':
+            case 'k': case 'l': case 'm': case 'n': case 'o':
+            case 'p': case 'q': case 'r': case 's': case 't':
+            case 'u': case 'v': case 'w': case 'x': case 'y':
+            case 'z':
+            case '_':
+                {
+                    // Identifier or keyword
+                    IdentInfo identInfo;
+                    parseIdentifier(identInfo);
+
+                    if (unlikely(!ec.isOK())) {
+                        success = false;
+                    }
+
+                    ti.setToken(Token::Identifier, marker);
+                }
+                break;
+
+            case '0':
+                {
+                    char ch1 = stream_.get(1);
+                    if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
+                        // Determine the radix for the constant
+                        int radix;
+                        uint64_t number;
+                        ec = parseRadixNumber(token, radix, number);
+                        if (ec.isOK()) {
+                            ti.setToken(token, marker);
+                            return true;
+                        }
+                    }
+
+                    // It's a real number? Including integer, float or double number.
+                    uint64_t integer;
+                    uint64_t fractional;
+                    int exponent;
+                    bool is_float;
+                    ec = parseRealNumber(token, integer, fractional, exponent, is_float);
+                    if (ec.isOK()) {
+                        ti.setToken(token, marker);
+                        return true;
+                    }
+
+                    stream_.next();
+                    ti.setToken(Token::IntegerLiteral, marker);
+                }
+                break;
+
+            case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+                {
+                    // It's a real number? Including integer, float or double number.
+                    uint64_t integer;
+                    uint64_t fractional;
+                    int exponent;
+                    bool is_float;
+                    ec = parseRealNumber(token, integer, fractional, exponent, is_float);
+                    if (ec.isOK()) {
+                        ti.setToken(token, marker);
+                        return true;
+                    }
+                    ti.setToken(Token::IntegerLiteral, marker);
+                }
+                break;
+
+            case '.':
+                stream_.next();
+                {
+                    ch = stream_.get();
+                    if (isAlphabet(ch)) {
+                        // It's a section declare
+                        IdentInfo sectionInfo;
+                        sectionInfo.setName(".");
+                        parseIdentifier(sectionInfo, ti);
+
+                        KeywordMapping & sectionMapping = Global::getSectionMapping();
+                        auto iter = sectionMapping.find(sectionInfo.name());
+                        if (iter != sectionMapping.end()) {
+                            Keyword section = iter->second;
+                            ec = handleSectionStatement(section.getType(), ti);
+                            if (ec.isOK()) {
+                                // success
+                            }
+                        }
+                    }
+                    else if (isDigital(ch)) {
+                        // It's a float or double number.
+                        uint64_t fractional;
+                        int exponent;
+                        ec = parseRealNumberSuffix(token, fractional, exponent);
+                        if (ec.isOK()) {
+                            ti.setToken(token, marker);
+                            return true;
+                        }
+                    }
+                    else {
+                        ti.setToken(Token::Dot, marker);
+                    }
+                }
+                break;
+
+            case '!':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    // BoolNot token, operator: !
+                    ti.setToken(Token::BoolNot, marker);
+                }
+                else {
+                    // operator: !=
+                    stream_.next();
+                    // NotEqual token
+                    ti.setToken(Token::NotEqual, marker);
+                }
+                break;
+
+            case '%':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    // Mod token, operator: %
+                    ti.setToken(Token::Mod, marker);
+                }
+                else {
+                    // operator: %=
+                    stream_.next();
+                    // ModEqual token
+                    ti.setToken(Token::ModEqual, marker);
+                }
+                break;
+
+            case '&':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    if (stream_.get() != '&') {
+                        // BitAnd token, operator: &
+                        ti.setToken(Token::BitAnd, marker);
+                    }
+                    else {
+                        // BoolAnd token, operator: &&
+                        ti.setToken(Token::BoolAnd, marker);
+                    }
+                }
+                else {
+                    // operator: &=
+                    stream_.next();
+                    // AndEqual token
+                    ti.setToken(Token::AndEqual, marker);
+                }
+                break;
+
+            case '*':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    // Multiply token, operator: *
+                    ti.setToken(Token::Multiply, marker);
+                }
+                else {
+                    // operator: *=
+                    stream_.next();
+                    // MultiplyEqual token
+                    ti.setToken(Token::MultiplyEqual, marker);
+                }
+                break;
+
+            case '+':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    if (stream_.get() != '+') {
+                        // Plus token, operator: +
+                        ti.setToken(Token::Add, marker);
+                    }
+                    else {
+                        // Increase token, operator: ++
+                        ti.setToken(Token::Increase, marker);
+                    }
+                }
+                else {
+                    // operator: +=
+                    stream_.next();
+                    // PlusEqual token
+                    ti.setToken(Token::AddEqual, marker);
+                }
+                break;
+
+            case '-':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    if (stream_.get() == '>') {
+                        // Pointer token, operator: ->
+                        ti.setToken(Token::Pointer, marker);
+                    }
+                    else if (stream_.get() != '-') {
+                        // Minus token, operator: -
+                        ti.setToken(Token::Sub, marker);
+                    }
+                    else {
+                        // Decrease token, operator: --
+                        ti.setToken(Token::Decrease, marker);
+                    }
+                }
+                else {
+                    // operator: -=
+                    stream_.next();
+                    // MinusEqual token
+                    ti.setToken(Token::SubEqual, marker);
+                }
+                break;
+
+            case ':':
+                stream_.next();
+                if (stream_.get() == ':') {
+                    // operator: ::
+                    stream_.next();
+                    // Scope token
+                    ti.setToken(Token::Scope, marker);
+                }
+                else {
+                    // Colon token, operator: :
+                    ti.setToken(Token::Colon, marker);
+                }
+                break;
+
+            case '=':
+                stream_.next();
+                if (stream_.get() != '=') {
+                    // Assignment token, operator: =
+                    ti.setToken(Token::Assignment, marker);
+                }
+                else {
+                    // operator: ==
+                    stream_.next();
+                    // Equal token
+                    ti.setToken(Token::Equal, marker);
+                }
+                break;
+
+            case '?':
+                stream_.next();
+                // Question token, operator: ?
+                ti.setToken(Token::Question, marker);
+                break;
+
+            case '^':
+                stream_.next();
+                if (stream_.get() != '^') {
+                    if (stream_.get() != '=') {
+                        // BitXor token, operator: ^
+                        ti.setToken(Token::BitXor, marker);
+                    }
+                    else {
+                        // XorEqual token, operator: ^=
+                        ti.setToken(Token::XorEqual, marker);
+                    }
+                }
+                else {
+                    // operator: ^^
+                    stream_.next();
+                    // BoolXor token
+                    ti.setToken(Token::BoolXor, marker);
+                }
+                break;
+
+            case '|':
+                stream_.next();
+                if (stream_.get() != '|') {
+                    if (stream_.get() != '=') {
+                        // BitOr token, operator: |
+                        ti.setToken(Token::BitOr, marker);
+                    }
+                    else {
+                        // OrEqual token, operator: |=
+                        ti.setToken(Token::OrEqual, marker);
+                    }
+                }
+                else {
+                    // operator: ||
+                    stream_.next();
+                    // BoolOr token
+                    ti.setToken(Token::BoolOr, marker);
+                }
+                break;
+
+            case '~':
+                stream_.next();
+                if (stream_.get() != '~') {
+                    if (stream_.get() != '=') {
+                        // BitNot token, operator: ~
+                        ti.setToken(Token::BitNot);
+                    }
+                    else {
+                        // NotEqual token, operator: ~=
+                        ti.setToken(Token::BitNotEqual);
+                    }
+                }
+                else {
+                    // operator: ~~
+                    stream_.next();
+                    // BoolNot token
+                    ti.setToken(Token::BoolNot, marker);
+                }
+                break;
+
+            case '@':
+                // Is a annotation?
+                stream_.next();
+                ti.setToken(Token::Handle, marker);
+                break;
+
+            case ',':
+                stream_.next();
+                ti.setToken(Token::Comma, marker);
+                break;
+
+            case ';':
+                stream_.next();
+                ti.setToken(Token::Semicolon, marker);
+                break;
+
+            case '(':
+                stream_.next();
+                ti.setToken(Token::LParen, marker);
+                break;
+
+            case ')':
+                stream_.next();
+                ti.setToken(Token::RParen, marker);
+                break;
+
+            case '[':
+                stream_.next();
+                ti.setToken(Token::LBracket, marker);
+                break;
+
+            case ']':
+                stream_.next();
+                ti.setToken(Token::RBracket, marker);
+                break;
+
+            case '{':
+                stream_.next();
+                ti.setToken(Token::LBrace, marker);
+                break;
+
+            case '}':
+                stream_.next();
+                ti.setToken(Token::RBrace, marker);
+                break;
+
+            case '\'':  // Single character literal
+                {
+                    stream_.next();
+                    std::string singelChar;
+                    ec = parseSingleCharLiteral(singelChar, ti);
+                    if (unlikely(!ec.isOK())) {
+                        success = false;
+                    }
+                }
+                break;
+
+            case '\"':  // String literal or single char literal
+                {
+                    stream_.next();
+                    std::string stringLiteral;
+                    ec = parseStringLiteral(stringLiteral, ti);
+                    if (unlikely(!ec.isOK())) {
+                        success = false;
+                    }
+                }
+                break;
+
+            default:    // Internal keywords
+                {
+                    ec = parseReservedKeyword(ti);
+                    if (ec.isOK()) {
+                        //stream_.next();
+                        ti.setToken(Token::Keyword);
+                    }
+                    else {
+                        ti.setToken(Token::Unrecognized);
+                        if (marker.length() <= 0)
+                            stream_.next();
+                    }
+                }
+                break;
+            }
+
+            ti.setStart(marker.start());
+            ti.setLength(marker.length());
+            
+        }
+
+        if (likely(!stream_.has_next())) {
+            ti.setToken(Token::Eof, stream_.tell(), 0);
+        }
+
+        return true;
+    }
+
     bool parseToken(TokenInfo & ti, Error & ec_) {
         Error ec = Error::OK;
         StreamMarker marker(stream_);
-        // You can add [ !stream_.is_null() ].
+        // We needn't use [ !stream_.is_null() ].
         while (likely(stream_.has_next())) {
             marker.remark();
             Token token;
-            // For ppc or arm cpu, make sure to use "signed char or int8_t".
             uint8_t ch = stream_.getu();
             switch (ch) {
             case '\0':
@@ -2444,7 +2928,7 @@ ParseStringSection_Entry:
 
             ti.setStart(marker.start());
             ti.setLength(marker.length());
-            assert(ti.getLength() > 0);
+            assert(ti.length() > 0);
             if (ti.token() != Token::Unknown &&
                 ti.token() != Token::Unrecognized) {
                 break;

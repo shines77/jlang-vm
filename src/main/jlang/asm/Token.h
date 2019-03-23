@@ -14,9 +14,7 @@
 
 #include <string>
 
-#include "jlang/lang/Error.h"
 #include "jlang/lang/Comparatorable.h"
-#include "jlang/asm/KeywordKind.h"
 
 namespace jlang {
 namespace jasm {
@@ -73,15 +71,23 @@ public:
         return *this;
     }
 
-    Type get() const   { return this->token_; }
-    Type value() const { return this->token_; }
-    Type getType() const   { return this->token_; }
+    Type get() const { return this->token_; }
 
     void set(Type token)     { this->token_ = token; }
+
     void set(int16_t token)  { this->token_ = (Type)token; }
     void set(int32_t token)  { this->token_ = (Type)token; }
     void set(int64_t token)  { this->token_ = (Type)token; }
+
+    int32_t value() const  { return static_cast<int32_t>(this->token_); }
+
+    Type type() const { return this->token_; }    
+
     void setType(Type token) { this->token_ = token; }
+
+    void setType(int16_t type) { this->token_ = (Type)type; }
+    void setType(int32_t type) { this->token_ = (Type)type; }
+    void setType(int64_t type) { this->token_ = (Type)type; }
 
     void copy(const Token & src) {
         this->token_ = src.token_;
