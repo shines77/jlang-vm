@@ -34,25 +34,25 @@
 #define PREPROCESSING_CHAR          '#'
 #define PREPROCESSING_CHAR_LEN      sizeof('#')
 
-#define TO_STRING(name)             #name
-
 #define MAX_IDENTIFIER_LEN          512
+
+#define TO_STRING(name)             #name
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace jlang {
 namespace jasm {
 
-#define JLANG_KEYWORD_ID(token, category)       token##_##category
-#define JLANG_PREPROCESSING_ID(keyword)         pp_##keyword
+#define KEYWORD_ID(keywordId)          keywordId
+#define PREPROCESSING_ID(keywordId)    pp_##keywordId
 
-#define KEYWORD_DEF(token, keyword, category)   JLANG_KEYWORD_ID(token, category),
-#define PREPROCESSING_DEF(keyword)              JLANG_PREPROCESSING_ID(keyword),
+#define KEYWORD_DEF(token, keywordId, keyword, kind)    KEYWORD_ID(token),
+#define PREPROCESSING_DEF(keyword)                      PREPROCESSING_ID(keyword),
 
 struct KeywordId {
     enum Type {
         #include "jlang/asm/KeywordDef.h"
-        MaxKeywordId
+        LastKeyword
     };
 };
 
@@ -84,24 +84,24 @@ public:
     friend class Keyword;
 };
 
-#undef JLANG_KEYWORD_ID
-#undef JLANG_PREPROCESSING_ID
+#undef KEYWORD_ID
+#undef PREPROCESSING_ID
 
-#define JLANG_KEYWORD_ID(token, kind)    jasm::KeywordId::token##_##kind
-#define JLANG_PREPROCESSING_ID(keyword)  jasm::KeywordId::pp_##keyword
+#define KEYWORD_ID(keywordId)           jasm::KeywordId::keywordId
+#define PREPROCESSING_ID(keywordId)     jasm::KeywordId::pp_##keywordId
 
-#define KEYWORD_DEF(token, keyword, kind)  \
+#define KEYWORD_DEF(token, keywordId, keyword, kind)  \
     { \
-        (uint16_t)JLANG_KEYWORD_ID(token, kind), \
+        (uint16_t)KEYWORD_ID(token), \
         (uint16_t)jasm::Token::token, \
         (uint32_t)jasm::KeywordKind::kind, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
 
-#define PREPROCESSING_DEF(keyword)  \
+#define PREPROCESSING_DEF(keyword) \
     { \
-        (uint16_t)JLANG_PREPROCESSING_ID(keyword), \
+        (uint16_t)PREPROCESSING_ID(keyword), \
         (uint16_t)jasm::Token::pp_##keyword, \
         (uint16_t)jasm::KeywordKind::Preprocessing, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
@@ -109,15 +109,20 @@ public:
     },
 
 static const KeywordInfoDef gKeywordList[] = {
+
     #include "jlang/asm/KeywordDef.h"
+
     {
-        (uint16_t)jasm::KeywordId::Type::MaxKeywordId,
+        (uint16_t)jasm::KeywordId::LastKeyword,
         (uint16_t)jasm::Token::Unknown,
         (uint32_t)jasm::KeywordKind::Unknown,
         0,
         ""
     }
 };
+
+#undef KEYWORD_ID
+#undef PREPROCESSING_ID
 
 static const size_t gKeywordListSize = sizeof(gKeywordList) / sizeof(gKeywordList[0]) - 1;
 
@@ -193,7 +198,7 @@ public:
 // class Keyword
 ///////////////////////////////////////////////////
 
-class Keyword : public KeywordInfo {
+class Keyword : public KeywordId, public KeywordInfo {
 public:
 #if (KEYWORD_HASHCODE_WORDLEN == 64)
     typedef KeywordHash64               hashcode_type;

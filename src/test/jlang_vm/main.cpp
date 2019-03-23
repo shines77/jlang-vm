@@ -445,6 +445,8 @@ void test_Assembler()
     InputStringStream stream1;
     Scanner scanner(stream1);
 
+    int keywordId = Keyword::If;
+
     /*
     jstd::SmallString<14> * smallString = new jstd::SmallString<14>();
     printf("\n");

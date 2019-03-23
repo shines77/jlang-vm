@@ -25,9 +25,9 @@ class Token : public Comparatorable<Token>,
               public Comparatorable<int32_t>,
               public Comparatorable<int64_t> {
 public:
-    #define TOKEN_DEF(token)                        token,
-    #define KEYWORD_DEF(token, keyword, category)   token,
-    #define PREPROCESSING_DEF(keyword)              pp_##keyword,
+    #define TOKEN_DEF(token)                                token,
+    #define KEYWORD_DEF(token, keywordId, keyword, kind)    token,
+    #define PREPROCESSING_DEF(keyword)                      pp_##keyword,
 
     enum Type {
         Unrecognized = -2,
@@ -156,7 +156,7 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     #define TOKEN_DEF(token)            CASE_TOKEN(token)
-    #define KEYWORD_DEF(token, keyword, category) \
+    #define KEYWORD_DEF(token, keywordId, keyword, kind) \
                                         CASE_TOKEN(token)
     #define PREPROCESSING_DEF(keyword)  CASE_PREPROCESSING_TOKEN(keyword)
 
