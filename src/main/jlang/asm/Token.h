@@ -170,7 +170,7 @@ public:
 
     #define CASE_PREPROCESSING_TOKEN(token)     \
         case Type::pp_##token:                  \
-            return "#" TOKEN_TO_STRING(token);
+            return "Token::" TOKEN_TO_STRING(token);
 
     ///////////////////////////////////////////////////////////////////////
 
@@ -182,9 +182,11 @@ public:
             #include "jlang/asm/TokenDef.h"
 
             CASE_TOKEN(LastToken);
+
             default: break;
         }
-        return "Unknown Token";
+
+        return "Token::Undefined";
     }
 
     #undef TOKEN_TO_STRING

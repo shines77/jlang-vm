@@ -478,7 +478,7 @@ public:
             }
             else {
                 // Error
-                ec = Error::UnknownError;
+                ec = Error::Unknown;
             }
         }
         else if (likely(ch == '-')) {   // --cnt;
@@ -491,7 +491,7 @@ public:
             }
             else {
                 // Error
-                ec = Error::UnknownError;
+                ec = Error::Unknown;
             }
         }
         else if (likely(ch == '.')) {   // Dot
@@ -673,7 +673,7 @@ public:
             }
         }
         else {
-            ec = Error::UnknownError;
+            ec = Error::Unknown;
         }
 
         return ec;
@@ -1902,7 +1902,7 @@ ParseAlignBytes_Start:
                         }
                         else {
                             // Got Errors, expect to a decimal integer.
-                            ec = Error::UnknownError;
+                            ec = Error::Unknown;
                         }
                     }
                 }

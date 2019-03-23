@@ -25,19 +25,19 @@ public:
     #define _Err(err)   err,
 
     enum Type {
-        First = -60000,
-        ErrorFirst = -30000,
+        FirstError = -60000,
+        ErrorBase = -29999,
 
         #include "jlang/lang/ErrorDef.h"
 
         // Standard errors
-        UnknownError = -2,
+        Unknown = -2,
         Failed = -1,
         OK = 0,
         Success = OK,
         ErrorInsufficientBuffer =  122L,
         Status_AlreadyExists = 256,
-        Last
+        LastError
     };
 
 protected:
@@ -193,7 +193,7 @@ public:
 
     #define CASE_ERROR(err)         \
         case Type::err:             \
-            return ERROR_TO_STRING(err);
+            return "Error::" ERROR_TO_STRING(err);
 
     #define _Err(err)   CASE_ERROR(err)
 
@@ -201,15 +201,23 @@ public:
 
     static const char * format(Type ec) {
         switch (ec) {
-            case Type::UnknownError:
-                return "Unknown";
+            CASE_ERROR(FirstError);
+            CASE_ERROR(ErrorBase);
 
             #include "jlang/lang/ErrorDef.h"
+
+            CASE_ERROR(Unknown);
+            CASE_ERROR(Failed);
+            CASE_ERROR(OK);
+            CASE_ERROR(ErrorInsufficientBuffer);
+            CASE_ERROR(Status_AlreadyExists);
+            CASE_ERROR(LastError);
 
             default:
                 break;
         }
-        return "Undefined Error";
+
+        return "Error::Undefined";
     }
 
     #undef ERROR_TO_STRING
