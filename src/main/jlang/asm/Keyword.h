@@ -27,6 +27,8 @@
 #include <mutex>
 #include <memory>
 
+/////////////////////////////////////////////////////////////////////////////////////////
+
 /* The word length of the keyword's hash code. */
 /* The value can choose: 0, 32 or 64. */
 #define KEYWORD_HASHCODE_WORDLEN    32
@@ -38,7 +40,7 @@
 
 #define TO_STRING(name)             #name
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 
 namespace jlang {
 namespace jasm {
@@ -46,7 +48,7 @@ namespace jasm {
 #define KEYWORD_ID(keywordId)          keywordId
 #define PREPROCESSING_ID(keywordId)    pp_##keywordId
 
-#define KEYWORD_DEF(token, keywordId, keyword, kind)    KEYWORD_ID(token),
+#define KEYWORD_DEF(token, keywordId, keyword, kind)    KEYWORD_ID(keywordId),
 #define PREPROCESSING_DEF(keyword)                      PREPROCESSING_ID(keyword),
 
 struct KeywordId {
@@ -92,7 +94,7 @@ public:
 
 #define KEYWORD_DEF(token, keywordId, keyword, kind)  \
     { \
-        (uint16_t)KEYWORD_ID(token), \
+        (uint16_t)KEYWORD_ID(keywordId), \
         (uint16_t)jasm::Token::token, \
         (uint32_t)jasm::KeywordKind::kind, \
         (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
