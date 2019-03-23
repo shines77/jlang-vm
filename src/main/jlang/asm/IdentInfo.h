@@ -99,7 +99,7 @@ public:
         std::swap(this->length_, src.length_);
     }
 
-    void makeName(const StreamMarker & marker) {
+    void makeIdent(const StreamMarker & marker) {
         if (likely(marker.is_marked())) {
             intptr_t length = StringUtils::sub_str(this->name_, marker.start_ptr(), marker.end_ptr());
         }
@@ -109,7 +109,7 @@ public:
         this->setPosition(marker.start(), marker.length());
     }
 
-    void appendName(const StreamMarker & marker) {
+    void appendIdent(const StreamMarker & marker) {
         if (likely(marker.is_marked())) {
             intptr_t length = StringUtils::append(this->name_, marker.start_ptr(), marker.end_ptr());
         }

@@ -339,7 +339,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
     }
 
     void parseIdentifier(IdentInfo & identInfo, TokenInfo & ti) {
@@ -348,7 +348,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
@@ -359,7 +359,7 @@ public:
         skipIdentifierBody();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
     }
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo, TokenInfo & ti) {
@@ -369,7 +369,7 @@ public:
         skipIdentifierBody();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
@@ -380,7 +380,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
         if (identInfo.length() <= 0) {
             ec = Error::IllegalIdentifer;
         }
@@ -394,7 +394,7 @@ public:
         skipIdentifier();
         assert(marker.length() > 0);
 
-        identInfo.appendName(marker);
+        identInfo.appendIdent(marker);
         if (identInfo.length() > 0) {
             ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
         }
@@ -783,7 +783,7 @@ Parse_Exit:
         assert(marker.length() > 0);
 
         IdentInfo keywordInfo;
-        keywordInfo.makeName(marker);
+        keywordInfo.makeIdent(marker);
         if (keywordInfo.length() > 0) {
             std::string & keywordName = keywordInfo.name();
 
@@ -807,7 +807,7 @@ Parse_Exit:
                     assert(identMarker.length() > 0);
 
                     IdentInfo identInfo;
-                    identInfo.makeName(identMarker);
+                    identInfo.makeIdent(identMarker);
 
                     skipWhiteSpace();
 
@@ -832,13 +832,13 @@ Parse_Exit:
                             identMarker.remark();
                             skipIdentifier();
                             
-                            identInfo.makeName(identMarker);
+                            identInfo.makeIdent(identMarker);
                             if (identInfo.length() <= 0) {
                                 // Type-list define failure
                                 std::cout << "*** Error: Type-list define failure. *** ";
                                 return false;
                             }
-                            identInfo.makeName(identMarker);
+                            identInfo.makeIdent(identMarker);
 
                             skipWhiteSpace();
                             //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
@@ -897,7 +897,7 @@ Parse_Exit:
         skipIdentifier();
 
         IdentInfo identInfo;
-        identInfo.makeName(marker);
+        identInfo.makeIdent(marker);
 
         if (identInfo.length() > 0) {
             KeywordMapping & ppKeyMapping = Global::getPPKeywordMapping();
