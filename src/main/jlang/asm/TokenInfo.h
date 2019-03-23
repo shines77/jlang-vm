@@ -16,7 +16,7 @@
 
 #include "jlang/asm/Token.h"
 #include "jlang/asm/KeywordKind.h"
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 
 namespace jlang {
 namespace jasm {

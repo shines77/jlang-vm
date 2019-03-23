@@ -20,7 +20,7 @@
 
 namespace jlang {
 
-class Char : public lang::NonCopyable {
+class Char : public NonCopyable {
 public:
     Char() {}
     ~Char() {}

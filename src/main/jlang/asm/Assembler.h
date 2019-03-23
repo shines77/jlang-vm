@@ -13,7 +13,7 @@
 
 #include <stdarg.h>     // For va_start(), va_end()
 
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 
 namespace jlang {
 

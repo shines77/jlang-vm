@@ -7,7 +7,7 @@
 #endif
 
 #include "jlang/lang/NonCopyable.h"
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 #include "jlang/asm/Keyword.h"
 #include "jlang/jstd/Singleton.h"
 
@@ -18,18 +18,18 @@ namespace jlang {
 
 class LastError {
 private:
-    ErrorCode err_;
+    Error err_;
 
 public:
-    LastError() : err_(ErrorCode::OK) {}
+    LastError() : err_(Error::OK) {}
     virtual ~LastError() {}
 
-    bool isSuccess() const { return (err_ == ErrorCode::OK); }
-    bool hasErrors() const { return (err_ != ErrorCode::OK); }
+    bool isSuccess() const { return (err_ == Error::OK); }
+    bool hasErrors() const { return (err_ != Error::OK); }
 
-    ErrorCode getLastError() { return err_; }
+    Error getLastError() { return err_; }
 
-    void setLastError(const ErrorCode & err) { err_ = err; }
+    void setLastError(const Error & err) { err_ = err; }
     void setLastError(uint32_t err) { err_ = err; }
 };
 
@@ -37,7 +37,7 @@ public:
 // class Global
 ///////////////////////////////////////////////////
 
-class Global : public lang::NonCopyable {
+class Global : public NonCopyable {
 private:
     typedef std::lock_guard<std::mutex> lock_type;
 

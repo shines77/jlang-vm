@@ -37,9 +37,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorCode.h">
-      <Filter>src\lang</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h">
       <Filter>src\lang</Filter>
     </ClInclude>
@@ -177,6 +174,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\KeywordKind.h">
       <Filter>src\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Equatable.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Comparable.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Comparatorable.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Error.h">
+      <Filter>src\lang</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorDef.h">
+      <Filter>src\lang</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,6 @@
 #endif
 
 namespace jlang {
-namespace lang {
 
 ///////////////////////////////////////////////////
 // class NonCopyable
@@ -15,8 +14,8 @@ namespace lang {
 
 class NonCopyable {
 public:
-    NonCopyable() {}
-    ~NonCopyable() {}
+    NonCopyable() = default;
+    ~NonCopyable() = default;
 
     // NonCopyable
     NonCopyable(const NonCopyable & rhs) = delete;
@@ -24,7 +23,6 @@ public:
     NonCopyable & operator = (const NonCopyable & rhs) = delete;
 };
 
-} // namespace lang
 } // namespace jlang
 
 #endif // JLANG_LANG_NONCOPYABLE_H

@@ -421,7 +421,7 @@ private:
 // class KeywordInitializer
 ///////////////////////////////////////////////////
 
-class KeywordInitializer : public lang::NonCopyable {
+class KeywordInitializer : public NonCopyable {
 public:
     static std::unique_ptr<KeywordMapping> keyword_mapping;
     static std::unique_ptr<KeywordMapping> pp_keyword_mapping;

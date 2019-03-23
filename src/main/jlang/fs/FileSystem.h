@@ -8,7 +8,7 @@
 
 #include "jlang/lang/Global.h"
 #include "jlang/lang/CharInfo.h"
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 #include "jlang/support/StringUtils.h"
 
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
@@ -84,7 +84,7 @@ static std::string getExeName() {
             Global::lastError().setLastError(0);
         }
         else {
-            Global::lastError().setLastError(ErrorCode::ErrorInsufficientBuffer);
+            Global::lastError().setLastError(Error::ErrorInsufficientBuffer);
         }
         exe_filename = filename;
     }
@@ -122,7 +122,7 @@ static std::string getAppPath(bool including_slash = true) {
             Global::lastError().setLastError(0);
         }
         else {
-            Global::lastError().setLastError(ErrorCode::ErrorInsufficientBuffer);
+            Global::lastError().setLastError(Error::ErrorInsufficientBuffer);
         }
         app_path = filename;
     }
@@ -160,7 +160,7 @@ static std::string getExeName() {
         Global::lastError().setLastError(0);
     }
     else if (cnt >= (int)max_cnt) {
-        Global::lastError().setLastError(ErrorCode::ErrorInsufficientBuffer);
+        Global::lastError().setLastError(Error::ErrorInsufficientBuffer);
     }
     else {
         Global::lastError().setLastError(errno);
@@ -186,7 +186,7 @@ static std::string getExeName() {
         Global::lastError().setLastError(0);
     }
     else if (cnt >= (ptrdiff_t)max_cnt) {
-        Global::lastError().setLastError(ErrorCode::ErrorInsufficientBuffer);
+        Global::lastError().setLastError(Error::ErrorInsufficientBuffer);
     }
     else {
         Global::lastError().setLastError(errno);
@@ -226,7 +226,7 @@ static std::string getAppPath(bool including_slash = true) {
         Global::lastError().setLastError(0);
     }
     else if (cnt >= (int)max_cnt) {
-        Global::lastError().setLastError(ErrorCode::ErrorInsufficientBuffer);
+        Global::lastError().setLastError(Error::ErrorInsufficientBuffer);
     }
     else {
         Global::lastError().setLastError(errno);
@@ -292,14 +292,14 @@ static std::string appendPath(const std::string & base, const std::string & file
                 // "E?"
                 new_path.push_back(first_char);
                 new_path.push_back(second_char);
-                Global::lastError().setLastError(ErrorCode::IllegalPathOrFilename);
+                Global::lastError().setLastError(Error::IllegalPathOrFilename);
                 return std::move(new_path);
             }
         }
         else {
             // "E"
             new_path.push_back(first_char);
-            Global::lastError().setLastError(ErrorCode::IllegalPathOrFilename);
+            Global::lastError().setLastError(Error::IllegalPathOrFilename);
             return std::move(new_path);
         }
     }
@@ -402,7 +402,7 @@ Next_Searching:
                 }
                 else {
                     // "..???"
-                    Global::lastError().setLastError(ErrorCode::IllegalPathOrFilename);
+                    Global::lastError().setLastError(Error::IllegalPathOrFilename);
                     return std::move(new_path);
                 }
                 if (path_depth > 0) {

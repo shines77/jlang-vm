@@ -14,18 +14,21 @@
 
 #include <string>
 
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
+#include "jlang/lang/Comparatorable.h"
 #include "jlang/asm/KeywordKind.h"
-
-#define TOKEN_DEF(token)                        token,
-#define KEYWORD_DEF(token, keyword, category)   token,
-#define PREPROCESSING_DEF(keyword)              pp_##keyword,
 
 namespace jlang {
 namespace jasm {
 
-class Token {
+class Token : public Comparatorable<Token>,
+              public Comparatorable<int32_t>,
+              public Comparatorable<int64_t> {
 public:
+    #define TOKEN_DEF(token)                        token,
+    #define KEYWORD_DEF(token, keyword, category)   token,
+    #define PREPROCESSING_DEF(keyword)              pp_##keyword,
+
     enum Type {
         Unrecognized = -2,
         Unsupported = -1,
@@ -84,17 +87,17 @@ public:
         this->token_ = src.token_;
     }
 
-    bool isEquals(const Token & value) const { return (this->token_ == value.token_); }
-    bool isEquals(int32_t value) const       { return (this->token_ == value); }
-    bool isEquals(int64_t value) const       { return (this->token_ == value); }
+    bool isEquals(const Token & value) const override { return (this->token_ == value.token_); }
+    bool isEquals(int32_t value) const override       { return (this->token_ == value); }
+    bool isEquals(int64_t value) const override       { return (this->token_ == value); }
 
-    bool isLessThan(const Token & value) const { return (this->token_ < value.token_); }
-    bool isLessThan(int32_t value) const       { return (this->token_ < value); }
-    bool isLessThan(int64_t value) const       { return (this->token_ < value); }
+    bool isLessThan(const Token & value) const override { return (this->token_ < value.token_); }
+    bool isLessThan(int32_t value) const override       { return (this->token_ < value); }
+    bool isLessThan(int64_t value) const override       { return (this->token_ < value); }
 
-    bool isGreaterThan(const Token & value) const { return (this->token_ > value.token_); }
-    bool isGreaterThan(int32_t value) const       { return (this->token_ > value); }
-    bool isGreaterThan(int64_t value) const       { return (this->token_ > value); }
+    bool isGreaterThan(const Token & value) const override { return (this->token_ > value.token_); }
+    bool isGreaterThan(int32_t value) const override       { return (this->token_ > value); }
+    bool isGreaterThan(int64_t value) const override       { return (this->token_ > value); }
 
     friend bool operator == (const Token & lhs, const Token & rhs) { return lhs.isEquals(rhs);   }
     friend bool operator <  (const Token & lhs, const Token & rhs) { return lhs.isLessThan(rhs); }
@@ -150,6 +153,15 @@ public:
         return std::string(Token::format(this->token_));
     }
 
+    ///////////////////////////////////////////////////////////////////////
+
+    #define TOKEN_DEF(token)            CASE_TOKEN(token)
+    #define KEYWORD_DEF(token, keyword, category) \
+                                        CASE_TOKEN(token)
+    #define PREPROCESSING_DEF(keyword)  CASE_PREPROCESSING_TOKEN(keyword)
+
+    ///////////////////////////////////////////////////////////////////////
+
     #define TOKEN_TO_STRING(token)  #token
 
     #define CASE_TOKEN(token)       \
@@ -160,10 +172,7 @@ public:
         case Type::pp_##token:                  \
             return "#" TOKEN_TO_STRING(token);
 
-    #define TOKEN_DEF(token)            CASE_TOKEN(token)
-    #define KEYWORD_DEF(token, keyword, category) \
-                                        CASE_TOKEN(token)
-    #define PREPROCESSING_DEF(keyword)  CASE_PREPROCESSING_TOKEN(keyword)
+    ///////////////////////////////////////////////////////////////////////
 
     static const char * format(Type token) {
         switch (token) {

@@ -7,7 +7,7 @@
 #endif
 
 #include "jlang/vm/Interpreter.h"
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 #include "jlang/support/Console.h"
 
 #include <stdint.h>
@@ -1180,7 +1180,7 @@ public:
     int create() {
         int ec = binary_.loadFromFile("test.bin");
         if (ec <= 0) {
-            return ErrorCode::BinaryFile_Read_Failed;
+            return Error::BinaryFile_Read_Failed;
         }
 
         context_.setImageInfo(binary_.getImagePtr(), binary_.getImageSize(),
@@ -1188,7 +1188,7 @@ public:
 
         bool success = createContext();
         if (!success) {
-            return ErrorCode::MainProcess_Create_Failed;
+            return Error::MainProcess_Create_Failed;
         }
 
         return (int)success;

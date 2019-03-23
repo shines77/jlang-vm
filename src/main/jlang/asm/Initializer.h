@@ -19,7 +19,7 @@ namespace jasm {
 // class Initializer
 ///////////////////////////////////////////////////
 
-class Initializer : public lang::NonCopyable {
+class Initializer : public NonCopyable {
 private:
     typedef std::lock_guard<std::mutex> lock_type;
 

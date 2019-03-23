@@ -420,7 +420,7 @@ void test_Assembler()
 
     using namespace jlang::jasm;
 
-    ErrorCode ec;
+    Error ec;
     TokenInfo ti(Token::Unknown);
     Parser parser;
 

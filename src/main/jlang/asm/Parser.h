@@ -17,7 +17,7 @@
 #include <utility>  // For std::pair<T1, T2>
 
 #include "jlang/basic/stddef.h"
-#include "jlang/lang/ErrorCode.h"
+#include "jlang/lang/Error.h"
 #include "jlang/lang/Char.h"
 #include "jlang/asm/Keyword.h"
 #include "jlang/asm/Token.h"
@@ -365,8 +365,8 @@ public:
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
     }
 
-    ErrorCode parseIdentifierStrict(IdentInfo & identInfo) {
-        ErrorCode ec;
+    Error parseIdentifierStrict(IdentInfo & identInfo) {
+        Error ec;
         StreamMarker marker(stream_);
         marker.setmark();
         skipIdentifier();
@@ -374,13 +374,13 @@ public:
 
         marker.append_ident(identInfo);
         if (identInfo.length() <= 0) {
-            ec = ErrorCode::IllegalIdentifer;
+            ec = Error::IllegalIdentifer;
         }
         return ec;
     }
 
-    ErrorCode parseIdentifierStrict(IdentInfo & identInfo, TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseIdentifierStrict(IdentInfo & identInfo, TokenInfo & ti) {
+        Error ec;
         StreamMarker marker(stream_);
         marker.setmark();
         skipIdentifier();
@@ -392,13 +392,13 @@ public:
         }
         else {
             ti.setToken(Token::Unrecognized, identInfo.start(), identInfo.length());
-            ec = ErrorCode::IllegalIdentifer;
+            ec = Error::IllegalIdentifer;
         }
         return ec;
     }
 
-    ErrorCode parseStatements() {
-        ErrorCode ec;
+    Error parseStatements() {
+        Error ec;
 
         // Skip the whitespaces at the beginning of the stream.
         skipWhiteSpaces();
@@ -478,7 +478,7 @@ public:
             }
             else {
                 // Error
-                ec = ErrorCode::UnknownError;
+                ec = Error::UnknownError;
             }
         }
         else if (likely(ch == '-')) {   // --cnt;
@@ -491,7 +491,7 @@ public:
             }
             else {
                 // Error
-                ec = ErrorCode::UnknownError;
+                ec = Error::UnknownError;
             }
         }
         else if (likely(ch == '.')) {   // Dot
@@ -525,14 +525,14 @@ public:
         }
         else {
             stream_.next();
-            ec = ErrorCode::IllegalStatement;
+            ec = Error::IllegalStatement;
         }
 
         return ec;
     }
 
-    ErrorCode parseFunctionBody() {
-        ErrorCode ec;
+    Error parseFunctionBody() {
+        Error ec;
 
         do {
             uint8_t ch = stream_.getu();
@@ -551,8 +551,8 @@ public:
         return ec;
     }
 
-    ErrorCode parseFunctionBodyWrapper() {
-        ErrorCode ec;
+    Error parseFunctionBodyWrapper() {
+        Error ec;
         uint8_t ch = stream_.getu();
         if (likely(ch == '{')) {
             // It's a function body
@@ -569,15 +569,15 @@ public:
         else {
             // Error
             stream_.next();
-            ec = ErrorCode::IllegalFunctionBody;
+            ec = Error::IllegalFunctionBody;
         }
         return ec;
     }
 
     typedef std::vector<std::pair<std::string, std::string>> ArgumentList;
 
-    ErrorCode parseFunctionArgumentList() {
-        ErrorCode ec;
+    Error parseFunctionArgumentList() {
+        Error ec;
         ArgumentList argList;
 
         do {
@@ -625,17 +625,17 @@ public:
                         skipWhiteSpaces();
                     }
                     else {
-                        ec = ErrorCode::IllegalArgumentDelimiter;
+                        ec = Error::IllegalArgumentDelimiter;
                         break;
                     }
                 }
                 else {
-                    ec = ErrorCode::IllegalArgumentName;
+                    ec = Error::IllegalArgumentName;
                     break;
                 }
             }
             else {
-                ec = ErrorCode::IllegalArgumentType;
+                ec = Error::IllegalArgumentType;
                 break;
             }
         } while (1);
@@ -643,8 +643,8 @@ public:
         return ec;
     }
 
-    ErrorCode parseIdentifierDeclareName(const IdentInfo & identType) {
-        ErrorCode ec;
+    Error parseIdentifierDeclareName(const IdentInfo & identType) {
+        Error ec;
 
         IdentInfo identName;
         parseIdentifier(identName);
@@ -673,14 +673,14 @@ public:
             }
         }
         else {
-            ec = ErrorCode::UnknownError;
+            ec = Error::UnknownError;
         }
 
         return ec;
     }
 
-    ErrorCode parseIdentifierDeclare(const Keyword & keyword, IdentInfo & identInfo) {
-        ErrorCode ec;
+    Error parseIdentifierDeclare(const Keyword & keyword, IdentInfo & identInfo) {
+        Error ec;
         Token signToken(Token::Unknown);
 
         if (keyword.getKind() == KeywordKind::PodSign) {
@@ -703,19 +703,19 @@ public:
                     // Merge the sign type and POD type.
                     bool merged = identInfo.merge(podIdentInfo);
                     if (!merged) {
-                        ec = ErrorCode::IllegalPodType;
+                        ec = Error::IllegalPodType;
                         goto Parse_Exit;
                     }
                 }
                 else {
                     // Error: After "signed"/"unsigned", it's a unsupport POD type.
-                    ec = ErrorCode::UnsupportPodType;
+                    ec = Error::UnsupportPodType;
                     goto Parse_Exit;
                 }
             }
             else {
                 // Error: After "signed"/"unsigned", it's a unknown type.
-                ec = ErrorCode::UnknownPodType;
+                ec = Error::UnknownPodType;
                 goto Parse_Exit;
             }
         }
@@ -729,13 +729,13 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode handleReservedKeyword(const Keyword & keyword) {
-        ErrorCode ec;
+    Error handleReservedKeyword(const Keyword & keyword) {
+        Error ec;
         return ec;
     }
 
-    ErrorCode parseIdentifierOrKeyword(TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseIdentifierOrKeyword(TokenInfo & ti) {
+        Error ec;
 
         IdentInfo identInfo;
         parseIdentifier(identInfo);
@@ -767,8 +767,8 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode parseReservedKeyword(TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseReservedKeyword(TokenInfo & ti) {
+        Error ec;
         StreamMarker marker(stream_);
         marker.setmark();
         skipIdentifier();
@@ -868,7 +868,7 @@ Parse_Exit:
             }
         }
         else {
-            ec = ErrorCode::IllegalIdentifer;
+            ec = Error::IllegalIdentifer;
         }
 
         return ec;
@@ -881,8 +881,8 @@ Parse_Exit:
             return false;
     }
 
-    ErrorCode parsePreprocessing(TokenInfo & ti) {
-        ErrorCode ec;
+    Error parsePreprocessing(TokenInfo & ti) {
+        Error ec;
         Token token = Token::Unknown;
         StreamMarker marker(stream_);
         marker.setmark();
@@ -912,12 +912,12 @@ Parse_Exit:
             }
             else {
                 // Error: It's a unknown preprocessing keyword.
-                ec = ErrorCode::UnknownPreprocessingKeyword;
+                ec = Error::UnknownPreprocessingKeyword;
             }
         }
         else {
             // Error: It's not a preprocessing keyword.
-            ec = ErrorCode::IllegalPreprocessingKeyword;
+            ec = Error::IllegalPreprocessingKeyword;
         }
 
         if (token != Token::Unknown) {
@@ -929,8 +929,8 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode handlePreprocessingStatement(Token ppToken, const TokenInfo & ti) {
-        ErrorCode ec = ErrorCode::OK;
+    Error handlePreprocessingStatement(Token ppToken, const TokenInfo & ti) {
+        Error ec = Error::OK;
         switch (ppToken.value()) {
         case Token::pp_if:
             //
@@ -975,7 +975,7 @@ Parse_Exit:
             break;
 
         default:
-            ec = ErrorCode::UnknownPreprocessingKeyword;
+            ec = Error::UnknownPreprocessingKeyword;
             break;
         }
         return ec;
@@ -1026,7 +1026,7 @@ Parse_Exit:
         return is_completed;
     }
 
-    bool parseComment(TokenInfo & ti, ErrorCode & ec) {
+    bool parseComment(TokenInfo & ti, Error & ec) {
         bool is_comments;
         char ch = stream_.get();
         if (ch == ';' || ch == '/') {
@@ -1034,9 +1034,9 @@ Parse_Exit:
             stream_.next();
             bool is_completed = skipLineComment();
             if (is_completed)
-                ec = ErrorCode::OK;
+                ec = Error::OK;
             else 
-                ec = ErrorCode::IllegalLineComment;
+                ec = Error::IllegalLineComment;
             ti.setToken(Token::LineComment);
             is_comments = true;
         }
@@ -1045,14 +1045,14 @@ Parse_Exit:
             stream_.next();
             bool is_completed = skipBlockComment();
             if (is_completed)
-                ec = ErrorCode::OK;
+                ec = Error::OK;
             else 
-                ec = ErrorCode::IllegalBlockComment;
+                ec = Error::IllegalBlockComment;
             ti.setToken(Token::BlockComment);
             is_comments = true;
         }
         else {
-            ec = ErrorCode::OK;
+            ec = Error::OK;
             is_comments = false;
         }
         return is_comments;
@@ -1193,9 +1193,9 @@ Parse_Exit:
         return is_valid;
     }
 
-    ErrorCode parseRadixNumber(Token & token,
+    Error parseRadixNumber(Token & token,
                                int & radix, uint64_t & number) {
-        ErrorCode ec;
+        Error ec;
         bool is_valid;
         char ch1 = stream_.get(1);
         if (likely(ch1 == 'x' || ch1 == 'X')) {
@@ -1204,7 +1204,7 @@ Parse_Exit:
             is_valid = parseRadixNumberImpl<16>(number);
             token = Token::HexLiteral;
             if (!is_valid) {
-                ec = ErrorCode::IllegalRadix16Number;
+                ec = Error::IllegalRadix16Number;
             }
         }
         else if (likely(ch1 == 'o' || ch1 == 'O')) {
@@ -1213,7 +1213,7 @@ Parse_Exit:
             is_valid = parseRadixNumberImpl<8>(number);
             token = Token::OcxLiteral;
             if (!is_valid) {
-                ec = ErrorCode::IllegalRadix8Number;
+                ec = Error::IllegalRadix8Number;
             }
         }
         else if (likely(ch1 == 'b' || ch1 == 'B')) {
@@ -1222,7 +1222,7 @@ Parse_Exit:
             is_valid = parseRadixNumberImpl<2>(number);
             token = Token::BinaryLiteral;
             if (!is_valid) {
-                ec = ErrorCode::IllegalRadix2Number;
+                ec = Error::IllegalRadix2Number;
             }
         }
         else if (likely(ch1 == 'd' || ch1 == 'D')) {
@@ -1231,28 +1231,28 @@ Parse_Exit:
             is_valid = parseRadixNumberImpl<10>(number);
             token = Token::DecLiteral;
             if (!is_valid) {
-                ec = ErrorCode::IllegalRadix10Number;
+                ec = Error::IllegalRadix10Number;
             }
         }
         else {
             // It's not a based radix number, re-parse from old place.
-            ec = ErrorCode::IllegalRadixNumber;
+            ec = Error::IllegalRadixNumber;
         }
         return ec;
     }
 
-    ErrorCode parseDecimalNumber(uint64_t & number) {
+    Error parseDecimalNumber(uint64_t & number) {
         bool is_valid = parseRadixNumberImpl<10>(number);
         if (is_valid)
-            return ErrorCode::OK;
+            return Error::OK;
         else
-            return ErrorCode::IllegalRadix10Number;
+            return Error::IllegalRadix10Number;
     }
 
-    ErrorCode parseRealNumber(Token & token,
+    Error parseRealNumber(Token & token,
                               uint64_t & integer, uint64_t & fractional,
                               int & exponent, bool & is_float) {
-        ErrorCode ec;
+        Error ec;
         int integer_len = 0;
         int fractional_len = 0;
         integer = 0;
@@ -1297,7 +1297,7 @@ Parse_Exit:
                 }
                 else if (ch == '.') {
                     // Found the second decimal point, exit now.
-                    ec = ErrorCode::IllegalFloatNumber;
+                    ec = Error::IllegalFloatNumber;
                     goto Parse_Exit;
                 }
                 else {
@@ -1336,24 +1336,24 @@ Parse_Exit:
 
                 if (exponent_cnt > 10 || (exponent_cnt == 10 && exponent_num < 1000000000)) {
                     // Exponent part is overflow
-                    ec = ErrorCode::ErrorExponentPartOverflow;
+                    ec = Error::ErrorExponentPartOverflow;
                     goto Parse_Exit;
                 }
                 else if (exponent_cnt <= 0) {
                     // Does not contain the exponential number, it's a illegal error.
-                    ec = ErrorCode::IllegalExponentPart;
+                    ec = Error::IllegalExponentPart;
                     goto Parse_Exit;
                 }
                 else {
                     // The exponent is smaller than -2147483648 or bigger than 2147483647 !
                     if ((exponent_sign != -1 && exponent_num > 2147483647) ||
                         (exponent_sign == -1 && exponent_num > 2147483648)) {
-                        ec = ErrorCode::ErrorNegativeExponentPartOverflow;
+                        ec = Error::ErrorNegativeExponentPartOverflow;
                         goto Parse_Exit;
                     }
                     // The exponent of the long double range is (1.2e-4932 ~ 1.2e+4932)
                     else if (exponent_num > 4932) {
-                        ec = ErrorCode::ErrorExponentPartOutOfRange;
+                        ec = Error::ErrorExponentPartOutOfRange;
                         goto Parse_Exit;
                     } 
                     exponent = (exponent_sign != -1) ? (int)exponent_num : -(int)exponent_num;
@@ -1377,17 +1377,17 @@ Parse_Exit:
         // 0xDE0B6B3A7640000ULL = 10^19 = 10E+19
         if (fractional_len > 20 || (fractional_len == 20 && fractional < 0xDE0B6B3A7640000ULL)) {
             // Fractional part is overflow
-            ec = ErrorCode::ErrorFractionalPartOverflow;
+            ec = Error::ErrorFractionalPartOverflow;
             goto Parse_Exit;
         }
         // Same to fractional part
         if (integer_len > 20 || (integer_len == 20 && integer < 0xDE0B6B3A7640000ULL)) {
             // Integer part is overflow
-            ec = ErrorCode::ErrorIntegerPartOverflow;
+            ec = Error::ErrorIntegerPartOverflow;
             goto Parse_Exit;
         }
 
-        if (ec == ErrorCode::OK) {
+        if (ec == Error::OK) {
             if (hasDots) {
                 token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
             }
@@ -1400,8 +1400,8 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode parseRealNumberSuffix(Token & token, uint64_t & fractional, int & exponent) {
-        ErrorCode ec;
+    Error parseRealNumberSuffix(Token & token, uint64_t & fractional, int & exponent) {
+        Error ec;
         int fractional_len = 0;
         fractional = 0;
         exponent = 0;
@@ -1422,7 +1422,7 @@ Parse_Exit:
             }
             else if (ch == '.') {
                 // Found the second decimal point, exit now.
-                ec = ErrorCode::IllegalFloatingNumber;
+                ec = Error::IllegalFloatingNumber;
                 goto Parse_Exit;
             }
             else {
@@ -1460,24 +1460,24 @@ Parse_Exit:
 
                 if (exponent_cnt > 10 || (exponent_cnt == 10 && exponent_num < 1000000000)) {
                     // Exponent part is overflow
-                    ec = ErrorCode::ErrorExponentPartOverflow;
+                    ec = Error::ErrorExponentPartOverflow;
                     goto Parse_Exit;
                 }
                 else if (exponent_cnt <= 0) {
                     // Does not contain the exponential number, it's a illegal error.
-                    ec = ErrorCode::IllegalExponentPart;
+                    ec = Error::IllegalExponentPart;
                     goto Parse_Exit;
                 }
                 else {
                     // The exponent is smaller than -2147483648 or bigger than 2147483647 !
                     if ((exponent_sign != -1 && exponent_num > 2147483647) ||
                         (exponent_sign == -1 && exponent_num > 2147483648)) {
-                        ec = ErrorCode::ErrorNegativeExponentPartOverflow;
+                        ec = Error::ErrorNegativeExponentPartOverflow;
                         goto Parse_Exit;
                     }
                     // The exponent of the long double range is (1.2e-4932 ~ 1.2e+4932)
                     else if (exponent_num > 4932) {
-                        ec = ErrorCode::ErrorExponentPartOutOfRange;
+                        ec = Error::ErrorExponentPartOutOfRange;
                         goto Parse_Exit;
                     }
                     exponent = (exponent_sign != -1) ? (int)exponent_num : -(int)exponent_num;
@@ -1499,11 +1499,11 @@ Parse_Exit:
         // 0xDE0B6B3A7640000ULL = 10^19 = 10E+19
         if (fractional_len > 20 || (fractional_len == 20 && fractional < 0xDE0B6B3A7640000ULL)) {
             // Fractional part is overflow
-            ec = ErrorCode::ErrorFractionalPartOverflow;
+            ec = Error::ErrorFractionalPartOverflow;
             goto Parse_Exit;
         }
 
-        if (ec == ErrorCode::OK) {
+        if (ec == Error::OK) {
             token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
         }
 
@@ -1637,8 +1637,8 @@ Parse_Exit:
     }
 
     // Single character literal
-    ErrorCode parseSingleCharLiteral(std::string & content, TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseSingleCharLiteral(std::string & content, TokenInfo & ti) {
+        Error ec;
         unsigned char character;
         char ch = stream_.get();
         if (likely(ch != '\\')) {
@@ -1659,7 +1659,7 @@ Parse_Exit:
             }
             else {
                 // Get a unknown unescaped char
-                ec = ErrorCode::UnknownUnescapedChar;
+                ec = Error::UnknownUnescapedChar;
                 goto Parse_Exit;
             }
         }
@@ -1672,11 +1672,11 @@ Parse_Exit:
         }
         else {
             // It's a illegal single character format.
-            ec = ErrorCode::IllegalSingleCharacterFormat;
+            ec = Error::IllegalSingleCharacterFormat;
             goto Parse_Exit;
         }
 
-        if (ec == ErrorCode::OK) {
+        if (ec == Error::OK) {
             content = character;
         }
 
@@ -1685,8 +1685,8 @@ Parse_Exit:
     }
 
     // Normal string literal
-    ErrorCode parseStringLiteral(std::string & content, TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseStringLiteral(std::string & content, TokenInfo & ti) {
+        Error ec;
         int multipart_cnt = 0;
         bool completed;
 
@@ -1717,7 +1717,7 @@ Parse_Exit:
                             stream_.next(skip);
                         }
                         else {
-                            ec = ErrorCode::UnknownUnescapedChar;
+                            ec = Error::UnknownUnescapedChar;
                             break;
                         }
                     }
@@ -1743,7 +1743,7 @@ Parse_Exit:
             if (!completed) {
                 if (ec.isOK()) {
                     std::cout << ">>> Error: String literal is not completed!" << std::endl;
-                    ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
+                    ec = Error::IllegalStringLiteralIsNotCompleted;
                 }
                 else {
                     std::cout << ">>> Error: String literal unknown error!" << std::endl;
@@ -1773,13 +1773,13 @@ Parse_Exit:
         }
         else {
             std::cout << ">>> Error: String literal is not completed. (mismatch \\\") !" << std::endl;
-            ec = ErrorCode::IllegalStringLiteralIsNotCompleted;
+            ec = Error::IllegalStringLiteralIsNotCompleted;
         }
         return ec;
     }
 
-    ErrorCode parseNumberLiteral(TokenInfo & ti) {
-        ErrorCode ec;
+    Error parseNumberLiteral(TokenInfo & ti) {
+        Error ec;
         Token token;
         StreamMarker marker(stream_);
         marker.setmark();
@@ -1813,8 +1813,8 @@ Parse_Exit:
         return ec;
     }
 
-    ErrorCode parseLiteral(std::string & content, TokenInfo & token) {
-        ErrorCode ec;
+    Error parseLiteral(std::string & content, TokenInfo & token) {
+        Error ec;
         
         uint8_t ch = stream_.getu();
         if (likely(isNumber(ch))) {
@@ -1863,8 +1863,8 @@ Parse_Exit:
         }
     }
 
-    ErrorCode handleSectionStatement(Token sectionToken, TokenInfo & ti) {
-        ErrorCode ec;
+    Error handleSectionStatement(Token sectionToken, TokenInfo & ti) {
+        Error ec;
 
         switch (sectionToken.value()) {
         case Token::Align:
@@ -1902,7 +1902,7 @@ ParseAlignBytes_Start:
                         }
                         else {
                             // Got Errors, expect to a decimal integer.
-                            ec = ErrorCode::UnknownError;
+                            ec = Error::UnknownError;
                         }
                     }
                 }
@@ -1950,23 +1950,23 @@ ParseStringSection_Entry:
                                 }
                                 else {
                                     // Got a error, expect to '}', string section ending.
-                                    ec = ErrorCode::ExpectingStringSectionEnding;
+                                    ec = Error::ExpectingStringSectionEnding;
                                 }
                             }
                             else {
                                 // Got a error, illegal string literal.
-                                ec = ErrorCode::IllegalStringLiteral;
+                                ec = Error::IllegalStringLiteral;
                             }
                         }
                         else {
                             // Got a error, expect to '"'.
-                            ec = ErrorCode::ExpectingStringLiteral;
+                            ec = Error::ExpectingStringLiteral;
                         }
                     }
                 }
                 else {
                     // Got a error, expect to '{', string section beginning.
-                    ec = ErrorCode::ExpectingStringSectionBeginning;
+                    ec = Error::ExpectingStringSectionBeginning;
                 }
             }
             break;
@@ -1982,15 +1982,15 @@ ParseStringSection_Entry:
             {
                 // Unsupported section keyword
                 ti.setToken(Token::Unsupported);
-                ec = ErrorCode::UnknownSectionStatement;
+                ec = Error::UnknownSectionStatement;
             }
             break;
         }
         return ec;
     }
 
-    bool parseToken(TokenInfo & ti, ErrorCode & ec_) {
-        ErrorCode ec = ErrorCode::OK;
+    bool parseToken(TokenInfo & ti, Error & ec_) {
+        Error ec = Error::OK;
         StreamMarker marker(stream_);
         // You can add [ !stream_.is_null() ].
         while (likely(stream_.has_next())) {
@@ -2456,7 +2456,7 @@ ParseStringSection_Entry:
         }
 
         ec_ = ec;
-        return (ec == ErrorCode::OK);
+        return (ec == Error::OK);
     }
 };
 
