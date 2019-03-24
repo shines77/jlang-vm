@@ -58,9 +58,32 @@
     KEYWORD_DEF(UInt64,             UInt64,         uint64,         Pod)
 
     // Reserved keywords
-    KEYWORD_DEF(Namespace,          Namespace,      namespace,      Keyword)
+    
+    KEYWORD_DEF(Import,             Import,         import,         Keyword)
+    KEYWORD_DEF(Using,              Using,          using,          Keyword)
+    KEYWORD_DEF(NameSpace,          NameSpace,      namespace,      Keyword)
+    KEYWORD_DEF(TypeDef,            TypeDef,        typedef,        Keyword)
+    KEYWORD_DEF(Class,              Class,          class,          Keyword)
+    KEYWORD_DEF(Struct,             Struct,         struct,         Keyword)
+    KEYWORD_DEF(Interface,          Interface,      interface,      Keyword)
+    KEYWORD_DEF(Enum,               Enum,           enum,           Keyword)
+    KEYWORD_DEF(Template,           Template,       template,       Keyword)
+
     KEYWORD_DEF(If,                 If,             if,             Keyword)
     KEYWORD_DEF(Else,               Else,           else,           Keyword)
+
+    KEYWORD_DEF(Do,                 Do,             do,             Keyword)
+    KEYWORD_DEF(While,              While,          while,          Keyword)
+    KEYWORD_DEF(Continue,           Continue,       continue,       Keyword)
+
+    KEYWORD_DEF(For,                For,            for,            Keyword)
+
+    KEYWORD_DEF(Switch,             Switch,         switch,         Keyword)
+    KEYWORD_DEF(Case,               Case,           case,           Keyword)
+    KEYWORD_DEF(Default,            Default,        default,        Keyword)
+
+    KEYWORD_DEF(Break,              Break,          break,          Keyword)
+    KEYWORD_DEF(Goto,               Goto,           goto,           Keyword)
 
     // Section
     KEYWORD_DEF(Align,              Align,          .align,         Section)

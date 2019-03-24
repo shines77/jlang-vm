@@ -9,6 +9,8 @@
 
 using namespace jlang;
 
+jasm::Keyword jasm::Keyword::NotFoundKeyword = jasm::Keyword(jasm::gKeywordList[0]);
+
 std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::keyword_mapping     = nullptr;
 std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::pp_keyword_mapping  = nullptr;
 std::unique_ptr<jasm::KeywordMapping> jasm::KeywordInitializer::section_mapping     = nullptr;

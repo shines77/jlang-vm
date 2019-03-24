@@ -53,6 +53,8 @@ namespace jasm {
 
 struct KeywordId {
     enum Type {
+        Unknown,
+        NotFound,
         #include "jlang/asm/KeywordDef.h"
         LastKeyword
     };
@@ -65,7 +67,7 @@ struct KeywordInfoDef {
     int32_t  token;
     uint32_t kind;
     uint32_t length;
-    char name[64 - sizeof(uint32_t) * 4];   // Alignment for 64 bytes.
+    char name[128 - sizeof(uint32_t) * 4];   // Alignment for 128 bytes.
 };
 
 class KeywordInfo {
@@ -77,7 +79,7 @@ protected:
     std::string name_;
 
 public:
-    KeywordInfo() : id_(-1), token_(jasm::Token::Unknown),
+    KeywordInfo() : id_(KeywordId::Unknown), token_(jasm::Token::Unknown),
                     kind_(jasm::KeywordKind::Unknown),
                     length_(0) {
     }
@@ -111,6 +113,21 @@ public:
     },
 
 static const KeywordInfoDef gKeywordList[] = {
+    {
+        (int32_t)jasm::KeywordId::Unknown,
+        (int32_t)jasm::Token::Unknown,
+        (uint32_t)jasm::KeywordKind::Unknown,
+        0,
+        ""
+    },
+
+    {
+        (int32_t)jasm::KeywordId::NotFound,
+        (int32_t)jasm::Token::Unknown,
+        (uint32_t)jasm::KeywordKind::Unknown,
+        0,
+        ""
+    },
 
     #include "jlang/asm/KeywordDef.h"
 
@@ -210,6 +227,8 @@ public:
     typedef KeywordHash::value_type     hashvalue_type;
 #endif
 
+    static Keyword NotFoundKeyword;
+
 protected:
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
     hashcode_type hashCode_;
@@ -248,19 +267,32 @@ public:
 #endif
     }
 
+    Keyword(const Keyword & src) {
+        this->id_ = src.id_;
+        this->kind_ = src.kind_;
+        this->token_ = src.token_;
+        this->length_ = src.length_;
+        this->name_ = src.name_;
+#if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
+        hashCode_ = calcHashCode();
+#endif
+    }
+
     ~Keyword() {
     }
 
+    int32_t  id() const { return this->id_; }
     uint32_t kind() const { return this->kind_; }
-    int32_t type() const { return this->token_; }
+    int32_t  type() const { return this->token_; }
     uint32_t length() const { return this->length_; }
-    jasm::Token token() const { return jasm::Token(this->token_); }
+    jasm::Token::Type token() const { return jasm::Token::Type(this->token_); }
 
     jasm::KeywordKind::Type getKind() const { return jasm::KeywordKind::Type(this->kind_); }
     jasm::Token getToken() const { return jasm::Token(this->token_); }
     jasm::Token::Type getType() const { return jasm::Token::Type(this->token_); }
 
-    void setKind(uint32_t type) { this->kind_ = type; }
+    void setId(int32_t id) { this->id_ = id; }
+    void setKind(uint32_t kind) { this->kind_ = kind; }
     void setToken(const jasm::Token & token) { this->token_ = token.value(); }
 
     void setType(int16_t token) { this->token_ = static_cast<int32_t>(token); }

@@ -991,7 +991,7 @@ Parse_Exit:
     bool skipLineComment() {
         bool is_completed = false;
         char cur;
-        while ((cur = stream_.get()) != '\0') {
+        while (likely((cur = stream_.get()) != '\0')) {
             if (likely(cur != '\n' && cur != '\r')) {
                 stream_.next();
             }
@@ -1008,13 +1008,13 @@ Parse_Exit:
     bool skipBlockComment() {
         bool is_completed = false;
         char cur;
-        while ((cur = stream_.get()) != '\0') {
+        while (likely((cur = stream_.get()) != '\0')) {
             if (likely(cur != '*')) {
                 stream_.next();
             }
             else {
                 stream_.next();
-                if (stream_.get() == '/') {
+                if (unlikely(stream_.get() == '/')) {
                     stream_.next();
                     // Find the end of block comment.
                     is_completed = true;
@@ -1028,7 +1028,7 @@ Parse_Exit:
     bool parseComment(TokenInfo & ti, Error & ec) {
         bool is_comments;
         char ch = stream_.get();
-        if (ch == ';' || ch == '/') {
+        if (likely(ch == ';' || ch == '/')) {
             // Line comment
             stream_.next();
             bool is_completed = skipLineComment();
@@ -1039,7 +1039,7 @@ Parse_Exit:
             ti.setToken(Token::LineComment);
             is_comments = true;
         }
-        else if (ch == '*') {
+        else if (likely(ch == '*')) {
             // Block comment
             stream_.next();
             bool is_completed = skipBlockComment();
@@ -1987,17 +1987,150 @@ ParseStringSection_Entry:
         return ec;
     }
 
-    Error handleScriptKeyword(const Keyword & keyword) {
+    Error parseImport() {
         Error ec;
         return ec;
     }
 
-    // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Interface |
+    Error parseUsing() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseNameSpace() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseTypeDef() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseClass() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseStruct() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInterface() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseEnum() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseTemplate() {
+        Error ec;
+        return ec;
+    }
+
+    Error handleScriptKeyword(const Keyword & keyword) {
+        Error ec;
+        switch (keyword.token()) {
+            case Token::Import:
+                {
+                    skipWhiteSpaces();
+
+                    // import std::vector;
+                    ec = parseImport();
+                }
+                break;
+
+            case Token::Using:
+                {
+                    skipWhiteSpaces();
+
+                    // using std::map;
+                    // using namespace std;
+                    // using xxxx = std::map;
+                    ec = parseUsing();
+                }
+                break;
+
+            case Token::NameSpace:
+                {
+                    skipWhiteSpaces();
+
+                    // namespace abcd {};
+                    ec = parseNameSpace();
+                }
+                break;
+
+            case Token::TypeDef:
+                {
+                    skipWhiteSpaces();
+
+                    // typedef int int32_t;
+                    ec = parseTypeDef();
+                }
+                break;
+
+            case Token::Class:
+                {
+                    skipWhiteSpaces();
+
+                    // class abcd {};
+                    ec = parseClass();
+                }
+                break;
+
+            case Token::Struct:
+                {
+                    skipWhiteSpaces();
+
+                    // struct abcd {};
+                    ec = parseStruct();
+                }
+                break;
+
+            case Token::Interface:
+                {
+                    skipWhiteSpaces();
+
+                    // interface abcd {};
+                    ec = parseInterface();
+                }
+                break;
+
+            case Token::Enum:
+                {
+                    skipWhiteSpaces();
+
+                    // enum abcd {};
+                    ec = parseEnum();
+                }
+                break;
+
+            case Token::Template:
+                {
+                    skipWhiteSpaces();
+
+                    // template <typename T> abcd {};
+                    ec = parseTemplate();
+                }
+                break;
+
+            default:
+                break;
+        }
+        return ec;
+    }
+
+    // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Enum | Interface |
     //                  Template | Preprocessing | Comment | Variable | Function | FunctionDeclaration |
     //                  ';' }
-    Error parseScript(bool inBlock) {
+    Error parseScript(bool inBlock = false) {
         Error ec;
         StreamMarker marker(stream_, false);
+        TokenInfo ti;
 
         do {
             skipWhiteSpaces();
@@ -2018,23 +2151,55 @@ ParseStringSection_Entry:
 
                 const std::string & identName = identInfo.name();
 
-                KeywordMapping & keyMapping = Global::getKeywordMapping();
-                assert(keyMapping.inited());
-                KeywordMapping::iterator iter = keyMapping.find(identName);
-                if (iter != keyMapping.end()) {
-                    const Keyword & keyword = iter->second;
-                    if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
-                        // It's a function or identifier declare.
-                        ec = parseIdentifierDeclare(keyword, identInfo);
-                    }
-                    else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
-                        // It's a keyword
-                        ec = handleScriptKeyword(keyword);
-                    }
+                const Keyword & keyword = identInfo.getKeyword();
+                if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
+                    // It's a function or identifier declare.
+                    ec = parseIdentifierDeclare(keyword, identInfo);
+                }
+                else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                    // It's a keyword
+                    ec = handleScriptKeyword(keyword);
+                }
+                else if (likely(keyword.id() == Keyword::NotFound)) {
+                    // Not found
+                }
+                else {
+                    // Error
                 }
             }
+            else if (likely(ch == '.')) {
+                // Section statement
+                stream_.next();
+
+                IdentInfo identInfo;
+                parseIdentifier(identInfo);
+
+                if (likely(identInfo.length() > 0)) {
+                    const Keyword & keyword = identInfo.getKeyword();
+                    ec = handleSectionStatement(keyword.token(), ti);
+                }
+            }
+            else if (likely(ch == '/')) {
+                // Comment statement
+                stream_.next();
+
+                bool is_comment = parseComment(ti, ec);
+            }
+            else if (likely(ch == '#')) {
+                // Preprocessing statement
+                stream_.next();
+            }
+            else if (likely(ch == ';')) {
+                // Semicolon
+                stream_.next();
+            }
+            else if (likely(ch == '\0' || !stream_.has_next())) {
+                // Eof
+                break;
+            }
             else {
-                //
+                // Error
+                break;
             }
 
             if (ec.isError()) {

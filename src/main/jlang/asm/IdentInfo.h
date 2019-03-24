@@ -12,6 +12,7 @@
 
 #include "jlang/basic/stddef.h"
 #include "jlang/asm/Token.h"
+#include "jlang/asm/Keyword.h"
 #include "jlang/stream/StreamMarker.h"
 
 namespace jlang {
@@ -97,6 +98,32 @@ public:
         this->name_.swap(src.name_);
         std::swap(this->start_, src.start_);
         std::swap(this->length_, src.length_);
+    }
+
+    Keyword & getKeyword() {
+        KeywordMapping & keyMapping = Global::getKeywordMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
+    }
+
+    const Keyword & getKeyword() const {
+        KeywordMapping & keyMapping = Global::getKeywordMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            const Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
     }
 
     void makeIdent(const StreamMarker & marker) {
