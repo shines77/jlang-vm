@@ -198,23 +198,27 @@ private:
 #endif
 
 public:
-    StreamMarker(StringStream & steam)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)), marker_(nullptr), marked_(false) {
+    StreamMarker(StringStream & steam, bool marked = true)
+        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+          marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
-    StreamMarker(InputStringStream & steam)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)), marker_(nullptr), marked_(false) {
+    StreamMarker(InputStringStream & steam, bool marked = true)
+        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+          marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
-    StreamMarker(OutputStringStream & steam)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)), marker_(nullptr), marked_(false) {
+    StreamMarker(OutputStringStream & steam, bool marked = true)
+        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+          marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
-    StreamMarker(MemoryStream & steam)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)), marker_(nullptr), marked_(false) {
+    StreamMarker(MemoryStream & steam, bool marked = true)
+        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+          marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
     ~StreamMarker() {}

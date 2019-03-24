@@ -21,7 +21,9 @@ namespace jasm {
 
 class Token : public Comparatorable<Token>,
               public Comparatorable<int32_t>,
-              public Comparatorable<int64_t> {
+              public Comparatorable<int64_t>,
+              public Comparatorable<uint32_t>,
+              public Comparatorable<uint64_t> {
 public:
     #define TOKEN_DEF(token)                                token,
     #define KEYWORD_DEF(token, keywordId, keyword, kind)    token,
@@ -47,6 +49,9 @@ public:
     Token(int16_t token) : token_(static_cast<Type>(token)) {}
     Token(int32_t token) : token_(static_cast<Type>(token)) {}
     Token(int64_t token) : token_(static_cast<Type>(token)) {}
+    Token(uint16_t token) : token_(static_cast<Type>(token)) {}
+    Token(uint32_t token) : token_(static_cast<Type>(token)) {}
+    Token(uint64_t token) : token_(static_cast<Type>(token)) {}
     Token(const Token & src) : token_(src.token_) {}
     Token(Token && src) : token_(src.token_) {}
     ~Token() {}
@@ -71,23 +76,44 @@ public:
         return *this;
     }
 
+    Token & operator = (uint16_t rhs) {
+        this->set(rhs);
+        return *this;
+    }
+
+    Token & operator = (uint32_t rhs) {
+        this->set(rhs);
+        return *this;
+    }
+
+    Token & operator = (uint64_t rhs) {
+        this->set(rhs);
+        return *this;
+    }
+
     Type get() const { return this->token_; }
 
-    void set(Type token)     { this->token_ = token; }
+    void set(Type token) { this->token_ = token; }
 
-    void set(int16_t token)  { this->token_ = (Type)token; }
-    void set(int32_t token)  { this->token_ = (Type)token; }
-    void set(int64_t token)  { this->token_ = (Type)token; }
+    void set(int16_t token)   { this->token_ = static_cast<Type>(token); }
+    void set(int32_t token)   { this->token_ = static_cast<Type>(token); }
+    void set(int64_t token)   { this->token_ = static_cast<Type>(token); }
+    void set(uint16_t token)  { this->token_ = static_cast<Type>(token); }
+    void set(uint32_t token)  { this->token_ = static_cast<Type>(token); }
+    void set(uint64_t token)  { this->token_ = static_cast<Type>(token); }
 
-    int32_t value() const  { return static_cast<int32_t>(this->token_); }
+    int32_t value() const { return static_cast<int32_t>(this->token_); }
 
     Type type() const { return this->token_; }    
 
     void setType(Type token) { this->token_ = token; }
 
-    void setType(int16_t type) { this->token_ = (Type)type; }
-    void setType(int32_t type) { this->token_ = (Type)type; }
-    void setType(int64_t type) { this->token_ = (Type)type; }
+    void setType(int16_t type)  { this->token_ = static_cast<Type>(type); }
+    void setType(int32_t type)  { this->token_ = static_cast<Type>(type); }
+    void setType(int64_t type)  { this->token_ = static_cast<Type>(type); }
+    void setType(uint16_t type) { this->token_ = static_cast<Type>(type); }
+    void setType(uint32_t type) { this->token_ = static_cast<Type>(type); }
+    void setType(uint64_t type) { this->token_ = static_cast<Type>(type); }
 
     void copy(const Token & src) {
         this->token_ = src.token_;
@@ -96,14 +122,22 @@ public:
     bool isEquals(const Token & value) const override { return (this->token_ == value.token_); }
     bool isEquals(int32_t value) const override       { return (this->token_ == value); }
     bool isEquals(int64_t value) const override       { return (this->token_ == value); }
+    bool isEquals(uint32_t value) const override      { return (this->token_ == static_cast<Type>(value)); }
+    bool isEquals(uint64_t value) const override      { return (this->token_ == static_cast<Type>(value)); }
 
     bool isLessThan(const Token & value) const override { return (this->token_ < value.token_); }
     bool isLessThan(int32_t value) const override       { return (this->token_ < value); }
     bool isLessThan(int64_t value) const override       { return (this->token_ < value); }
+    bool isLessThan(uint32_t value) const override      { return (this->token_ < static_cast<Type>(value)); }
+    bool isLessThan(uint64_t value) const override      { return (this->token_ < static_cast<Type>(value)); }
 
     bool isGreaterThan(const Token & value) const override { return (this->token_ > value.token_); }
     bool isGreaterThan(int32_t value) const override       { return (this->token_ > value); }
     bool isGreaterThan(int64_t value) const override       { return (this->token_ > value); }
+    bool isGreaterThan(uint32_t value) const override      { return (this->token_ > static_cast<Type>(value)); }
+    bool isGreaterThan(uint64_t value) const override      { return (this->token_ > static_cast<Type>(value)); }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     friend bool operator == (const Token & lhs, const Token & rhs) { return lhs.isEquals(rhs);   }
     friend bool operator <  (const Token & lhs, const Token & rhs) { return lhs.isLessThan(rhs); }
@@ -112,6 +146,8 @@ public:
     friend bool operator >  (const Token & lhs, const Token & rhs) { return  (rhs <  lhs); }
     friend bool operator <= (const Token & lhs, const Token & rhs) { return !(lhs >  rhs); }
     friend bool operator >= (const Token & lhs, const Token & rhs) { return !(lhs <  rhs); }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     friend bool operator == (const Token & lhs,       int32_t rhs) { return  lhs.isEquals(rhs); }
     friend bool operator == (      int32_t lhs, const Token & rhs) { return  rhs.isEquals(lhs); }
@@ -142,6 +178,40 @@ public:
     friend bool operator >= (      int32_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
     friend bool operator >= (const Token & lhs,       int64_t rhs) { return  lhs.isLessThan(rhs);    }
     friend bool operator >= (      int64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    friend bool operator == (const Token & lhs,       uint32_t rhs) { return  lhs.isEquals(rhs); }
+    friend bool operator == (      uint32_t lhs, const Token & rhs) { return  rhs.isEquals(lhs); }
+    friend bool operator == (const Token & lhs,       uint64_t rhs) { return  lhs.isEquals(rhs); }
+    friend bool operator == (      uint64_t lhs, const Token & rhs) { return  rhs.isEquals(lhs); }
+
+    friend bool operator != (const Token & lhs,       uint32_t rhs) { return !lhs.isEquals(rhs); }
+    friend bool operator != (      uint32_t lhs, const Token & rhs) { return !rhs.isEquals(lhs); }
+    friend bool operator != (const Token & lhs,       uint64_t rhs) { return !lhs.isEquals(rhs); }
+    friend bool operator != (      uint64_t lhs, const Token & rhs) { return !rhs.isEquals(lhs); }
+
+    friend bool operator <  (const Token & lhs,       uint32_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator <  (      uint32_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+    friend bool operator <  (const Token & lhs,       uint64_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator <  (      uint64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+
+    friend bool operator >  (const Token & lhs,       uint32_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator >  (      uint32_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+    friend bool operator >  (const Token & lhs,       uint64_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator >  (      uint64_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+
+    friend bool operator <= (const Token & lhs,       uint32_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator <= (      uint32_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+    friend bool operator <= (const Token & lhs,       uint64_t rhs) { return  lhs.isGreaterThan(rhs); }
+    friend bool operator <= (      uint64_t lhs, const Token & rhs) { return  rhs.isLessThan(lhs);    }
+
+    friend bool operator >= (const Token & lhs,       uint32_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator >= (      uint32_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+    friend bool operator >= (const Token & lhs,       uint64_t rhs) { return  lhs.isLessThan(rhs);    }
+    friend bool operator >= (      uint64_t lhs, const Token & rhs) { return  rhs.isGreaterThan(lhs); }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     char * c_str() {
         return (char *)Token::format(this->token_);

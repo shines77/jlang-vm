@@ -335,7 +335,6 @@ private:
 public:
     void parseIdentifier(IdentInfo & identInfo) {
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
         assert(marker.length() > 0);
 
@@ -344,7 +343,6 @@ public:
 
     void parseIdentifier(IdentInfo & identInfo, TokenInfo & ti) {
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
         assert(marker.length() > 0);
 
@@ -354,7 +352,7 @@ public:
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo) {
         assert(firstChar == stream_.getu(-1));
-        StreamMarker marker(stream_);
+        StreamMarker marker(stream_, false);
         marker.setmark(-1);
         skipIdentifierBody();
         assert(marker.length() > 0);
@@ -364,7 +362,7 @@ public:
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo, TokenInfo & ti) {
         assert(firstChar == stream_.getu(-1));
-        StreamMarker marker(stream_);
+        StreamMarker marker(stream_, false);
         marker.setmark(-1);
         skipIdentifierBody();
         assert(marker.length() > 0);
@@ -376,7 +374,6 @@ public:
     Error parseIdentifierStrict(IdentInfo & identInfo) {
         Error ec;
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
         assert(marker.length() > 0);
 
@@ -390,7 +387,6 @@ public:
     Error parseIdentifierStrict(IdentInfo & identInfo, TokenInfo & ti) {
         Error ec;
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
         assert(marker.length() > 0);
 
@@ -752,22 +748,20 @@ Parse_Exit:
         if (identInfo.length() > 0) {
             std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
 
-            if (identInfo.length() > 0) {
-                const std::string & identName = identInfo.name();
+            const std::string & identName = identInfo.name();
 
-                KeywordMapping & keyMapping = Global::getKeywordMapping();
-                assert(keyMapping.inited());
-                KeywordMapping::iterator iter = keyMapping.find(identName);
-                if (iter != keyMapping.end()) {
-                    const Keyword & keyword = iter->second;
-                    if (likely((keyword.getKind() & KeywordKind::IsType) != 0)) {
-                        // Function or identifier declare.
-                        ec = parseIdentifierDeclare(keyword, identInfo);
-                    }
-                    else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
-                        // It's a keyword
-                        ec = handleReservedKeyword(keyword);
-                    }
+            KeywordMapping & keyMapping = Global::getKeywordMapping();
+            assert(keyMapping.inited());
+            KeywordMapping::iterator iter = keyMapping.find(identName);
+            if (iter != keyMapping.end()) {
+                const Keyword & keyword = iter->second;
+                if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
+                    // Function or identifier declare.
+                    ec = parseIdentifierDeclare(keyword, identInfo);
+                }
+                else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                    // It's a keyword
+                    ec = handleReservedKeyword(keyword);
                 }
             }
         }
@@ -778,7 +772,6 @@ Parse_Exit:
     Error parseReservedKeyword(TokenInfo & ti) {
         Error ec;
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
         assert(marker.length() > 0);
 
@@ -802,7 +795,6 @@ Parse_Exit:
                     skipWhiteSpace();
 
                     StreamMarker identMarker(stream_);
-                    identMarker.setmark();
                     skipIdentifier();
                     assert(identMarker.length() > 0);
 
@@ -893,7 +885,6 @@ Parse_Exit:
         Error ec;
         Token token = Token::Unknown;
         StreamMarker marker(stream_);
-        marker.setmark();
         skipIdentifier();
 
         IdentInfo identInfo;
@@ -1790,7 +1781,6 @@ Parse_Exit:
         Error ec;
         Token token;
         StreamMarker marker(stream_);
-        marker.setmark();
 
         // It's a radix based number? like "0x", "0o", "0b", "0d" ...
         char ch = stream_.get();
@@ -1994,6 +1984,64 @@ ParseStringSection_Entry:
             }
             break;
         }
+        return ec;
+    }
+
+    Error handleScriptKeyword(const Keyword & keyword) {
+        Error ec;
+        return ec;
+    }
+
+    // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Interface |
+    //                  Template | Preprocessing | Comment | Variable | Function | FunctionDeclaration |
+    //                  ';' }
+    Error parseScript(bool inBlock) {
+        Error ec;
+        StreamMarker marker(stream_, false);
+
+        do {
+            skipWhiteSpaces();
+
+            marker.remark();
+            uint8_t ch = stream_.get();
+            if (likely(Char::isIdentifierFirst(ch))) {
+                stream_.next();
+
+                // Parse identifier body
+                skipIdentifierBody();
+
+                IdentInfo identInfo;
+                identInfo.makeIdent(marker);
+                assert(identInfo.length() > 0);
+
+                std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
+
+                const std::string & identName = identInfo.name();
+
+                KeywordMapping & keyMapping = Global::getKeywordMapping();
+                assert(keyMapping.inited());
+                KeywordMapping::iterator iter = keyMapping.find(identName);
+                if (iter != keyMapping.end()) {
+                    const Keyword & keyword = iter->second;
+                    if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
+                        // It's a function or identifier declare.
+                        ec = parseIdentifierDeclare(keyword, identInfo);
+                    }
+                    else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                        // It's a keyword
+                        ec = handleScriptKeyword(keyword);
+                    }
+                }
+            }
+            else {
+                //
+            }
+
+            if (ec.isError()) {
+                break;
+            }
+        } while (1);
+
         return ec;
     }
 

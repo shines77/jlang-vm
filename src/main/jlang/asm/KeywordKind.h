@@ -55,7 +55,7 @@ public:
         Macro           = 1 << 14,
 
         // Masks
-        IsType          = Pod | PodSign | TypeDef | InnerTypeDef | UserDefine,
+        IsDataType      = Pod | PodSign | TypeDef | InnerTypeDef | UserDefine,
         IsIdentifier    = Default,
         IsSection       = Section,
         IsKeyword       = Keyword | Classes | LogicFlow,

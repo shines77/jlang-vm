@@ -61,19 +61,19 @@ struct KeywordId {
 class Keyword;
 
 struct KeywordInfoDef {
-    uint16_t id;
-    uint16_t token;
+    int32_t  id;
+    int32_t  token;
     uint32_t kind;
-    uint16_t length;
-    char name[64 - sizeof(uint16_t) * 5];   // Alignment for 64 bytes.
+    uint32_t length;
+    char name[64 - sizeof(uint32_t) * 4];   // Alignment for 64 bytes.
 };
 
 class KeywordInfo {
 protected:
-    uint16_t id_;
-    uint16_t token_;
+    int32_t  id_;
+    int32_t  token_;
     uint32_t kind_;
-    uint16_t length_;
+    uint32_t length_;
     std::string name_;
 
 public:
@@ -94,19 +94,19 @@ public:
 
 #define KEYWORD_DEF(token, keywordId, keyword, kind)  \
     { \
-        (uint16_t)KEYWORD_ID(keywordId), \
-        (uint16_t)jasm::Token::token, \
+        (int32_t)KEYWORD_ID(keywordId), \
+        (int32_t)jasm::Token::token, \
         (uint32_t)jasm::KeywordKind::kind, \
-        (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
+        (uint32_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
 
 #define PREPROCESSING_DEF(keyword) \
     { \
-        (uint16_t)PREPROCESSING_ID(keyword), \
-        (uint16_t)jasm::Token::pp_##keyword, \
-        (uint16_t)jasm::KeywordKind::Preprocessing, \
-        (uint16_t)(sizeof(TO_STRING(keyword)) - 1), \
+        (int32_t)PREPROCESSING_ID(keyword), \
+        (int32_t)jasm::Token::pp_##keyword, \
+        (uint32_t)jasm::KeywordKind::Preprocessing, \
+        (uint32_t)(sizeof(TO_STRING(keyword)) - 1), \
         TO_STRING(keyword) \
     },
 
@@ -115,8 +115,8 @@ static const KeywordInfoDef gKeywordList[] = {
     #include "jlang/asm/KeywordDef.h"
 
     {
-        (uint16_t)jasm::KeywordId::LastKeyword,
-        (uint16_t)jasm::Token::Unknown,
+        (int32_t)jasm::KeywordId::LastKeyword,
+        (int32_t)jasm::Token::Unknown,
         (uint32_t)jasm::KeywordKind::Unknown,
         0,
         ""
@@ -227,22 +227,22 @@ public:
     }
 
     Keyword(const KeywordInfoDef & src) {
-        id_ = src.id;
-        kind_ = src.kind;
-        token_ = src.token;
-        length_ = src.length;
-        name_ = src.name;
+        this->id_ = src.id;
+        this->kind_ = src.kind;
+        this->token_ = src.token;
+        this->length_ = src.length;
+        this->name_ = src.name;
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
         hashCode_ = calcHashCode();
 #endif
     }
 
     Keyword(const KeywordInfo & src) {
-        id_ = src.id_;
-        kind_ = src.kind_;
-        token_ = src.token_;
-        length_ = src.length_;
-        name_ = src.name_;
+        this->id_ = src.id_;
+        this->kind_ = src.kind_;
+        this->token_ = src.token_;
+        this->length_ = src.length_;
+        this->name_ = src.name_;
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)
         hashCode_ = calcHashCode();
 #endif
@@ -251,30 +251,37 @@ public:
     ~Keyword() {
     }
 
-    uint32_t length() const { return length_; }
+    uint32_t kind() const { return this->kind_; }
+    int32_t type() const { return this->token_; }
+    uint32_t length() const { return this->length_; }
+    jasm::Token token() const { return jasm::Token(this->token_); }
 
-    char * c_str() { return const_cast<char *>(name_.c_str()); }
-    const char * c_str() const { return name_.c_str(); }
+    jasm::KeywordKind::Type getKind() const { return jasm::KeywordKind::Type(this->kind_); }
+    jasm::Token getToken() const { return jasm::Token(this->token_); }
+    jasm::Token::Type getType() const { return jasm::Token::Type(this->token_); }
 
-    std::string toString() { return this->name_; }
-    const std::string toString() const { return this->name_; }
+    void setKind(uint32_t type) { this->kind_ = type; }
+    void setToken(const jasm::Token & token) { this->token_ = token.value(); }
 
-    const jasm::KeywordKind::Type getKind() const { return jasm::KeywordKind::Type(kind_); }
-    const jasm::Token getToken() const { return jasm::Token(token_); }
-    const jasm::Token::Type getType() const { return jasm::Token::Type(token_); }
+    void setType(int16_t token) { this->token_ = static_cast<int32_t>(token); }
+    void setType(int32_t token) { this->token_ = static_cast<int32_t>(token); }
+    void setType(int64_t token) { this->token_ = static_cast<int32_t>(token); }
+    void setType(jasm::Token::Type token) { this->token_ = static_cast<int32_t>(token); }
 
-    void setKind(uint16_t type) { kind_ = type; }
-    void setToken(const jasm::Token & token) { token_ = token.value(); }
+    std::string & name() { return this->name_; }
+    const std::string & name() const { return this->name_; }
 
-    void setType(int16_t token) { token_ = static_cast<uint16_t>(token); }
-    void setType(int32_t token) { token_ = static_cast<uint16_t>(token); }
-    void setType(int64_t token) { token_ = static_cast<uint16_t>(token); }
-    void setType(jasm::Token::Type token) { token_ = static_cast<uint16_t>(token); }
+    std::string & getName() { return this->name_; }   
+    const std::string & getName() const { return this->name_; }
 
-    const std::string & getName() const { return name_; }
+    void setName(const std::string & name) { this->name_ = name; }
+    void setName(const char * name, size_t length) { this->name_.assign(name, length); }
 
-    void setName(const std::string & name) { name_ = name; }
-    void setName(const char * name, size_t length) { name_.assign(name, length); }
+    char * c_str() { return const_cast<char *>(this->name_.c_str()); }
+    const char * c_str() const { return this->name_.c_str(); }
+
+    std::string & toString() { return this->name_; }
+    const std::string & toString() const { return this->name_; }
 
     const hashcode_type getHashCode() const {
 #if (KEYWORD_HASHCODE_WORDLEN == 32) || (KEYWORD_HASHCODE_WORDLEN == 64)

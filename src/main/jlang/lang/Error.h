@@ -61,8 +61,12 @@ public:
         return (this->ec_ == Type::Success);
     }
 
-    bool hasErrors() const {
+    bool isError() const {
         return (this->ec_ != Type::OK);
+    }
+
+    bool hasErrors() const {
+        return (this->ec_ < Type::OK);
     }
 
     Error & operator = (const Error & src) {

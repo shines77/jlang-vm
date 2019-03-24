@@ -61,7 +61,7 @@ public:
         this->name_ = name;
     }
 
-    Token::Type getToken() const { return this->token_; }
+    Token::Type token() const { return this->token_; }
 
     void setToken(Token::Type type) {
         this->token_ = type;
