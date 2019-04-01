@@ -190,6 +190,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorDef.h">
       <Filter>src\lang</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringScanner.h">
+      <Filter>src\stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

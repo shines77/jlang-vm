@@ -58,6 +58,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamDetail.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamMarker.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamRoot.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringScanner.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringStream.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StopWatch.h" />

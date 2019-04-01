@@ -23,15 +23,12 @@
 #include "jlang/asm/Token.h"
 #include "jlang/asm/TokenInfo.h"
 #include "jlang/asm/IdentInfo.h"
+#include "jlang/stream/StringScanner.h"
+#include "jlang/stream/StringStream.h"
 #include "jlang/stream/StreamMarker.h"
 #include "jlang/jstd/min_max.h"
 #include "jlang/jstd/SmallString.h"
 #include "jlang/support/HashAlgorithm.h"
-
-#define LANG_ASM        0
-#define LANG_CPP        1
-
-#define OBJECT_LANGUAGE LANG_ASM
 
 namespace jlang {
 namespace jasm {
@@ -50,6 +47,7 @@ public:
 
 protected:
     StringStream stream_;
+    StringScanner scanner_;
     std::string filename_;
     Token token_;
     std::string identifier_;
@@ -68,10 +66,12 @@ public:
     Parser & operator = (const Parser & rhs) = delete;
 
     void setStream(StringStream & stream) {
-        stream_.copy_from(stream);
+        stream_.copy(stream);
         stream_.seek(SeekType::End, 0);
         stream_.put_null();
         stream_.reset();
+
+        scanner_.copy(stream);
     }
 
     void setStream(FileStringStream & fileStream) {

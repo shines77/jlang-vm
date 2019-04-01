@@ -38,12 +38,12 @@ public:
     FileStringStream() : loaded_(false) {
     }
     FileStringStream(const std::string & filename,
-               std::ios_base::openmode mode = default_mode, int prot = default_prot)
+                     std::ios_base::openmode mode = default_mode, int prot = default_prot)
         : loaded_(false), filename_(filename) {
         loadFile(filename, mode, prot);
     }
     FileStringStream(const std::string & base_dir, const std::string & filename,
-               std::ios_base::openmode mode = default_mode, int prot = default_prot)
+                     std::ios_base::openmode mode = default_mode, int prot = default_prot)
         : loaded_(false), filename_(base_dir, filename) {
         loadFile(base_dir, filename, mode, prot);
     }

@@ -31,8 +31,31 @@ public:
     StringStream() : root_type() {
     }
 
-    virtual ~StringStream() {
+    StringStream(const StringStream & src) : root_type() {
+        if (this != &src) {
+            this->copy(src.root());
+        }
     }
+
+    StringStream(StringStream && src) : root_type() {
+        if (this != &src) {
+            this->swap(src.root());
+        }
+    }
+
+    virtual ~StringStream() {
+        this->destroy();
+    }
+
+    StringStream & operator = (const StringStream & rhs) {
+        if (this != &rhs) {
+            this->copy(rhs.root());
+        }
+        return *this;
+    }
+
+    StringStream & getStream() { return *this; }
+    const StringStream & getStream() const { return *this; }
 
     //----------------------------------------------------------------------
 
@@ -92,12 +115,6 @@ public:
 #endif
         return this->current_;
     }
-
-private:
-    // NonCopyable
-    StringStream(const StringStream & src) = delete;
-    StringStream(StringStream && src) = delete;
-    StringStream & operator = (const StringStream & rhs) = delete;
 };
 
 } // namespace jlang

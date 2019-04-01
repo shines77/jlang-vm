@@ -27,18 +27,34 @@ namespace jlang {
 
 class StreamRoot {
 protected:
-    char * current_;
-    char * head_;
-    char * tail_;
+    mutable char * current_;
+    mutable char * head_;
+    mutable char * tail_;
 
 public:
     StreamRoot() : current_(nullptr), head_(nullptr), tail_(nullptr) {
         /* Do nothing!! */
     }
 
+    StreamRoot(const StreamRoot & src) {
+        this->copy(src.root());
+    }
+
+    StreamRoot(StreamRoot && src) {
+        this->swap(src.root());
+    }
+
     virtual ~StreamRoot() {
         this->destroy();
     }
+
+    StreamRoot & operator = (const StreamRoot & rhs) {
+        this->copy(rhs.root());
+        return *this;
+    }
+
+    StreamRoot & root() { return *this; }
+    const StreamRoot & root() const { return *this; }
 
 public:
     //----------------------------------------------------------------------
@@ -211,10 +227,13 @@ public:
         ::memset(this->head_, 0, this->sizes());
     }
 
-    bool reserve(size_t size, bool need_clear = false) {
+    bool reserve(size_t size, bool need_init = false) {
         char * new_data = (char *)::malloc(size + 1);
         if (likely(new_data)) {
-            if (unlikely(need_clear && this->head_)) {
+            if (unlikely(need_init)) {
+                ::memset(new_data, 0, size + 1);
+            }
+            if (likely(this->head_)) {
                 ::free(this->head_);
             }
             this->current_ = new_data;
@@ -225,15 +244,12 @@ public:
         return false;
     }
 
-    bool resize(size_t size, bool need_clear = false) {
+    bool resize(size_t size, bool need_init = false) {
         char * new_data = (char *)::realloc(this->head_, size + 1);
         if (likely(new_data)) {
-            if (unlikely(need_clear)) {
+            if (unlikely(need_init)) {
                 if (likely(size > this->sizes())) {
-                    ::memset(this->head_ + this->sizes(), 0, size - this->sizes() + 1);
-                }
-                else if (likely(new_data != this->head_)) {
-                    ::memset(new_data, 0, size + 1);
+                    ::memset(new_data + this->sizes(), 0, size - this->sizes() + 1);
                 }
             }
             this->current_ = new_data;
@@ -241,7 +257,32 @@ public:
             this->tail_ = new_data + size;
             return true;
         }
-        return false;
+        else {
+            return false;
+        }
+    }
+
+    void copy(const StreamRoot & src) {
+        if (this != &src) {
+            if (src.sizes() > 0) {
+                this->reserve(src.sizes());
+                assert(this->current() != nullptr);
+                assert(src.current() != nullptr);
+                src.seek(SeekType::Begin, 0);
+                ::memcpy(this->current(), src.current(), src.sizes() + 1);
+            }
+            else {
+                this->destroy();
+            }
+        }
+    }
+
+    void swap(StreamRoot & src) {
+        if (this != &src) {
+            std::swap(this->current_, src.current_);
+            std::swap(this->head_, src.head_);
+            std::swap(this->tail_, src.tail_);
+        }
     }
 
     intptr_t copy(std::string & str, intptr_t first_pos, intptr_t last_pos) {
@@ -251,22 +292,8 @@ public:
         return (last_pos - first_pos);
     }
 
-    size_t copy_from(StreamRoot & src) {
-        if (src.sizes() > 0) {
-            this->reserve(src.sizes());
-            assert(this->current() != nullptr);
-            assert(src.current() != nullptr);
-            src.seek(SeekType::Begin, 0);
-            ::memcpy(this->current(), src.current(), src.sizes());
-        }
-        else {
-            this->destroy();
-        }
-        return this->sizes();
-    }
-
     template <int offset = 0>
-    void seek(SeekType::Type type) {
+    void seek(SeekType::Type type) const {
         if (likely(offset == 0)) {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;
@@ -281,7 +308,7 @@ public:
         }
     }
 
-    void seek(SeekType::Type type, int offset = 0) {
+    void seek(SeekType::Type type, int offset = 0) const {
         if (likely(offset == 0)) {
             if (likely(type == SeekType::Begin))
                 this->current_ = this->head_;

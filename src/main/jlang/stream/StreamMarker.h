@@ -10,6 +10,7 @@
 #include "jlang/stream/OutputStringStream.h"
 #include "jlang/stream/StringStream.h"
 #include "jlang/stream/MemoryStream.h"
+#include "jlang/stream/StringScanner.h"
 #include "jlang/support/StringUtils.h"
 
 #include <stddef.h>
@@ -199,28 +200,35 @@ private:
 
 public:
     StreamMarker(StringStream & steam, bool marked = true)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+        : stream_(steam.root()),
           marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
     StreamMarker(InputStringStream & steam, bool marked = true)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+        : stream_(steam.root()),
           marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
     StreamMarker(OutputStringStream & steam, bool marked = true)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+        : stream_(steam.root()),
           marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
 
     StreamMarker(MemoryStream & steam, bool marked = true)
-        : stream_(REFERENCE_CAST_TO(steam, StreamRoot)),
+        : stream_(steam.root()),
           marker_(marked ? steam.current() : nullptr), marked_(marked) {
         /* Do nothing !! */
     }
+
+    StreamMarker(StringScanner & scanner, bool marked = true)
+        : stream_(scanner.getStream().root()),
+          marker_(marked ? scanner.getStream().current() : nullptr), marked_(marked) {
+        /* Do nothing !! */
+    }
+
     ~StreamMarker() {}
 
     StreamRoot & get_stream() { return stream_; }
