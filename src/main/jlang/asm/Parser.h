@@ -46,7 +46,6 @@ public:
     typedef Parser this_type;
 
 protected:
-    StringStream stream_;
     StringScanner scanner_;
     std::string filename_;
     Token token_;
@@ -66,11 +65,6 @@ public:
     Parser & operator = (const Parser & rhs) = delete;
 
     void setStream(StringStream & stream) {
-        stream_.copy(stream);
-        stream_.seek(SeekType::End, 0);
-        stream_.put_null();
-        stream_.reset();
-
         scanner_.copy(stream);
     }
 
@@ -88,262 +82,18 @@ private:
         return HashAlgorithm::getHash(keyword, length);
     }
 
-    /* WhiteSpace */
-
-    bool isWhiteSpace(uint8_t ch) const {
-        return Char::isWhiteSpace(ch);
-    }
-
-    void skipWhiteSpace() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (likely(isWhiteSpace(ch)))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipWhiteSpace_0() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (likely(!isWhiteSpace(ch)))
-                break;
-            else
-                stream_.next();
-        } while (1);
-    }
-
-    void skipWhiteSpace_1() {
-        uint8_t ch = stream_.getu();
-        if (likely(isWhiteSpace(ch))) {
-            stream_.next();
-            // Expect to skip 0 WhiteSpace char.
-            skipWhiteSpace_0();
-        }
-    }
-
-    /* WhiteSpaces */
-
-    bool isWhiteSpaces(uint8_t ch) {
-        return Char::isWhiteSpaces(ch);
-    }
-
-    void skipWhiteSpaces() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (likely(isWhiteSpaces(ch)))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipWhiteSpaces_0() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (likely(!isWhiteSpaces(ch)))
-                break;
-            else
-                stream_.next();
-        } while (1);
-    }
-
-    void skipWhiteSpaces_1() {
-        uint8_t ch = stream_.getu();
-        if (likely(isWhiteSpaces(ch))) {
-            stream_.next();
-            // Expect to skip 0 WhiteSpaces char.
-            skipWhiteSpaces_0();
-        }
-    }
-
-    /* NewLine */
-
-    bool isNewLine(uint8_t ch) {
-        return Char::isNewLine(ch);
-    }
-
-    void skipNewLine() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isNewLine(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipToNewLine() {
-        while (!stream_.is_null()) {
-            uint8_t ch = stream_.getu();
-            if (!isNewLine(ch))
-                stream_.next();
-            else
-                break;
-        }
-    }
-
-    /* Identifier */
-
-    // Identifier first letter: can not be a number, parse priority order: 'abcDEF_'.
-    bool isIdentifierFirst(uint8_t ch) {
-        return Char::isIdentifierFirst(ch);
-    }
-
-    // Check if is identifier first letter and skip to next.
-    bool skipIdentifierFirst() {
-        uint8_t ch = stream_.getu();
-        if (isIdentifierFirst(ch)) {
-            stream_.next();
-            return true;
-        }
-        return false;
-    }
-
-    // Identifier body: include numbers, parse priority order: 'abc789_DEF'.
-    inline bool isIdentifierBody(uint8_t ch) const {
-        return Char::isIdentifierBody(ch);
-    }
-
-    // Skip the identifier body.
-    void skipIdentifierBody() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isIdentifierBody(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    bool isIdentifier(uint8_t ch) {
-        // Identifier first char can not be a number.
-        if (isIdentifierFirst(ch)) {
-            stream_.next();
-            skipIdentifierBody();
-            return true;
-        }
-        return false;
-    }
-
-    void skipIdentifier() { 
-        // Identifier first char can not be a number.
-        uint8_t ch = stream_.getu();
-        if (isIdentifierFirst(ch)) {
-            stream_.next();
-            skipIdentifierBody();
-        }
-    }
-
-    /* Number */
-
-    bool isDigital(uint8_t ch) const {
-        return Char::isDigital(ch);
-    }
-
-    // Starting with numbers: "[0-9]", or ".[0-9]"
-    inline bool isNumber(uint8_t ch) {
-        return (isDigital(ch) || (ch == '.' && stream_.remain() > 1 &&
-                isDigital(stream_.getu(1))));
-    }
-
-    // Skip the numbers.
-    void skipNumbers() {
-        uint8_t ch = stream_.getu();
-        if ((ch == '0' && stream_.get(1) == '.') ||
-            (ch == '.' && isDigital(stream_.get(1)))) {
-            stream_.next(2);
-        }
-
-        do {
-            uint8_t ch = stream_.getu();
-            if (isDigital(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    // Skip the signed numbers.
-    int skipSignedNumbers() {
-        uint8_t ch = stream_.getu();
-        int positive;
-        if (likely(ch != '-')) {
-            if (likely(ch != '+')) {
-                positive = 0;
-            } else {
-                stream_.next();
-                positive = 1;
-            }
-        } else {
-            stream_.next();
-            positive = -1;
-        }
-        skipNumbers();
-        return positive;
-    }
-
-    /* Alphabet */
-
-    inline bool isAlphabet(uint8_t ch) const {
-        return Char::isAlphabet(ch);
-    }
-
-    inline bool isLowerAlphabet(uint8_t ch) const {
-        return Char::isLowerAlphabet(ch);
-    }
-
-    inline bool isUpperAlphabet(uint8_t ch) const {
-        return Char::isUpperAlphabet(ch);
-    }
-
-    void skipAlphabet() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isAlphabet(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipLowerAlphabet() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isLowerAlphabet(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipUpperAlphabet() {
-        do {
-            uint8_t ch = stream_.getu();
-            if (isUpperAlphabet(ch))
-                stream_.next();
-            else
-                break;
-        } while (1);
-    }
-
-    void skipExpression() {
-        skipToNewLine();
-    }
-
 public:
     void parseIdentifier(IdentInfo & identInfo) {
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
     }
 
     void parseIdentifier(IdentInfo & identInfo, TokenInfo & ti) {
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
@@ -351,20 +101,20 @@ public:
     }
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo) {
-        assert(firstChar == stream_.getu(-1));
-        StreamMarker marker(stream_, false);
+        assert(firstChar == scanner_.getu(-1));
+        StreamMarker marker(scanner_, false);
         marker.setmark(-1);
-        skipIdentifierBody();
+        scanner_.skipIdentifierBody();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
     }
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo, TokenInfo & ti) {
-        assert(firstChar == stream_.getu(-1));
-        StreamMarker marker(stream_, false);
+        assert(firstChar == scanner_.getu(-1));
+        StreamMarker marker(scanner_, false);
         marker.setmark(-1);
-        skipIdentifierBody();
+        scanner_.skipIdentifierBody();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
@@ -373,8 +123,8 @@ public:
 
     Error parseIdentifierStrict(IdentInfo & identInfo) {
         Error ec;
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
@@ -386,8 +136,8 @@ public:
 
     Error parseIdentifierStrict(IdentInfo & identInfo, TokenInfo & ti) {
         Error ec;
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
         assert(marker.length() > 0);
 
         identInfo.appendIdent(marker);
@@ -405,80 +155,80 @@ public:
         Error ec;
 
         // Skip the whitespaces at the beginning of the stream.
-        skipWhiteSpaces();
+        scanner_.skipWhiteSpaces();
 
-        uint8_t ch = stream_.getu();
+        uint8_t ch = scanner_.getu();
 
         // Check first non-whitespace char.
         if (likely(Char::isIdentifierFirst(ch))) {  // Identifier?
-            stream_.next();
+            scanner_.next();
 
             IdentInfo identInfo;
             parseIdentifierBody(ch, identInfo);
 
             // Expect to skip N whitespace.
-            skipWhiteSpace();
+            scanner_.skipWhiteSpace();
 
-            ch = stream_.getu();
+            ch = scanner_.getu();
             if (likely(ch == '=')) {
                 // It's a assignment statement.
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == '+')) {
                 // cnt++; or x += 1;
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == '-')) {
                 // cnt--; or x -= 1;
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == '.')) {
                 // object.read();
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == '-')) {
                 // object->read();
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == '(')) {
                 // It's a function call.
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == ':')) {
-                ch = stream_.getu(1);
+                ch = scanner_.getu(1);
                 if (likely(ch == ':')) {
                     // It's a identifier namespace.
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
                 else {
                     // It's a label name.
-                    stream_.next();
+                    scanner_.next();
 
                     // TODO: Append the label name.
                 }
             }
         }
         else if (likely(Char::isWhiteSpace(ch))) {   // WhiteSpace
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(Char::isDigital(ch))) {   // Digital
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '{')) {
             // Scope begin
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '}')) {
             // Scope end
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '+')) {   // ++cnt;
-            stream_.next();
+            scanner_.next();
 
-            ch = stream_.getu();
+            ch = scanner_.getu();
             if (likely(ch == '+')) {
                 // It's a ++cnt;
-                stream_.next();
+                scanner_.next();
             }
             else {
                 // Error
@@ -486,12 +236,12 @@ public:
             }
         }
         else if (likely(ch == '-')) {   // --cnt;
-            stream_.next();
+            scanner_.next();
 
-            ch = stream_.getu();
+            ch = scanner_.getu();
             if (likely(ch == '-')) {
                 // It's a --cnt;
-                stream_.next();
+                scanner_.next();
             }
             else {
                 // Error
@@ -499,36 +249,36 @@ public:
             }
         }
         else if (likely(ch == '.')) {   // Dot
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == ',')) {   // Comma
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '<')) {   // &lt;
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '>')) {   // &gt;
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '=')) {   // EqualSign
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '(')) {   // (
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == ')')) {   // )
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == '?')) {   // Question
-            stream_.next();
+            scanner_.next();
         }
         else if (likely(ch == ';')) {   // Semicolon
-            stream_.next();
+            scanner_.next();
 
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
         }
         else {
-            stream_.next();
+            scanner_.next();
             ec = Error::IllegalStatement;
         }
 
@@ -539,7 +289,7 @@ public:
         Error ec;
 
         do {
-            uint8_t ch = stream_.getu();
+            uint8_t ch = scanner_.getu();
             if (likely(ch != '}')) {
                 ec = parseStatements();
                 if (!ec.isOK())
@@ -547,7 +297,7 @@ public:
             }
             else {
                 // End of function.
-                stream_.next();
+                scanner_.next();
                 break;
             }
         } while (1);
@@ -557,22 +307,22 @@ public:
 
     Error parseFunctionBodyWrapper() {
         Error ec;
-        uint8_t ch = stream_.getu();
+        uint8_t ch = scanner_.getu();
         if (likely(ch == '{')) {
             // It's a function body
-            stream_.next();
+            scanner_.next();
 
             ec = parseFunctionBody();
         }
         else if (likely(ch == ';')) {
             // It's a function declaration.
-            stream_.next();
+            scanner_.next();
 
             // TODO: Append the function declaration.
         }
         else {
             // Error
-            stream_.next();
+            scanner_.next();
             ec = Error::IllegalFunctionBody;
         }
         return ec;
@@ -590,7 +340,7 @@ public:
             parseIdentifier(argType);
             if (likely(argType.length() > 0)) {
                 // Expect to skip one whitespace.
-                skipWhiteSpaces();
+                scanner_.skipWhiteSpaces();
 
                 // Argument name
                 IdentInfo argName;
@@ -603,30 +353,30 @@ public:
                     // Expect to skip 0 whitespace.
                     //skipWhiteSpaces_0();
 
-                    uint8_t ch = stream_.getu();
+                    uint8_t ch = scanner_.getu();
                     if (likely(ch == ',')) {        // Argument delimiter
-                        stream_.next();
+                        scanner_.next();
 
                         // Expect to skip 1 whitespace.
-                        skipWhiteSpaces_1();
+                        scanner_.skipWhiteSpaces_1();
 
                         // Continue to parse next argument
                         continue;
                     }
                     else if (likely(ch == ')')) {   // End of argument list.
-                        stream_.next();
+                        scanner_.next();
 
                         // Expect to skip N whitespace.
-                        skipWhiteSpaces();
+                        scanner_.skipWhiteSpaces();
 
                         ec = parseFunctionBodyWrapper();
                         break;
                     }
                     else if (likely(Char::isWhiteSpaces(ch))) {
-                        stream_.next();
+                        scanner_.next();
 
                         // Maybe have more than 1 WhiteSpaces.
-                        skipWhiteSpaces();
+                        scanner_.skipWhiteSpaces();
                     }
                     else {
                         ec = Error::IllegalArgumentDelimiter;
@@ -655,20 +405,20 @@ public:
 
         if (identName.length() > 0) {
             // Skip whitespaces between identifier name and ['(' or '='].
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
 
-            uint8_t ch = stream_.getu();
+            uint8_t ch = scanner_.getu();
             if (likely(ch == '=')) {
                 // Expression assignment
-                stream_.next();
-                skipWhiteSpaces();
+                scanner_.next();
+                scanner_.skipWhiteSpaces();
 
                 //ec = parseExpression();
             }
             else if (likely(ch == '(')) {
                 // Function argument list
-                stream_.next();
-                skipWhiteSpaces();
+                scanner_.next();
+                scanner_.skipWhiteSpaces();
 
                 ec = parseFunctionArgumentList();
             }
@@ -690,7 +440,7 @@ public:
         if (keyword.getKind() == KeywordKind::PodSign) {
             // If identifier is "signed"/"unsigned", continue parse a POD type.
             signToken = keyword.getToken();
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
 
             IdentInfo podIdentInfo;
             parseIdentifier(podIdentInfo);
@@ -724,7 +474,7 @@ public:
             }
         }
 
-        skipWhiteSpaces();
+        scanner_.skipWhiteSpaces();
 
         // Parse function or identifier declare name
         ec = parseIdentifierDeclareName(identInfo);
@@ -771,8 +521,8 @@ Parse_Exit:
 
     Error parseReservedKeyword(TokenInfo & ti) {
         Error ec;
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
         assert(marker.length() > 0);
 
         IdentInfo keywordInfo;
@@ -792,37 +542,37 @@ Parse_Exit:
                     if (keyword.getKind() != KeywordKind::Pod) {
                         // Parse full type define
                     }
-                    skipWhiteSpace();
+                    scanner_.skipWhiteSpace();
 
-                    StreamMarker identMarker(stream_);
-                    skipIdentifier();
+                    StreamMarker identMarker(scanner_);
+                    scanner_.skipIdentifier();
                     assert(identMarker.length() > 0);
 
                     IdentInfo identInfo;
                     identInfo.makeIdent(identMarker);
 
-                    skipWhiteSpace();
+                    scanner_.skipWhiteSpace();
 
                     //LexerLog::traceTypeDeclare(keyword_start, keyword_end, keyword_name);
 
-                    if (stream_.get() == '(') {
+                    if (scanner_.get() == '(') {
                         // It's a function
                         //LexerLog::traceFunction(identifier_start, identifier_end, identifier_name);
                     }
-                    else if (stream_.get() == ';') {
+                    else if (scanner_.get() == ';') {
                         // It's a type define or others
                         //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
-                        stream_.next();
+                        scanner_.next();
                     }
-                    else if (stream_.get() == ',') {
+                    else if (scanner_.get() == ',') {
                         // It's a type-list define or others list
                         //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
 
                         do {
-                            stream_.next();
-                            skipWhiteSpace();
+                            scanner_.next();
+                            scanner_.skipWhiteSpace();
                             identMarker.remark();
-                            skipIdentifier();
+                            scanner_.skipIdentifier();
                             
                             identInfo.makeIdent(identMarker);
                             if (identInfo.length() <= 0) {
@@ -832,13 +582,13 @@ Parse_Exit:
                             }
                             identInfo.makeIdent(identMarker);
 
-                            skipWhiteSpace();
+                            scanner_.skipWhiteSpace();
                             //LexerLog::traceIdentifier(identifier_start, identifier_end, identifier_name);
-                        } while (stream_.get() == ',');
+                        } while (scanner_.get() == ',');
 
-                        skipWhiteSpace();
-                        if (stream_.get() == ';') {
-                            stream_.next();
+                        scanner_.skipWhiteSpace();
+                        if (scanner_.get() == ';') {
+                            scanner_.next();
                         }
                     }
                     else {
@@ -847,19 +597,19 @@ Parse_Exit:
                 }
                 else if (keyword.getKind() == KeywordKind::UserDefine) {
                     // User define function or variant
-                    skipWhiteSpace();
+                    scanner_.skipWhiteSpace();
                 }
                 else {
                     //LexerLog::traceKeyword(keyword_start, keyword_end, keyword_name);
                 }
             }
             else {
-                skipWhiteSpace();
-                if (stream_.get() == '(') {
+                scanner_.skipWhiteSpace();
+                if (scanner_.get() == '(') {
                     // It's a function call
                     //LexerLog::traceFunction(keyword_start, keyword_end, keyword_name);
 
-                    //stream_.next();
+                    //scanner_.next();
                 }
                 else {
                     // Maybe is a identifier
@@ -875,7 +625,7 @@ Parse_Exit:
     }
 
     bool isPreprocessing() {
-        if (stream_.get() == PREPROCESSING_CHAR)
+        if (scanner_.get() == PREPROCESSING_CHAR)
             return true;
         else
             return false;
@@ -884,8 +634,8 @@ Parse_Exit:
     Error parsePreprocessing(TokenInfo & ti) {
         Error ec;
         Token token = Token::Unknown;
-        StreamMarker marker(stream_);
-        skipIdentifier();
+        StreamMarker marker(scanner_);
+        scanner_.skipIdentifier();
 
         IdentInfo identInfo;
         identInfo.makeIdent(marker);
@@ -982,7 +732,7 @@ Parse_Exit:
 
     bool isComment() const {
         // The comment must be starting with ';' or '/' char.
-        if (stream_.get() == ';' || stream_.get() == '/')
+        if (scanner_.get() == ';' || scanner_.get() == '/')
             return true;
         else
             return false;
@@ -991,12 +741,12 @@ Parse_Exit:
     bool skipLineComment() {
         bool is_completed = false;
         char cur;
-        while (likely((cur = stream_.get()) != '\0')) {
+        while (likely((cur = scanner_.get()) != '\0')) {
             if (likely(cur != '\n' && cur != '\r')) {
-                stream_.next();
+                scanner_.next();
             }
             else {
-                stream_.next();
+                scanner_.next();
                 // Find the end of line comment.
                 is_completed = true;
                 break;
@@ -1008,14 +758,14 @@ Parse_Exit:
     bool skipBlockComment() {
         bool is_completed = false;
         char cur;
-        while (likely((cur = stream_.get()) != '\0')) {
+        while (likely((cur = scanner_.get()) != '\0')) {
             if (likely(cur != '*')) {
-                stream_.next();
+                scanner_.next();
             }
             else {
-                stream_.next();
-                if (unlikely(stream_.get() == '/')) {
-                    stream_.next();
+                scanner_.next();
+                if (unlikely(scanner_.get() == '/')) {
+                    scanner_.next();
                     // Find the end of block comment.
                     is_completed = true;
                     break;
@@ -1027,10 +777,10 @@ Parse_Exit:
 
     bool parseComment(TokenInfo & ti, Error & ec) {
         bool is_comments;
-        char ch = stream_.get();
+        char ch = scanner_.get();
         if (likely(ch == ';' || ch == '/')) {
             // Line comment
-            stream_.next();
+            scanner_.next();
             bool is_completed = skipLineComment();
             if (is_completed)
                 ec = Error::OK;
@@ -1041,7 +791,7 @@ Parse_Exit:
         }
         else if (likely(ch == '*')) {
             // Block comment
-            stream_.next();
+            scanner_.next();
             bool is_completed = skipBlockComment();
             if (is_completed)
                 ec = Error::OK;
@@ -1058,57 +808,57 @@ Parse_Exit:
     }
 
     bool parseNumberSuffix(int & valueType) {
-        int8_t ch = stream_.get();
-        intptr_t remain = stream_.remain();
+        int8_t ch = scanner_.get();
+        intptr_t remain = scanner_.remain();
         valueType = ValueType::Unknown;
         if (ch == 'u' || ch == 'U') {
             // u, ul, ull and U, UL, ULL
             int8_t longChar = ch - 'U' + 'L';
-            if (stream_.get(1) == '6' && stream_.get(2) == '4' && remain >= 3) {
+            if (scanner_.get(1) == '6' && scanner_.get(2) == '4' && remain >= 3) {
                 valueType = ValueType::UInt64;
-                stream_.next(3);
+                scanner_.next(3);
             }
-            else if (stream_.get(1) == longChar && remain >= 2) {
-                if (stream_.get(2) == longChar && remain >= 3) {
+            else if (scanner_.get(1) == longChar && remain >= 2) {
+                if (scanner_.get(2) == longChar && remain >= 3) {
                     valueType = ValueType::UInt64;
-                    stream_.next(3);
+                    scanner_.next(3);
                 }
                 else {
                     valueType = ValueType::UInt32;
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
             }
             else  {
                 valueType = ValueType::UInt32;
-                stream_.next();
+                scanner_.next();
             }
         }
         else if (ch == 'l' || ch == 'L') {
             // l, ll and L, LL
-            if (stream_.get(1) == ch && remain >= 2) {
+            if (scanner_.get(1) == ch && remain >= 2) {
                 valueType = ValueType::Int64;
-                stream_.next(2);
+                scanner_.next(2);
             }
             else {
                 valueType = ValueType::Int32;
-                stream_.next();
+                scanner_.next();
             }
         }
         else if (ch == 'i' || ch == 'I') {
             // i, I, i64, I64
-            if (stream_.get(1) == '6' && stream_.get(2) == '4' && remain >= 3) {
+            if (scanner_.get(1) == '6' && scanner_.get(2) == '4' && remain >= 3) {
                 valueType = ValueType::Int64;
-                stream_.next(3);
+                scanner_.next(3);
             }
             else {
                 valueType = ValueType::Int32;
-                stream_.next();
+                scanner_.next();
             }
         }
         else if (ch == 'f' || ch == 'F') {
             // f, F
             valueType = ValueType::Fp64;
-            stream_.next();
+            scanner_.next();
         }
         return (valueType != ValueType::Unknown);
     }
@@ -1117,11 +867,11 @@ Parse_Exit:
     bool parseRadixNumberImpl(uint64_t & value) {
         bool is_valid;
         value = 0;
-        const char * marker = stream_.current();
+        const char * marker = scanner_.current();
         if (radix == 16) {
             int valueType = ValueType::Unknown;
             char ch;
-            while ((ch = stream_.get()) != '\0') {
+            while ((ch = scanner_.get()) != '\0') {
                 if (ch >= '0' && ch <= '9') {
                     ch -= '0';
                 }
@@ -1135,56 +885,56 @@ Parse_Exit:
                     break;
                 }
                 value = value * radix + ch;
-                stream_.next();
+                scanner_.next();
             }
-            is_valid = (stream_.current() > marker);
+            is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
         }
         else if (radix == 10) {
             int valueType = ValueType::Unknown;
             char ch;
-            while ((ch = stream_.get()) != '\0') {
+            while ((ch = scanner_.get()) != '\0') {
                 if (ch >= '0' && ch <= '9')
                     ch -= '0';
                 else
                     break;
                 value = value * radix + ch;
-                stream_.next();
+                scanner_.next();
             }
-            is_valid = (stream_.current() > marker);
+            is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
         }
         else if (radix == 8) {
             int valueType = ValueType::Unknown;
             char ch;
-            while ((ch = stream_.get()) != '\0') {
+            while ((ch = scanner_.get()) != '\0') {
                 if (ch >= '0' && ch <= '7')
                     ch -= '0';
                 else
                     break;
                 value = value * radix + ch;
-                stream_.next();
+                scanner_.next();
             }
-            is_valid = (stream_.current() > marker);
+            is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
         }
         else if (radix == 2) {
             int valueType = ValueType::Unknown;
             char ch;
-            while ((ch = stream_.get()) != '\0') {
+            while ((ch = scanner_.get()) != '\0') {
                 if (ch >= '0' && ch <= '1')
                     ch -= '0';
                 else
                     break;
                 value = value * radix + ch;
-                stream_.next();
+                scanner_.next();
             }
-            is_valid = (stream_.current() > marker);
+            is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
         }
         else {
             is_valid = false;
@@ -1196,10 +946,10 @@ Parse_Exit:
                                int & radix, uint64_t & number) {
         Error ec;
         bool is_valid;
-        char ch1 = stream_.get(1);
+        char ch1 = scanner_.get(1);
         if (likely(ch1 == 'x' || ch1 == 'X')) {
             radix = 16;
-            stream_.next(2);
+            scanner_.next(2);
             is_valid = parseRadixNumberImpl<16>(number);
             token = Token::HexLiteral;
             if (!is_valid) {
@@ -1208,7 +958,7 @@ Parse_Exit:
         }
         else if (likely(ch1 == 'o' || ch1 == 'O')) {
             radix = 8;
-            stream_.next(2);
+            scanner_.next(2);
             is_valid = parseRadixNumberImpl<8>(number);
             token = Token::OcxLiteral;
             if (!is_valid) {
@@ -1217,7 +967,7 @@ Parse_Exit:
         }
         else if (likely(ch1 == 'b' || ch1 == 'B')) {
             radix = 2;
-            stream_.next(2);
+            scanner_.next(2);
             is_valid = parseRadixNumberImpl<2>(number);
             token = Token::BinaryLiteral;
             if (!is_valid) {
@@ -1226,7 +976,7 @@ Parse_Exit:
         }
         else if (likely(ch1 == 'd' || ch1 == 'D')) {
             radix = 10;
-            stream_.next(2);
+            scanner_.next(2);
             is_valid = parseRadixNumberImpl<10>(number);
             token = Token::DecLiteral;
             if (!is_valid) {
@@ -1267,16 +1017,16 @@ Parse_Exit:
 
         // Search the integer part of floating-point number or integer.
         do {
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch >= '0' && ch <= '9') {
                 // Integer part
                 integer = integer * 10 + ch - '0';
                 integer_len++;
-                stream_.next();
+                scanner_.next();
             }
             else if (ch == '.') {
                 hasDots = true;
-                stream_.next();
+                scanner_.next();
                 break;
             }
             else {
@@ -1287,12 +1037,12 @@ Parse_Exit:
         if (hasDots) {
             // Search the fractional part of floating-point number.
             do {
-                char ch = stream_.get();
+                char ch = scanner_.get();
                 if (ch >= '0' && ch <= '9') {
                     // Fractional part
                     fractional = fractional * 10 + ch - '0';
                     fractional_len++;
-                    stream_.next();
+                    scanner_.next();
                 }
                 else if (ch == '.') {
                     // Found the second decimal point, exit now.
@@ -1310,23 +1060,23 @@ Parse_Exit:
             int exponent_sign = 1;
             unsigned int exponent_num = 0;
             int exponent_cnt = 0;
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch == 'e' || ch == 'E') {
-                ch = stream_.get(1);
+                ch = scanner_.get(1);
                 if (ch == '-') {
                     exponent_sign = -1;
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
                 else if (ch == '+') {
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
 
                 do {
-                    ch = stream_.get();
+                    ch = scanner_.get();
                     if (ch >= '0' && ch <= '9') {
                         exponent_num = exponent_num * 10 + ch - '0';
                         exponent_cnt++;
-                        stream_.next();
+                        scanner_.next();
                     }
                     else {
                         break;
@@ -1363,10 +1113,10 @@ Parse_Exit:
 
         // Is a double-precision floating-point number?
         if (hasDots) {
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch == 'f' || ch == 'F') {
                 isDouble = false;
-                stream_.next();
+                scanner_.next();
             }
         }
 
@@ -1412,12 +1162,12 @@ Parse_Exit:
 
         // Search the fractional part of floating-point number.
         do {
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch >= '0' && ch <= '9') {
                 // Fractional part
                 fractional = fractional * 10 + ch - '0';
                 fractional_len++;
-                stream_.next();
+                scanner_.next();
             }
             else if (ch == '.') {
                 // Found the second decimal point, exit now.
@@ -1434,23 +1184,23 @@ Parse_Exit:
             int exponent_sign = 1;
             unsigned int exponent_num = 0;
             int exponent_cnt = 0;
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch == 'e' || ch == 'E') {
-                ch = stream_.get(1);
+                ch = scanner_.get(1);
                 if (ch == '-') {
                     exponent_sign = -1;
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
                 else if (ch == '+') {
-                    stream_.next(2);
+                    scanner_.next(2);
                 }
 
                 do {
-                    ch = stream_.get();
+                    ch = scanner_.get();
                     if (ch >= '0' && ch <= '9') {
                         exponent_num = exponent_num * 10 + ch - '0';
                         exponent_cnt++;
-                        stream_.next();
+                        scanner_.next();
                     }
                     else {
                         break;
@@ -1488,10 +1238,10 @@ Parse_Exit:
 
         // Is a double-precision floating-point number?
         {
-            char ch = stream_.get();
+            char ch = scanner_.get();
             if (ch == 'f' || ch == 'F') {
                 isDouble = false;
-                stream_.next();
+                scanner_.next();
             }
         }
 
@@ -1639,22 +1389,22 @@ Parse_Exit:
     Error parseSingleCharLiteral(std::string & content, TokenInfo & ti) {
         Error ec;
         unsigned char character;
-        char ch = stream_.get();
+        char ch = scanner_.get();
         if (likely(ch != '\\')) {
             // It's not an non-escaped char
             character = ch;
-            stream_.next();
+            scanner_.next();
         }
         else {
             // It's an non-escaped char
-            stream_.next();
-            character = stream_.get();
-            int skip = getUnescapedChar(stream_, character);
+            scanner_.next();
+            character = scanner_.get();
+            int skip = getUnescapedChar(scanner_, character);
             if (likely(skip > 0)) {
                 std::string escapedChars;
                 getEscapedChars(character, escapedChars);
                 std::cout << ">>> Single character: [UnescapedChar] - [" << escapedChars << "]" << std::endl;
-                stream_.next(skip);
+                scanner_.next(skip);
             }
             else {
                 // Get a unknown unescaped char
@@ -1663,11 +1413,11 @@ Parse_Exit:
             }
         }
 
-        if (likely(stream_.get() == '\'')) {
+        if (likely(scanner_.get() == '\'')) {
             std::string escapedChars;
             getEscapedChars(character, escapedChars);
             std::cout << ">>> Single character: [" << escapedChars << "] (" << (int)character << ")" << std::endl;
-            stream_.next();
+            scanner_.next();
         }
         else {
             // It's a illegal single character format.
@@ -1692,7 +1442,7 @@ Parse_Exit:
         do {
             completed = false;
             char ch;
-            while ((ch = stream_.get()) != '\0') {
+            while ((ch = scanner_.get()) != '\0') {
                 if (likely(ch != '\"')) {
                     unsigned char character;
                     if (likely(ch != '\\')) {
@@ -1700,20 +1450,20 @@ Parse_Exit:
                         character = ch;
                         content.append(1, character);
                         //content.push_back(character);
-                        stream_.next();
+                        scanner_.next();
                     }
                     else {
                         // It's an non-escaped char
-                        stream_.next();
-                        character = stream_.get();
-                        int skip = getUnescapedChar(stream_, character);
+                        scanner_.next();
+                        character = scanner_.get();
+                        int skip = getUnescapedChar(scanner_, character);
                         if (likely(skip > 0)) {
                             std::string escapedChars;
                             getEscapedChars(character, escapedChars);
                             std::cout << ">>> Single character: [UnescapedChar] - [" << escapedChars << "]" << std::endl;
                             content.append(1, character);
                             //content.push_back(character);
-                            stream_.next(skip);
+                            scanner_.next(skip);
                         }
                         else {
                             ec = Error::UnknownUnescapedChar;
@@ -1722,15 +1472,15 @@ Parse_Exit:
                     }
                 }
                 else {
-                    if (unlikely(stream_.get(1) == '\"')) {
+                    if (unlikely(scanner_.get(1) == '\"')) {
                         // It's [""]
                         content.append(1, '\"');
                         //content.push_back('\"');
-                        stream_.next(2);
+                        scanner_.next(2);
                     }
                     else {
                         // It's the end of the normal string literal.
-                        stream_.next();
+                        scanner_.next();
                         multipart_cnt++;
                         completed = true;
                         break;
@@ -1751,15 +1501,15 @@ Parse_Exit:
             }
 
             // Skip the white spaces between the multi-part string literal.
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
 
-            if (likely(stream_.get() != '\"')) {
+            if (likely(scanner_.get() != '\"')) {
                 // It's the end of normal string literal or multi-part string literal.
                 break;
             }
             else {
                 // Find a multi-part string literal entry, skip the '"' char and continue parse.
-                stream_.next();
+                scanner_.next();
             }
         } while (1);
 
@@ -1780,13 +1530,13 @@ Parse_Exit:
     Error parseNumberLiteral(TokenInfo & ti) {
         Error ec;
         Token token;
-        StreamMarker marker(stream_);
+        StreamMarker marker(scanner_);
 
         // It's a radix based number? like "0x", "0o", "0b", "0d" ...
-        char ch = stream_.get();
+        char ch = scanner_.get();
         if (ch == '0') {
-            char ch1 = stream_.get(1);
-            if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
+            char ch1 = scanner_.get(1);
+            if ((ch1 >= 'B' && ch1 <= 'x') && scanner_.remain() > 2) {
                 // Determine the radix for the constant
                 int radix;
                 uint64_t number;
@@ -1814,30 +1564,29 @@ Parse_Exit:
     Error parseLiteral(std::string & content, TokenInfo & token) {
         Error ec;
         
-        uint8_t ch = stream_.getu();
-        if (likely(isNumber(ch))) {
+        if (likely(scanner_.isNumber())) {
             // A integer or a real number.
             // Starting with numbers: "[0-9]", or ".[0-9]"
             return parseNumberLiteral(token);
         }
-        else if (likely(stream_.get() == '\"')) {
+        else if (likely(scanner_.get() == '\"')) {
             // String literal or single char literal
-            stream_.next();
+            scanner_.next();
             return parseStringLiteral(content, token);
         }
-        else if (likely(stream_.get() == '\'')) {
+        else if (likely(scanner_.get() == '\'')) {
             // Single character literal
-            stream_.next();
+            scanner_.next();
             return parseSingleCharLiteral(content, token);
         }
-        else if (likely(stream_.get() == '-')) {
+        else if (likely(scanner_.get() == '-')) {
             // Negative sign
-            stream_.next();
+            scanner_.next();
             return parseStringLiteral(content, token);
         }
-        else if (likely(stream_.get() == '+')) {
+        else if (likely(scanner_.get() == '+')) {
             // Positive sign
-            stream_.next();
+            scanner_.next();
             return parseStringLiteral(content, token);
         }
 
@@ -1870,10 +1619,9 @@ Parse_Exit:
                 std::cout << ">>> Section [.align] begin." << std::endl;
 
                 // Skip the leading whitespace character first.
-                skipWhiteSpace();
+                scanner_.skipWhiteSpace();
 
-                uint8_t ch = stream_.getu();
-                if (likely(isNumber(ch))) {
+                if (likely(scanner_.isNumber())) {
 ParseAlignBytes_Start:
                     uint64_t alignedBytes = 0;
                     ec = parseDecimalNumber(alignedBytes);
@@ -1886,16 +1634,16 @@ ParseAlignBytes_Start:
                         }
                         std::cout << ">>> Section [.align]: alignedBytes = " << newAlignedBytes << " bytes" << std::endl;
                     }
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
                 }
-                else if (likely(isAlphabet(ch))) {
+                else if (likely(scanner_.isAlphabet())) {
                     IdentInfo identInfo;
                     TokenInfo identToken;
                     parseIdentifier(identInfo, identToken);
                     if (identInfo.name() == "default") {   // Setting default align bytes.
-                        skipWhiteSpace();
-                        uint8_t ch = stream_.getu();
-                        if (likely(isNumber(ch))) {
+                        scanner_.skipWhiteSpace();
+                        uint8_t ch = scanner_.getu();
+                        if (likely(scanner_.isNumber())) {
                             goto ParseAlignBytes_Start;
                         }
                         else {
@@ -1912,33 +1660,33 @@ ParseAlignBytes_Start:
         case Token::Strings:
             {
                 // Skip the leading whitespace character first
-                skipWhiteSpace();
+                scanner_.skipWhiteSpace();
 
-                uint8_t ch = stream_.getu();
+                uint8_t ch = scanner_.getu();
                 if (likely(ch == '{')) {
-                    stream_.next();
+                    scanner_.next();
 
                     std::cout << ">>> Section [.strings] begin." << std::endl;
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
 ParseStringSection_Entry:
                     IdentInfo identInfo;
                     ec = parseIdentifierStrict(identInfo, ti);
                     if (ec.isOK()) {
-                        skipWhiteSpace();
+                        scanner_.skipWhiteSpace();
 
-                        ch = stream_.getu();
+                        ch = scanner_.getu();
                         if (likely(ch == '\"')) {
-                            stream_.next();
+                            scanner_.next();
 
                             std::string stringValue;
                             ec = parseStringLiteral(stringValue, ti);
                             if (ec.isOK()) {
-                                skipWhiteSpaces();
+                                scanner_.skipWhiteSpaces();
 
                                 // Parse next string or end of sign '}'.
-                                ch = stream_.getu();
-                                if (likely(isIdentifierFirst(ch))) {
+                                ch = scanner_.getu();
+                                if (likely(scanner_.isIdentifierFirst())) {
                                     // Next string identifier
                                     goto ParseStringSection_Entry;
                                 }
@@ -1972,7 +1720,7 @@ ParseStringSection_Entry:
         case Token::EntryPoint:
             {
                 // Skip the trailing whitespace and newline character
-                skipWhiteSpaces();
+                scanner_.skipWhiteSpaces();
             }
             break;
 
@@ -2037,7 +1785,7 @@ ParseStringSection_Entry:
         switch (keyword.token()) {
             case Token::Import:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // import std::vector;
                     ec = parseImport();
@@ -2046,7 +1794,7 @@ ParseStringSection_Entry:
 
             case Token::Using:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // using std::map;
                     // using namespace std;
@@ -2057,7 +1805,7 @@ ParseStringSection_Entry:
 
             case Token::NameSpace:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // namespace abcd {};
                     ec = parseNameSpace();
@@ -2066,7 +1814,7 @@ ParseStringSection_Entry:
 
             case Token::TypeDef:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // typedef int int32_t;
                     ec = parseTypeDef();
@@ -2075,7 +1823,7 @@ ParseStringSection_Entry:
 
             case Token::Class:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // class abcd {};
                     ec = parseClass();
@@ -2084,7 +1832,7 @@ ParseStringSection_Entry:
 
             case Token::Struct:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // struct abcd {};
                     ec = parseStruct();
@@ -2093,7 +1841,7 @@ ParseStringSection_Entry:
 
             case Token::Interface:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // interface abcd {};
                     ec = parseInterface();
@@ -2102,7 +1850,7 @@ ParseStringSection_Entry:
 
             case Token::Enum:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // enum abcd {};
                     ec = parseEnum();
@@ -2111,7 +1859,7 @@ ParseStringSection_Entry:
 
             case Token::Template:
                 {
-                    skipWhiteSpaces();
+                    scanner_.skipWhiteSpaces();
 
                     // template <typename T> abcd {};
                     ec = parseTemplate();
@@ -2129,19 +1877,19 @@ ParseStringSection_Entry:
     //                  ';' }
     Error parseScript(bool inBlock = false) {
         Error ec;
-        StreamMarker marker(stream_, false);
+        StreamMarker marker(scanner_, false);
         TokenInfo ti;
 
         do {
-            skipWhiteSpaces();
+            scanner_.skipWhiteSpaces();
 
             marker.remark();
-            uint8_t ch = stream_.get();
+            uint8_t ch = scanner_.get();
             if (likely(Char::isIdentifierFirst(ch))) {
-                stream_.next();
+                scanner_.next();
 
                 // Parse identifier body
-                skipIdentifierBody();
+                scanner_.skipIdentifierBody();
 
                 IdentInfo identInfo;
                 identInfo.makeIdent(marker);
@@ -2169,7 +1917,7 @@ ParseStringSection_Entry:
             }
             else if (likely(ch == '.')) {
                 // Section statement
-                stream_.next();
+                scanner_.next();
 
                 IdentInfo identInfo;
                 parseIdentifier(identInfo);
@@ -2181,19 +1929,19 @@ ParseStringSection_Entry:
             }
             else if (likely(ch == '/')) {
                 // Comment statement
-                stream_.next();
+                scanner_.next();
 
                 bool is_comment = parseComment(ti, ec);
             }
             else if (likely(ch == '#')) {
                 // Preprocessing statement
-                stream_.next();
+                scanner_.next();
             }
             else if (likely(ch == ';')) {
                 // Semicolon
-                stream_.next();
+                scanner_.next();
             }
-            else if (likely(ch == '\0' || !stream_.has_next())) {
+            else if (likely(ch == '\0' || !scanner_.has_next())) {
                 // Eof
                 break;
             }
@@ -2214,26 +1962,26 @@ ParseStringSection_Entry:
     bool nextToken(TokenInfo & ti) {
         bool success = true;
         Error ec;
-        StreamMarker marker(stream_);
+        StreamMarker marker(scanner_);
 
-        // We needn't use [ !stream_.is_null() ].
-        if (likely(stream_.has_next())) {
+        // We needn't use [ !scanner_.is_null() ].
+        if (likely(scanner_.has_next())) {
 NextToken_Continue:
             Token token;
             marker.remark();
-            uint8_t ch = stream_.getu();
+            uint8_t ch = scanner_.getu();
             switch (ch) {
             case '\0':
                 // Set 'Eof' token's position first.
-                ti.setToken(Token::Eof, stream_.tell(), 0);
+                ti.setToken(Token::Eof, scanner_.tell(), 0);
                 return false;
 
             case '\t':  // Whitespace chars and next line
             case '\v':
             case '\f':
             case ' ':
-                stream_.next();
-                skipWhiteSpace();
+                scanner_.next();
+                scanner_.skipWhiteSpace();
                 if ((Property & kSkipWhiteSpace) != 0)
                     goto NextToken_Continue;
                 else
@@ -2242,7 +1990,7 @@ NextToken_Continue:
 
             case '\n':
             case '\r':
-                stream_.next();
+                scanner_.next();
                 skipNewLine();
                 if ((Property & kSkipWhiteSpace) != 0)
                     goto NextToken_Continue;
@@ -2251,7 +1999,7 @@ NextToken_Continue:
                 break;
 
             case '#':   // Preprocessing statement, example: #include <stdio.h>
-                stream_.next();
+                scanner_.next();
                 ec = parsePreprocessing(ti);
                 if (unlikely(!ec.isOK())) {
                     success = false;
@@ -2260,22 +2008,22 @@ NextToken_Continue:
 
             case '/':   // Line comment or block comment
                 {
-                    stream_.next();
+                    scanner_.next();
                     bool is_comments = parseComment(ti, ec);
                     if (likely(is_comments)) {
                         if (!ec.isOK()) {
-                            //getEngine().diagnosisComment(ec, stream_, token);
+                            //getEngine().diagnosisComment(ec, scanner_, token);
                             return false;
                         }
                     }
                     else {
-                        if (likely(stream_.get() != '=')) {
+                        if (likely(scanner_.get() != '=')) {
                             // Div token, operator: /
                             ti.setToken(Token::Div);
                         }
                         else {
                             // DivEqual token, operator: /=
-                            stream_.next();
+                            scanner_.next();
                             ti.setToken(Token::DivEqual, marker);
                         }
                     }
@@ -2310,8 +2058,8 @@ NextToken_Continue:
 
             case '0':
                 {
-                    char ch1 = stream_.get(1);
-                    if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
+                    char ch1 = scanner_.get(1);
+                    if ((ch1 >= 'B' && ch1 <= 'x') && scanner_.remain() > 2) {
                         // Determine the radix for the constant
                         int radix;
                         uint64_t number;
@@ -2333,7 +2081,7 @@ NextToken_Continue:
                         return true;
                     }
 
-                    stream_.next();
+                    scanner_.next();
                     ti.setToken(Token::IntegerLiteral, marker);
                 }
                 break;
@@ -2356,9 +2104,9 @@ NextToken_Continue:
                 break;
 
             case '.':
-                stream_.next();
+                scanner_.next();
                 {
-                    ch = stream_.get();
+                    ch = scanner_.get();
                     if (isAlphabet(ch)) {
                         // It's a section declare
                         IdentInfo sectionInfo;
@@ -2392,37 +2140,37 @@ NextToken_Continue:
                 break;
 
             case '!':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // BoolNot token, operator: !
                     ti.setToken(Token::BoolNot, marker);
                 }
                 else {
                     // operator: !=
-                    stream_.next();
+                    scanner_.next();
                     // NotEqual token
                     ti.setToken(Token::NotEqual, marker);
                 }
                 break;
 
             case '%':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Mod token, operator: %
                     ti.setToken(Token::Mod, marker);
                 }
                 else {
                     // operator: %=
-                    stream_.next();
+                    scanner_.next();
                     // ModEqual token
                     ti.setToken(Token::ModEqual, marker);
                 }
                 break;
 
             case '&':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() != '&') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() != '&') {
                         // BitAnd token, operator: &
                         ti.setToken(Token::BitAnd, marker);
                     }
@@ -2433,30 +2181,30 @@ NextToken_Continue:
                 }
                 else {
                     // operator: &=
-                    stream_.next();
+                    scanner_.next();
                     // AndEqual token
                     ti.setToken(Token::AndEqual, marker);
                 }
                 break;
 
             case '*':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Multiply token, operator: *
                     ti.setToken(Token::Multiply, marker);
                 }
                 else {
                     // operator: *=
-                    stream_.next();
+                    scanner_.next();
                     // MultiplyEqual token
                     ti.setToken(Token::MultiplyEqual, marker);
                 }
                 break;
 
             case '+':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() != '+') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() != '+') {
                         // Plus token, operator: +
                         ti.setToken(Token::Add, marker);
                     }
@@ -2467,20 +2215,20 @@ NextToken_Continue:
                 }
                 else {
                     // operator: +=
-                    stream_.next();
+                    scanner_.next();
                     // PlusEqual token
                     ti.setToken(Token::AddEqual, marker);
                 }
                 break;
 
             case '-':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() == '>') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() == '>') {
                         // Pointer token, operator: ->
                         ti.setToken(Token::Pointer, marker);
                     }
-                    else if (stream_.get() != '-') {
+                    else if (scanner_.get() != '-') {
                         // Minus token, operator: -
                         ti.setToken(Token::Sub, marker);
                     }
@@ -2491,17 +2239,17 @@ NextToken_Continue:
                 }
                 else {
                     // operator: -=
-                    stream_.next();
+                    scanner_.next();
                     // MinusEqual token
                     ti.setToken(Token::SubEqual, marker);
                 }
                 break;
 
             case ':':
-                stream_.next();
-                if (stream_.get() == ':') {
+                scanner_.next();
+                if (scanner_.get() == ':') {
                     // operator: ::
-                    stream_.next();
+                    scanner_.next();
                     // Scope token
                     ti.setToken(Token::Scope, marker);
                 }
@@ -2512,29 +2260,29 @@ NextToken_Continue:
                 break;
 
             case '=':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Assignment token, operator: =
                     ti.setToken(Token::Assignment, marker);
                 }
                 else {
                     // operator: ==
-                    stream_.next();
+                    scanner_.next();
                     // Equal token
                     ti.setToken(Token::Equal, marker);
                 }
                 break;
 
             case '?':
-                stream_.next();
+                scanner_.next();
                 // Question token, operator: ?
                 ti.setToken(Token::Question, marker);
                 break;
 
             case '^':
-                stream_.next();
-                if (stream_.get() != '^') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '^') {
+                    if (scanner_.get() != '=') {
                         // BitXor token, operator: ^
                         ti.setToken(Token::BitXor, marker);
                     }
@@ -2545,16 +2293,16 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ^^
-                    stream_.next();
+                    scanner_.next();
                     // BoolXor token
                     ti.setToken(Token::BoolXor, marker);
                 }
                 break;
 
             case '|':
-                stream_.next();
-                if (stream_.get() != '|') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '|') {
+                    if (scanner_.get() != '=') {
                         // BitOr token, operator: |
                         ti.setToken(Token::BitOr, marker);
                     }
@@ -2565,16 +2313,16 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ||
-                    stream_.next();
+                    scanner_.next();
                     // BoolOr token
                     ti.setToken(Token::BoolOr, marker);
                 }
                 break;
 
             case '~':
-                stream_.next();
-                if (stream_.get() != '~') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '~') {
+                    if (scanner_.get() != '=') {
                         // BitNot token, operator: ~
                         ti.setToken(Token::BitNot);
                     }
@@ -2585,7 +2333,7 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ~~
-                    stream_.next();
+                    scanner_.next();
                     // BoolNot token
                     ti.setToken(Token::BoolNot, marker);
                 }
@@ -2593,53 +2341,53 @@ NextToken_Continue:
 
             case '@':
                 // Is a annotation?
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Handle, marker);
                 break;
 
             case ',':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Comma, marker);
                 break;
 
             case ';':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Semicolon, marker);
                 break;
 
             case '(':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LParen, marker);
                 break;
 
             case ')':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RParen, marker);
                 break;
 
             case '[':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LBracket, marker);
                 break;
 
             case ']':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RBracket, marker);
                 break;
 
             case '{':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LBrace, marker);
                 break;
 
             case '}':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RBrace, marker);
                 break;
 
             case '\'':  // Single character literal
                 {
-                    stream_.next();
+                    scanner_.next();
                     std::string singelChar;
                     ec = parseSingleCharLiteral(singelChar, ti);
                     if (unlikely(!ec.isOK())) {
@@ -2650,7 +2398,7 @@ NextToken_Continue:
 
             case '\"':  // String literal or single char literal
                 {
-                    stream_.next();
+                    scanner_.next();
                     std::string stringLiteral;
                     ec = parseStringLiteral(stringLiteral, ti);
                     if (unlikely(!ec.isOK())) {
@@ -2663,13 +2411,13 @@ NextToken_Continue:
                 {
                     ec = parseReservedKeyword(ti);
                     if (ec.isOK()) {
-                        //stream_.next();
+                        //scanner_.next();
                         ti.setToken(Token::Keyword);
                     }
                     else {
                         ti.setToken(Token::Unrecognized);
                         if (marker.length() <= 0)
-                            stream_.next();
+                            scanner_.next();
                     }
                 }
                 break;
@@ -2680,8 +2428,8 @@ NextToken_Continue:
             
         }
 
-        if (likely(!stream_.has_next())) {
-            ti.setToken(Token::Eof, stream_.tell(), 0);
+        if (likely(!scanner_.has_next())) {
+            ti.setToken(Token::Eof, scanner_.tell(), 0);
         }
 
         return true;
@@ -2689,61 +2437,61 @@ NextToken_Continue:
 
     bool parseToken(TokenInfo & ti, Error & ec_) {
         Error ec = Error::OK;
-        StreamMarker marker(stream_);
-        // We needn't use [ !stream_.is_null() ].
-        while (likely(stream_.has_next())) {
+        StreamMarker marker(scanner_);
+        // We needn't use [ !scanner_.is_null() ].
+        while (likely(scanner_.has_next())) {
             marker.remark();
             Token token;
-            uint8_t ch = stream_.getu();
+            uint8_t ch = scanner_.getu();
             switch (ch) {
             case '\0':
                 // Set 'Eof' token's position first.
-                ti.setToken(Token::Eof, stream_.tell(), 0);
-                stream_.next();
+                ti.setToken(Token::Eof, scanner_.tell(), 0);
+                scanner_.next();
                 return false;
 
             case '\t':  // Whitespace chars and next line
             case '\v':
             case '\f':
             case ' ':
-                stream_.next();
-                skipWhiteSpace();
+                scanner_.next();
+                scanner_.skipWhiteSpace();
                 ti.setToken(Token::WhiteSpace);
                 break;
 
             case '\n':
             case '\r':
-                stream_.next();
-                skipNewLine();
+                scanner_.next();
+                scanner_.skipNewLine();
                 ti.setToken(Token::NewLine);
                 break;
 
             case '#':   // Preprocessing statement, example: #include <stdio.h>
-                stream_.next();
+                scanner_.next();
                 ec = parsePreprocessing(ti);
                 if (unlikely(!ec.isOK())) {
-                    stream_.next();
+                    scanner_.next();
                 }
                 break;
 
             case '/':   // Line comment or block comment
                 {
-                    stream_.next();
+                    scanner_.next();
                     bool is_comments = parseComment(ti, ec);
                     if (unlikely(!is_comments)) {
-                        if (stream_.get(0) != '=') {
+                        if (scanner_.get(0) != '=') {
                             // Div token, operator: /
                             ti.setToken(Token::Div);
                         }
                         else {
                             // DivEqual token, operator: /=
-                            stream_.next();
+                            scanner_.next();
                             ti.setToken(Token::DivEqual);
                         }
                     }
                     else {
                         if (!ec.isOK()) {
-                            //this->getEngine().diagnosisComment(ec, stream_, token);
+                            //this->getEngine().diagnosisComment(ec, scanner_, token);
                             return false;
                         }
                     }
@@ -2767,15 +2515,15 @@ NextToken_Continue:
                     // Identifier or keyword
                     ec = parseIdentifierOrKeyword(ti);
                     if (unlikely(!ec.isOK())) {
-                        stream_.next();
+                        scanner_.next();
                     }
                 }
                 break;
 
             case '0':
                 {
-                    char ch1 = stream_.get(1);
-                    if ((ch1 >= 'B' && ch1 <= 'x') && stream_.remain() > 2) {
+                    char ch1 = scanner_.get(1);
+                    if ((ch1 >= 'B' && ch1 <= 'x') && scanner_.remain() > 2) {
                         // Determine the radix for the constant
                         int radix;
                         uint64_t number;
@@ -2797,7 +2545,7 @@ NextToken_Continue:
                         return true;
                     }
 
-                    stream_.next();
+                    scanner_.next();
                     ti.setToken(Token::IntegerLiteral);
                 }
                 break;
@@ -2820,10 +2568,9 @@ NextToken_Continue:
                 break;
 
             case '.':
-                stream_.next();
+                scanner_.next();
                 {
-                    ch = stream_.get();
-                    if (isAlphabet(ch)) {
+                    if (scanner_.isAlphabet()) {
                         // It's a section declare
                         IdentInfo sectionInfo;
                         sectionInfo.setName(".");
@@ -2839,7 +2586,7 @@ NextToken_Continue:
                             }
                         }
                     }
-                    else if (isDigital(ch)) {
+                    else if (scanner_.isDigital()) {
                         // It's a float or double number.
                         uint64_t fractional;
                         int exponent;
@@ -2856,37 +2603,37 @@ NextToken_Continue:
                 break;
 
             case '!':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // BoolNot token, operator: !
                     ti.setToken(Token::BoolNot);
                 }
                 else {
                     // operator: !=
-                    stream_.next();
+                    scanner_.next();
                     // NotEqual token
                     ti.setToken(Token::NotEqual);
                 }
                 break;
 
             case '%':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Mod token, operator: %
                     ti.setToken(Token::Mod);
                 }
                 else {
                     // operator: %=
-                    stream_.next();
+                    scanner_.next();
                     // ModEqual token
                     ti.setToken(Token::ModEqual);
                 }
                 break;
 
             case '&':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() != '&') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() != '&') {
                         // BitAnd token, operator: &
                         ti.setToken(Token::BitAnd);
                     }
@@ -2897,30 +2644,30 @@ NextToken_Continue:
                 }
                 else {
                     // operator: &=
-                    stream_.next();
+                    scanner_.next();
                     // AndEqual token
                     ti.setToken(Token::AndEqual);
                 }
                 break;
 
             case '*':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Multiply token, operator: *
                     ti.setToken(Token::Multiply);
                 }
                 else {
                     // operator: *=
-                    stream_.next();
+                    scanner_.next();
                     // MultiplyEqual token
                     ti.setToken(Token::MultiplyEqual);
                 }
                 break;
 
             case '+':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() != '+') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() != '+') {
                         // Plus token, operator: +
                         ti.setToken(Token::Add);
                     }
@@ -2931,20 +2678,20 @@ NextToken_Continue:
                 }
                 else {
                     // operator: +=
-                    stream_.next();
+                    scanner_.next();
                     // PlusEqual token
                     ti.setToken(Token::AddEqual);
                 }
                 break;
 
             case '-':
-                stream_.next();
-                if (stream_.get() != '=') {
-                    if (stream_.get() == '>') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
+                    if (scanner_.get() == '>') {
                         // Pointer token, operator: ->
                         ti.setToken(Token::Pointer);
                     }
-                    else if (stream_.get() != '-') {
+                    else if (scanner_.get() != '-') {
                         // Minus token, operator: -
                         ti.setToken(Token::Sub);
                     }
@@ -2955,17 +2702,17 @@ NextToken_Continue:
                 }
                 else {
                     // operator: -=
-                    stream_.next();
+                    scanner_.next();
                     // MinusEqual token
                     ti.setToken(Token::SubEqual);
                 }
                 break;
 
             case ':':
-                stream_.next();
-                if (stream_.get() == ':') {
+                scanner_.next();
+                if (scanner_.get() == ':') {
                     // operator: ::
-                    stream_.next();
+                    scanner_.next();
                     // Scope token
                     ti.setToken(Token::Scope);
                 }
@@ -2976,29 +2723,29 @@ NextToken_Continue:
                 break;
 
             case '=':
-                stream_.next();
-                if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '=') {
                     // Assignment token, operator: =
                     ti.setToken(Token::Assignment);
                 }
                 else {
                     // operator: ==
-                    stream_.next();
+                    scanner_.next();
                     // Equal token
                     ti.setToken(Token::Equal);
                 }
                 break;
 
             case '?':
-                stream_.next();
+                scanner_.next();
                 // Question token, operator: ?
                 ti.setToken(Token::Question);
                 break;
 
             case '^':
-                stream_.next();
-                if (stream_.get() != '^') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '^') {
+                    if (scanner_.get() != '=') {
                         // BitXor token, operator: ^
                         ti.setToken(Token::BitXor);
                     }
@@ -3009,16 +2756,16 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ^^
-                    stream_.next();
+                    scanner_.next();
                     // BoolXor token
                     ti.setToken(Token::BoolXor);
                 }
                 break;
 
             case '|':
-                stream_.next();
-                if (stream_.get() != '|') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '|') {
+                    if (scanner_.get() != '=') {
                         // BitOr token, operator: |
                         ti.setToken(Token::BitOr);
                     }
@@ -3029,16 +2776,16 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ||
-                    stream_.next();
+                    scanner_.next();
                     // BoolOr token
                     ti.setToken(Token::BoolOr);
                 }
                 break;
 
             case '~':
-                stream_.next();
-                if (stream_.get() != '~') {
-                    if (stream_.get() != '=') {
+                scanner_.next();
+                if (scanner_.get() != '~') {
+                    if (scanner_.get() != '=') {
                         // BitNot token, operator: ~
                         ti.setToken(Token::BitNot);
                     }
@@ -3049,7 +2796,7 @@ NextToken_Continue:
                 }
                 else {
                     // operator: ~~
-                    stream_.next();
+                    scanner_.next();
                     // BoolNot token
                     ti.setToken(Token::BoolNot);
                 }
@@ -3057,68 +2804,68 @@ NextToken_Continue:
 
             case '@':
                 // Is a annotation?
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Annotation);
                 break;
 
             case ',':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Comma);
                 break;
 
             case ';':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::Semicolon);
                 break;
 
             case '(':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LParen);
                 break;
 
             case ')':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RParen);
                 break;
 
             case '[':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LBracket);
                 break;
 
             case ']':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RBracket);
                 break;
 
             case '{':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::LBrace);
                 break;
 
             case '}':
-                stream_.next();
+                scanner_.next();
                 ti.setToken(Token::RBrace);
                 break;
 
             case '\'':  // Single character literal
                 {
-                    stream_.next();
+                    scanner_.next();
                     std::string singelChar;
                     ec = parseSingleCharLiteral(singelChar, ti);
                     if (unlikely(!ec.isOK())) {
-                        stream_.next();
+                        scanner_.next();
                     }
                 }
                 break;
 
             case '\"':  // String literal or single char literal
                 {
-                    stream_.next();
+                    scanner_.next();
                     std::string stringLiteral;
                     ec = parseStringLiteral(stringLiteral, ti);
                     if (unlikely(!ec.isOK())) {
-                        stream_.next();
+                        scanner_.next();
                     }
                 }
                 break;
@@ -3127,13 +2874,13 @@ NextToken_Continue:
                 {
                     ec = parseReservedKeyword(ti);
                     if (ec.isOK()) {
-                        //stream_.next();
+                        //scanner_.next();
                         ti.setToken(Token::Keyword);
                     }
                     else {
                         ti.setToken(Token::Unrecognized);
                         if (marker.length() <= 0)
-                            stream_.next();
+                            scanner_.next();
                     }
                 }
                 break;
@@ -3148,8 +2895,8 @@ NextToken_Continue:
             }
         }
 
-        if (likely(!stream_.has_next())) {
-            ti.setToken(Token::Eof, stream_.tell(), 0);
+        if (likely(!scanner_.has_next())) {
+            ti.setToken(Token::Eof, scanner_.tell(), 0);
         }
 
         ec_ = ec;
