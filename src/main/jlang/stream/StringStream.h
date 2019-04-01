@@ -44,7 +44,6 @@ public:
     }
 
     virtual ~StringStream() {
-        this->destroy();
     }
 
     StringStream & operator = (const StringStream & rhs) {

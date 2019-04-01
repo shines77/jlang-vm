@@ -9,6 +9,7 @@
 #include "jlang/basic/stddef.h"
 #include "jlang/lang/Char.h"
 #include "jlang/stream/StringStream.h"
+#include "jlang/support/Console.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -25,7 +26,8 @@ public:
     StringScanner(StringScanner && scanner) : StringStream(std::forward<StringStream>(scanner.getStream())) {}
     StringScanner(const StringStream & stream) : StringStream(stream) {}
     StringScanner(StringStream && stream) : StringStream(std::forward<StringStream>(stream)) {}
-    virtual ~StringScanner() {}
+    virtual ~StringScanner() {
+    }
 
     /* WhiteSpace */
 
@@ -188,7 +190,7 @@ public:
         }
 
         do {
-            if (isDigital())
+            if (likely(isDigital()))
                 this->next();
             else
                 break;
@@ -233,7 +235,7 @@ public:
 
     void skipAlphabet() {
         do {
-            if (isAlphabet())
+            if (likely(isAlphabet()))
                 this->next();
             else
                 break;
@@ -242,7 +244,7 @@ public:
 
     void skipLowerAlphabet() {
         do {
-            if (isLowerAlphabet())
+            if (likely(isLowerAlphabet()))
                 this->next();
             else
                 break;
@@ -251,7 +253,7 @@ public:
 
     void skipUpperAlphabet() {
         do {
-            if (isUpperAlphabet())
+            if (likely(isUpperAlphabet()))
                 this->next();
             else
                 break;
