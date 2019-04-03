@@ -31,6 +31,10 @@ public:
 
     /* WhiteSpace */
 
+    bool isWhiteSpace(uint8_t ch) const {
+        return Char::isWhiteSpace(ch);
+    }
+
     bool isWhiteSpace() const {
         uint8_t ch = this->getu();
         return Char::isWhiteSpace(ch);
@@ -63,6 +67,10 @@ public:
     }
 
     /* WhiteSpaces */
+
+    bool isWhiteSpaces(uint8_t ch) {
+        return Char::isWhiteSpaces(ch);
+    }
 
     bool isWhiteSpaces() {
         uint8_t ch = this->getu();
@@ -97,6 +105,10 @@ public:
 
     /* NewLine */
 
+    bool isNewLine(uint8_t ch) {
+        return Char::isNewLine(ch);
+    }
+
     bool isNewLine() {
         uint8_t ch = this->getu();
         return Char::isNewLine(ch);
@@ -122,6 +134,10 @@ public:
 
     /* Identifier */
 
+    bool isIdentifierFirst(uint8_t ch) {
+        return Char::isIdentifierFirst(ch);
+    }
+
     // Identifier first letter: can not be a number, parse priority order: 'abcDEF_'.
     bool isIdentifierFirst() {
         uint8_t ch = this->getu();
@@ -135,6 +151,10 @@ public:
             return true;
         }
         return false;
+    }
+
+    bool isIdentifierBody(uint8_t ch) const {
+        return Char::isIdentifierBody(ch);
     }
 
     // Identifier body: include numbers, parse priority order: 'abc789_DEF'.
@@ -153,6 +173,11 @@ public:
         } while (1);
     }
 
+    bool isIdentifier(uint8_t ch) {
+        // Identifier first char can not be a number.
+        return isIdentifierFirst(ch);
+    }
+
     bool isIdentifier() {
         // Identifier first char can not be a number.
         return isIdentifierFirst();
@@ -167,6 +192,10 @@ public:
     }
 
     /* Number */
+
+    bool isDigital(uint8_t ch) const {
+        return Char::isDigital(ch);
+    }
 
     bool isDigital() const {
         uint8_t ch = this->getu();
@@ -218,17 +247,29 @@ public:
 
     /* Alphabet */
 
-    inline bool isAlphabet() const {
+    bool isAlphabet(uint8_t ch) const {
+        return Char::isAlphabet(ch);
+    }
+
+    bool isAlphabet() const {
         uint8_t ch = this->getu();
         return Char::isAlphabet(ch);
     }
 
-    inline bool isLowerAlphabet() const {
+    bool isLowerAlphabet(uint8_t ch) const {
+        return Char::isLowerAlphabet(ch);
+    }
+
+    bool isLowerAlphabet() const {
         uint8_t ch = this->getu();
         return Char::isLowerAlphabet(ch);
     }
 
-    inline bool isUpperAlphabet() const {
+    bool isUpperAlphabet(uint8_t ch) const {
+        return Char::isUpperAlphabet(ch);
+    }
+
+    bool isUpperAlphabet() const {
         uint8_t ch = this->getu();
         return Char::isUpperAlphabet(ch);
     }

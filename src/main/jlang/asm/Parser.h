@@ -160,7 +160,7 @@ public:
         uint8_t ch = scanner_.getu();
 
         // Check first non-whitespace char.
-        if (likely(Char::isIdentifierFirst(ch))) {  // Identifier?
+        if (likely(scanner_.isIdentifierFirst(ch))) {  // Identifier?
             scanner_.next();
 
             IdentInfo identInfo;
@@ -208,10 +208,10 @@ public:
                 }
             }
         }
-        else if (likely(Char::isWhiteSpace(ch))) {   // WhiteSpace
+        else if (likely(scanner_.isWhiteSpace(ch))) {   // WhiteSpace
             scanner_.next();
         }
-        else if (likely(Char::isDigital(ch))) {   // Digital
+        else if (likely(scanner_.isDigital(ch))) {   // Digital
             scanner_.next();
         }
         else if (likely(ch == '{')) {
@@ -372,7 +372,7 @@ public:
                         ec = parseFunctionBodyWrapper();
                         break;
                     }
-                    else if (likely(Char::isWhiteSpaces(ch))) {
+                    else if (likely(scanner_.isWhiteSpaces(ch))) {
                         scanner_.next();
 
                         // Maybe have more than 1 WhiteSpaces.
@@ -1885,7 +1885,7 @@ ParseStringSection_Entry:
 
             marker.remark();
             uint8_t ch = scanner_.get();
-            if (likely(Char::isIdentifierFirst(ch))) {
+            if (likely(scanner_.isIdentifierFirst(ch))) {
                 scanner_.next();
 
                 // Parse identifier body
