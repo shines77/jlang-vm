@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-project(jlang_vm)
+project(jlang-vm)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -71,4 +71,4 @@ add_custom_target(release
 )
 
 add_executable(jlang_vm ${SOURCE_FILES})
-target_link_libraries(jlang_vm ${EXTRA_LIBS})
+target_link_libraries(jlang-vm ${EXTRA_LIBS})
