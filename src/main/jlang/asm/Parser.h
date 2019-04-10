@@ -1991,7 +1991,7 @@ NextToken_Continue:
             case '\n':
             case '\r':
                 scanner_.next();
-                skipNewLine();
+                scanner_.skipNewLine();
                 if ((Property & kSkipWhiteSpace) != 0)
                     goto NextToken_Continue;
                 else
@@ -2107,7 +2107,7 @@ NextToken_Continue:
                 scanner_.next();
                 {
                     ch = scanner_.get();
-                    if (isAlphabet(ch)) {
+                    if (scanner_.isAlphabet(ch)) {
                         // It's a section declare
                         IdentInfo sectionInfo;
                         sectionInfo.setName(".");
@@ -2123,7 +2123,7 @@ NextToken_Continue:
                             }
                         }
                     }
-                    else if (isDigital(ch)) {
+                    else if (scanner_.isDigital(ch)) {
                         // It's a float or double number.
                         uint64_t fractional;
                         int exponent;
