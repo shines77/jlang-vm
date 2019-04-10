@@ -70,5 +70,5 @@ add_custom_target(release
     COMMENT "Switch CMAKE_BUILD_TYPE to Release"
 )
 
-add_executable(jlang_vm ${SOURCE_FILES})
+add_executable(jlang-vm ${SOURCE_FILES})
 target_link_libraries(jlang-vm ${EXTRA_LIBS})
