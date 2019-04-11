@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "main", "main", "{97FC79C8-5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E6492F42-1C58-40CC-A82E-732CE92E9FD4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jlang_vm", "projects\vc2015\test\jlang_vm\jlang_vm.vcxproj", "{1D66BE2C-148B-4504-9127-576AA217C914}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jlang-vm", "projects\vc2015\test\jlang-vm\jlang-vm.vcxproj", "{1D66BE2C-148B-4504-9127-576AA217C914}"
 	ProjectSection(ProjectDependencies) = postProject
 		{55A43D28-97D5-43C1-B3A7-EE512F093BFF} = {55A43D28-97D5-43C1-B3A7-EE512F093BFF}
 	EndProjectSection

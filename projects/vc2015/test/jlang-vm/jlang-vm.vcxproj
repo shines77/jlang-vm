@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1D66BE2C-148B-4504-9127-576AA217C914}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>jlang_vm</RootNamespace>
+    <RootNamespace>jlang-vm</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -162,7 +162,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\test\jlang_vm\main.cpp" />
+    <ClCompile Include="..\..\..\..\src\test\jlang-vm\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
