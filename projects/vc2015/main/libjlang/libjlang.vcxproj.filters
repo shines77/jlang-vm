@@ -193,6 +193,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringScanner.h">
       <Filter>src\stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\AsmParser.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\AsmParser.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Assembler.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\IdentInfo.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\Initializer.h" />

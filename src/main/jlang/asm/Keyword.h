@@ -45,11 +45,11 @@
 namespace jlang {
 namespace jasm {
 
-#define KEYWORD_ID(keywordId)          keywordId
-#define PREPROCESSING_ID(keywordId)    pp_##keywordId
+#define KEYWORD_ID(id)          id
+#define PREPROCESSING_ID(id)    pp_##id
 
-#define KEYWORD_DEF(token, keywordId, keyword, kind)    KEYWORD_ID(keywordId),
-#define PREPROCESSING_DEF(keyword)                      PREPROCESSING_ID(keyword),
+#define KEYWORD_DEF(token, id, keyword, kind)   KEYWORD_ID(id),
+#define PREPROCESSING_DEF(keyword)              PREPROCESSING_ID(keyword),
 
 struct KeywordId {
     enum Type {
@@ -91,12 +91,12 @@ public:
 #undef KEYWORD_ID
 #undef PREPROCESSING_ID
 
-#define KEYWORD_ID(keywordId)           jasm::KeywordId::keywordId
-#define PREPROCESSING_ID(keywordId)     jasm::KeywordId::pp_##keywordId
+#define KEYWORD_ID(id)           jasm::KeywordId::id
+#define PREPROCESSING_ID(id)     jasm::KeywordId::pp_##id
 
-#define KEYWORD_DEF(token, keywordId, keyword, kind)  \
+#define KEYWORD_DEF(token, id, keyword, kind)  \
     { \
-        (int32_t)KEYWORD_ID(keywordId), \
+        (int32_t)KEYWORD_ID(id), \
         (int32_t)jasm::Token::token, \
         (uint32_t)jasm::KeywordKind::kind, \
         (uint32_t)(sizeof(TO_STRING(keyword)) - 1), \

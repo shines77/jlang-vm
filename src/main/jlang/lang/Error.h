@@ -33,8 +33,8 @@ public:
         // Standard errors
         Unknown = -2,
         Failed = -1,
-        OK = 0,
-        Success = OK,
+        Ok = 0,
+        Success = Ok,
         ErrorInsufficientBuffer =  122L,
         Status_AlreadyExists = 256,
         LastError
@@ -44,7 +44,7 @@ protected:
     Type ec_;
 
 public:
-    Error() : ec_(Type::OK) {}
+    Error() : ec_(Type::Ok) {}
     Error(Type ec) : ec_(ec) {}
     Error(int32_t ec) : ec_(static_cast<Type>(ec)) {}
     Error(uint32_t ec) : ec_(static_cast<Type>(ec)) {}
@@ -53,8 +53,8 @@ public:
     Error(const Error & src) : ec_(src.ec_) {}
     ~Error() {}
 
-    bool isOK() const {
-        return (this->ec_ == Type::OK);
+    bool isOk() const {
+        return (this->ec_ == Type::Ok);
     }
 
     bool isSuccess() const {
@@ -62,11 +62,11 @@ public:
     }
 
     bool isError() const {
-        return (this->ec_ != Type::OK);
+        return (this->ec_ != Type::Ok);
     }
 
     bool hasErrors() const {
-        return (this->ec_ < Type::OK);
+        return (this->ec_ < Type::Ok);
     }
 
     Error & operator = (const Error & src) {
@@ -212,7 +212,7 @@ public:
 
             CASE_ERROR(Unknown);
             CASE_ERROR(Failed);
-            CASE_ERROR(OK);
+            CASE_ERROR(Ok);
             CASE_ERROR(ErrorInsufficientBuffer);
             CASE_ERROR(Status_AlreadyExists);
             CASE_ERROR(LastError);

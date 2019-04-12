@@ -21,11 +21,11 @@ private:
     Error err_;
 
 public:
-    LastError() : err_(Error::OK) {}
+    LastError() : err_(Error::Ok) {}
     virtual ~LastError() {}
 
-    bool isSuccess() const { return (err_ == Error::OK); }
-    bool hasErrors() const { return (err_ != Error::OK); }
+    bool isSuccess() const { return (err_ == Error::Ok); }
+    bool hasErrors() const { return (err_ != Error::Ok); }
 
     Error getLastError() { return err_; }
 

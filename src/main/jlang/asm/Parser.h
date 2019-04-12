@@ -41,7 +41,19 @@ enum SkipMasks {
     kSkipDefault        = kSkipWhiteSpaces
 };
 
-class Parser {
+struct IParser {
+    virtual bool skipLineComment() = 0;
+    virtual bool skipBlockComment() = 0;
+
+    virtual bool parseLineComment(Error & ec) = 0;
+    virtual bool parseBlockComment(Error & ec) = 0;
+
+    virtual bool parseComment(TokenInfo & ti, Error & ec) = 0;
+
+    virtual Error parseScript(bool inBlock = false) = 0;
+};
+
+class Parser : public IParser {
 public:
     typedef Parser this_type;
 
@@ -98,6 +110,15 @@ public:
 
         identInfo.appendIdent(marker);
         ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
+    }
+
+    void parseIdentifier(IdentInfo & identInfo, int offset) {
+        StreamMarker marker(scanner_, false);
+        marker.setmark(-1);
+        scanner_.skipIdentifier();
+        assert(marker.length() > 0);
+
+        identInfo.appendIdent(marker);
     }
 
     void parseIdentifierBody(uint8_t firstChar, IdentInfo & identInfo) {
@@ -292,7 +313,7 @@ public:
             uint8_t ch = scanner_.getu();
             if (likely(ch != '}')) {
                 ec = parseStatements();
-                if (!ec.isOK())
+                if (!ec.isOk())
                     break;
             }
             else {
@@ -433,7 +454,7 @@ public:
         return ec;
     }
 
-    Error parseIdentifierDeclare(const Keyword & keyword, IdentInfo & identInfo) {
+    Error parseIdentifierDeclaration(const Keyword & keyword, IdentInfo & identInfo) {
         Error ec;
         Token signToken(Token::Unknown);
 
@@ -507,7 +528,7 @@ Parse_Exit:
                 const Keyword & keyword = iter->second;
                 if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
                     // Function or identifier declare.
-                    ec = parseIdentifierDeclare(keyword, identInfo);
+                    ec = parseIdentifierDeclaration(keyword, identInfo);
                 }
                 else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
                     // It's a keyword
@@ -652,7 +673,7 @@ Parse_Exit:
                 ti.setLength(identInfo.length());
 
                 ec = handlePreprocessingStatement(token, ti);
-                if (ec.isOK()) {
+                if (ec.isOk()) {
                     ti.setToken(token);
                 }
                 else {
@@ -679,7 +700,7 @@ Parse_Exit:
     }
 
     Error handlePreprocessingStatement(Token ppToken, const TokenInfo & ti) {
-        Error ec = Error::OK;
+        Error ec = Error::Ok;
         switch (ppToken.value()) {
         case Token::pp_if:
             //
@@ -739,69 +760,86 @@ Parse_Exit:
     }
 
     bool skipLineComment() {
-        bool is_completed = false;
-        char cur;
-        while (likely((cur = scanner_.get()) != '\0')) {
-            if (likely(cur != '\n' && cur != '\r')) {
+        while (likely(!scanner_.is_null())) {
+            if (likely(!scanner_.isNewLine())) {
                 scanner_.next();
             }
             else {
                 scanner_.next();
+                scanner_.skipNewLine();
+
                 // Find the end of line comment.
-                is_completed = true;
-                break;
+                return true;
             }
         }
-        return is_completed;
+
+        // It's reach the end of file.
+        return true;
     }
 
     bool skipBlockComment() {
         bool is_completed = false;
-        char cur;
-        while (likely((cur = scanner_.get()) != '\0')) {
-            if (likely(cur != '*')) {
+        
+        while (likely(!scanner_.is_null())) {
+            uint8_t ch = scanner_.getu();
+            if (likely(ch != '*')) {
                 scanner_.next();
             }
             else {
                 scanner_.next();
-                if (unlikely(scanner_.get() == '/')) {
+                if (unlikely(scanner_.getu() == '*')) {
                     scanner_.next();
-                    // Find the end of block comment.
-                    is_completed = true;
-                    break;
+                    if (unlikely(scanner_.getu() == '/')) {
+                        scanner_.next();
+
+                        // Find the end of block comment.
+                        return true;
+                    }
                 }
             }
         }
+
+        // It's reach the end of file.
+        return false;
+    }
+
+    bool parseLineComment(Error & ec) {
+        bool is_completed = skipLineComment();
+        if (is_completed)
+            ec = Error::Ok;
+        else 
+            ec = Error::IllegalLineComment;
+        return is_completed;
+    }
+
+    bool parseBlockComment(Error & ec) {
+        bool is_completed = skipBlockComment();
+        if (is_completed)
+            ec = Error::Ok;
+        else 
+            ec = Error::IllegalBlockComment;
         return is_completed;
     }
 
     bool parseComment(TokenInfo & ti, Error & ec) {
         bool is_comments;
-        char ch = scanner_.get();
-        if (likely(ch == ';' || ch == '/')) {
+        uint8_t ch = scanner_.getu();
+        if (likely(ch == '/')) {
             // Line comment
             scanner_.next();
-            bool is_completed = skipLineComment();
-            if (is_completed)
-                ec = Error::OK;
-            else 
-                ec = Error::IllegalLineComment;
+
+            is_comments = parseLineComment(ec);
             ti.setToken(Token::LineComment);
-            is_comments = true;
         }
         else if (likely(ch == '*')) {
             // Block comment
             scanner_.next();
-            bool is_completed = skipBlockComment();
-            if (is_completed)
-                ec = Error::OK;
-            else 
-                ec = Error::IllegalBlockComment;
+
+            is_comments = parseBlockComment(ec);
             ti.setToken(Token::BlockComment);
-            is_comments = true;
         }
         else {
-            ec = Error::OK;
+            ec = Error::Ok;
             is_comments = false;
         }
         return is_comments;
@@ -993,7 +1031,7 @@ Parse_Exit:
     Error parseDecimalNumber(uint64_t & number) {
         bool is_valid = parseRadixNumberImpl<10>(number);
         if (is_valid)
-            return Error::OK;
+            return Error::Ok;
         else
             return Error::IllegalRadix10Number;
     }
@@ -1136,7 +1174,7 @@ Parse_Exit:
             goto Parse_Exit;
         }
 
-        if (ec == Error::OK) {
+        if (ec == Error::Ok) {
             if (hasDots) {
                 token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
             }
@@ -1252,7 +1290,7 @@ Parse_Exit:
             goto Parse_Exit;
         }
 
-        if (ec == Error::OK) {
+        if (ec == Error::Ok) {
             token = (isDouble) ? Token::DoubleLiteral : Token::FloatLiteral;
         }
 
@@ -1425,7 +1463,7 @@ Parse_Exit:
             goto Parse_Exit;
         }
 
-        if (ec == Error::OK) {
+        if (ec == Error::Ok) {
             content = character;
         }
 
@@ -1490,7 +1528,7 @@ Parse_Exit:
 
             // If it reach the end of file and it's not completed, exit now.
             if (!completed) {
-                if (ec.isOK()) {
+                if (ec.isOk()) {
                     std::cout << ">>> Error: String literal is not completed!" << std::endl;
                     ec = Error::IllegalStringLiteralIsNotCompleted;
                 }
@@ -1541,7 +1579,7 @@ Parse_Exit:
                 int radix;
                 uint64_t number;
                 ec = parseRadixNumber(token, radix, number);
-                if (ec.isOK()) {
+                if (ec.isOk()) {
                     ti.setToken(token, marker.start(), marker.length());
                 }
                 return ec;
@@ -1554,7 +1592,7 @@ Parse_Exit:
         int exponent;
         bool is_float;
         ec = parseRealNumber(token, integer, fractional, exponent, is_float);
-        if (ec.isOK()) {
+        if (ec.isOk()) {
             ti.setToken(token, marker.start(), marker.length());
         }
 
@@ -1625,7 +1663,7 @@ Parse_Exit:
 ParseAlignBytes_Start:
                     uint64_t alignedBytes = 0;
                     ec = parseDecimalNumber(alignedBytes);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         uint64_t newAlignedBytes = roundAlignedBytes(alignedBytes);
                         if (newAlignedBytes != alignedBytes) {
                             // Have changed to newAlignedBytes from alignedBytes.
@@ -1672,7 +1710,7 @@ ParseAlignBytes_Start:
 ParseStringSection_Entry:
                     IdentInfo identInfo;
                     ec = parseIdentifierStrict(identInfo, ti);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         scanner_.skipWhiteSpace();
 
                         ch = scanner_.getu();
@@ -1681,7 +1719,7 @@ ParseStringSection_Entry:
 
                             std::string stringValue;
                             ec = parseStringLiteral(stringValue, ti);
-                            if (ec.isOK()) {
+                            if (ec.isOk()) {
                                 scanner_.skipWhiteSpaces();
 
                                 // Parse next string or end of sign '}'.
@@ -1873,7 +1911,8 @@ ParseStringSection_Entry:
     }
 
     // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Enum | Interface |
-    //                  Template | Preprocessing | Comment | Variable | Function | FunctionDeclaration |
+    //                  Template | Preprocessing | Comment | Function | FunctionDeclaration |
+    //                  VariableDeclaration | IdentifierDeclaration |
     //                  ';' }
     Error parseScript(bool inBlock = false) {
         Error ec;
@@ -1899,20 +1938,22 @@ ParseStringSection_Entry:
 
                 const std::string & identName = identInfo.name();
 
-                const Keyword & keyword = identInfo.getKeyword();
-                if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
-                    // It's a function or identifier declare.
-                    ec = parseIdentifierDeclare(keyword, identInfo);
-                }
-                else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
-                    // It's a keyword
-                    ec = handleScriptKeyword(keyword);
-                }
-                else if (likely(keyword.id() == Keyword::NotFound)) {
-                    // Not found
-                }
-                else {
-                    // Error
+                Keyword * keyword = identInfo.getKeyword();
+                if (likely(keyword != nullptr)) {
+                    if (likely((keyword->getKind() & KeywordKind::IsDataType) != 0)) {
+                        // It's a function or identifier declaration.
+                        ec = parseIdentifierDeclaration(*keyword, identInfo);
+                    }
+                    else if (likely((keyword->getKind() & KeywordKind::IsKeyword) != 0)) {
+                        // It's a keyword
+                        ec = handleScriptKeyword(*keyword);
+                    }
+                    else if (likely(keyword->id() == Keyword::NotFound)) {
+                        // Not found
+                    }
+                    else {
+                        // Error
+                    }
                 }
             }
             else if (likely(ch == '.')) {
@@ -1923,8 +1964,13 @@ ParseStringSection_Entry:
                 parseIdentifier(identInfo);
 
                 if (likely(identInfo.length() > 0)) {
-                    const Keyword & keyword = identInfo.getKeyword();
-                    ec = handleSectionStatement(keyword.token(), ti);
+                    Keyword * keyword = identInfo.getKeyword();
+                    if (likely(keyword != nullptr)) {
+                        ec = handleSectionStatement(keyword->token(), ti);
+                    }
+                    else {
+                        // The keyword has not Found.
+                    }
                 }
             }
             else if (likely(ch == '/')) {
@@ -2001,7 +2047,7 @@ NextToken_Continue:
             case '#':   // Preprocessing statement, example: #include <stdio.h>
                 scanner_.next();
                 ec = parsePreprocessing(ti);
-                if (unlikely(!ec.isOK())) {
+                if (unlikely(!ec.isOk())) {
                     success = false;
                 }
                 break;
@@ -2011,7 +2057,7 @@ NextToken_Continue:
                     scanner_.next();
                     bool is_comments = parseComment(ti, ec);
                     if (likely(is_comments)) {
-                        if (!ec.isOK()) {
+                        if (!ec.isOk()) {
                             //getEngine().diagnosisComment(ec, scanner_, token);
                             return false;
                         }
@@ -2048,7 +2094,7 @@ NextToken_Continue:
                     IdentInfo identInfo;
                     parseIdentifier(identInfo);
 
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         success = false;
                     }
 
@@ -2064,7 +2110,7 @@ NextToken_Continue:
                         int radix;
                         uint64_t number;
                         ec = parseRadixNumber(token, radix, number);
-                        if (ec.isOK()) {
+                        if (ec.isOk()) {
                             ti.setToken(token, marker);
                             return true;
                         }
@@ -2076,7 +2122,7 @@ NextToken_Continue:
                     int exponent;
                     bool is_float;
                     ec = parseRealNumber(token, integer, fractional, exponent, is_float);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         ti.setToken(token, marker);
                         return true;
                     }
@@ -2095,7 +2141,7 @@ NextToken_Continue:
                     int exponent;
                     bool is_float;
                     ec = parseRealNumber(token, integer, fractional, exponent, is_float);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         ti.setToken(token, marker);
                         return true;
                     }
@@ -2118,7 +2164,7 @@ NextToken_Continue:
                         if (iter != sectionMapping.end()) {
                             Keyword section = iter->second;
                             ec = handleSectionStatement(section.getType(), ti);
-                            if (ec.isOK()) {
+                            if (ec.isOk()) {
                                 // success
                             }
                         }
@@ -2128,7 +2174,7 @@ NextToken_Continue:
                         uint64_t fractional;
                         int exponent;
                         ec = parseRealNumberSuffix(token, fractional, exponent);
-                        if (ec.isOK()) {
+                        if (ec.isOk()) {
                             ti.setToken(token, marker);
                             return true;
                         }
@@ -2390,7 +2436,7 @@ NextToken_Continue:
                     scanner_.next();
                     std::string singelChar;
                     ec = parseSingleCharLiteral(singelChar, ti);
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         success = false;
                     }
                 }
@@ -2401,7 +2447,7 @@ NextToken_Continue:
                     scanner_.next();
                     std::string stringLiteral;
                     ec = parseStringLiteral(stringLiteral, ti);
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         success = false;
                     }
                 }
@@ -2410,7 +2456,7 @@ NextToken_Continue:
             default:    // Internal keywords
                 {
                     ec = parseReservedKeyword(ti);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         //scanner_.next();
                         ti.setToken(Token::Keyword);
                     }
@@ -2436,7 +2482,7 @@ NextToken_Continue:
     }
 
     bool parseToken(TokenInfo & ti, Error & ec_) {
-        Error ec = Error::OK;
+        Error ec = Error::Ok;
         StreamMarker marker(scanner_);
         // We needn't use [ !scanner_.is_null() ].
         while (likely(scanner_.has_next())) {
@@ -2469,7 +2515,7 @@ NextToken_Continue:
             case '#':   // Preprocessing statement, example: #include <stdio.h>
                 scanner_.next();
                 ec = parsePreprocessing(ti);
-                if (unlikely(!ec.isOK())) {
+                if (unlikely(!ec.isOk())) {
                     scanner_.next();
                 }
                 break;
@@ -2490,7 +2536,7 @@ NextToken_Continue:
                         }
                     }
                     else {
-                        if (!ec.isOK()) {
+                        if (!ec.isOk()) {
                             //this->getEngine().diagnosisComment(ec, scanner_, token);
                             return false;
                         }
@@ -2514,7 +2560,7 @@ NextToken_Continue:
                 {
                     // Identifier or keyword
                     ec = parseIdentifierOrKeyword(ti);
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         scanner_.next();
                     }
                 }
@@ -2528,7 +2574,7 @@ NextToken_Continue:
                         int radix;
                         uint64_t number;
                         ec = parseRadixNumber(token, radix, number);
-                        if (ec.isOK()) {
+                        if (ec.isOk()) {
                             ti.setToken(token, marker.start(), marker.length());
                             return true;
                         }
@@ -2540,7 +2586,7 @@ NextToken_Continue:
                     int exponent;
                     bool is_float;
                     ec = parseRealNumber(token, integer, fractional, exponent, is_float);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         ti.setToken(token, marker.start(), marker.length());
                         return true;
                     }
@@ -2559,7 +2605,7 @@ NextToken_Continue:
                     int exponent;
                     bool is_float;
                     ec = parseRealNumber(token, integer, fractional, exponent, is_float);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         ti.setToken(token, marker.start(), marker.length());
                         return true;
                     }
@@ -2581,7 +2627,7 @@ NextToken_Continue:
                         if (iter != sectionMapping.end()) {
                             Keyword section = iter->second;
                             ec = handleSectionStatement(section.getType(), ti);
-                            if (ec.isOK()) {
+                            if (ec.isOk()) {
                                 // success
                             }
                         }
@@ -2591,7 +2637,7 @@ NextToken_Continue:
                         uint64_t fractional;
                         int exponent;
                         ec = parseRealNumberSuffix(token, fractional, exponent);
-                        if (ec.isOK()) {
+                        if (ec.isOk()) {
                             ti.setToken(token, marker.start(), marker.length());
                             return true;
                         }
@@ -2853,7 +2899,7 @@ NextToken_Continue:
                     scanner_.next();
                     std::string singelChar;
                     ec = parseSingleCharLiteral(singelChar, ti);
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         scanner_.next();
                     }
                 }
@@ -2864,7 +2910,7 @@ NextToken_Continue:
                     scanner_.next();
                     std::string stringLiteral;
                     ec = parseStringLiteral(stringLiteral, ti);
-                    if (unlikely(!ec.isOK())) {
+                    if (unlikely(!ec.isOk())) {
                         scanner_.next();
                     }
                 }
@@ -2873,7 +2919,7 @@ NextToken_Continue:
             default:    // Internal keywords
                 {
                     ec = parseReservedKeyword(ti);
-                    if (ec.isOK()) {
+                    if (ec.isOk()) {
                         //scanner_.next();
                         ti.setToken(Token::Keyword);
                     }
@@ -2900,7 +2946,12 @@ NextToken_Continue:
         }
 
         ec_ = ec;
-        return (ec == Error::OK);
+        return (ec == Error::Ok);
+    }
+
+    Error parse() {
+        Error ec = parseScript();
+        return ec;
     }
 };
 

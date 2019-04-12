@@ -32,6 +32,7 @@
 #include "jlang/vm/Interpreter_v4.h"
 
 #include "jlang/asm/Parser.h"
+#include "jlang/asm/AsmParser.h"
 #include "jlang/asm/Assembler.h"
 
 #include "jlang/support/StopWatch.h"

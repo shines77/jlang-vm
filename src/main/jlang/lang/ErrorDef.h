@@ -84,6 +84,7 @@
     _Err(IllegalStringLiteralIsNotCompleted)
 
     // String section
+    _Err(UnsupportedSection)
     _Err(UnknownSectionStatement)
     _Err(IllegalStringSection)
     _Err(ExpectingStringSectionBeginning)
