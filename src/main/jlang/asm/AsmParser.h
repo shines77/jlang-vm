@@ -174,7 +174,7 @@ public:
                         }
                         else {
                             // The section keywrod has not found.
-                            ec = Error::UnsupportedSection;
+                            ec = Error::UnsupportedSectionStatement;
                         }
                     }
                 }

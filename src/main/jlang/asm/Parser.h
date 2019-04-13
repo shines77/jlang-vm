@@ -1766,7 +1766,7 @@ ParseStringSection_Entry:
             {
                 // Unsupported section keyword
                 ti.setToken(Token::Unsupported);
-                ec = Error::UnknownSectionStatement;
+                ec = Error::UnsupportedSectionStatement;
             }
             break;
         }
