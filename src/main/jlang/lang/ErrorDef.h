@@ -17,6 +17,7 @@
 
     // Standard
     _Err(NotImplement)
+    _Err(EndOfFile)
 
     // FileSystem
     _Err(IllegalPathOrFilename)

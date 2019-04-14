@@ -40,12 +40,6 @@ public:
     typedef AsmParser   this_type;
     typedef ParserBase  base_type;
 
-protected:
-    StringScanner scanner_;
-    std::string filename_;
-    Token token_;
-    std::string identifier_;
-
 public:
     AsmParser() : base_type() {}
     AsmParser(const std::string & filename)
@@ -263,6 +257,10 @@ public:
 
             scanner_.skipWhiteSpaces();
         }
+        else if (likely(ch == '\0')) {
+            // Eof
+            ec = Error::EndOfFile;
+        }
         else {
             scanner_.next();
             ec = Error::IllegalStatement;
@@ -278,7 +276,7 @@ public:
             uint8_t ch = scanner_.getu();
             if (likely(ch != '}')) {
                 ec = parseStatements();
-                if (!ec.isOk())
+                if (ec.isError() || ec.isEof())
                     break;
             }
             else {
@@ -2921,7 +2919,7 @@ NextToken_Continue:
                 break;
             }
 
-            if (ec.isError() || isEof) {
+            if (ec.isError() || ec.isEof() || isEof) {
                 break;
             }
         }
@@ -2931,6 +2929,9 @@ NextToken_Continue:
 
     Error parse() {
         Error ec = parseScript();
+        if (ec.isEof()) {
+            ec = Error::Ok;
+        }
         return ec;
     }
 };

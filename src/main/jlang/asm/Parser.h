@@ -301,6 +301,10 @@ public:
 
             scanner_.skipWhiteSpaces();
         }
+        else if (likely(ch == '\0')) {
+            // Eof
+            ec = Error::EndOfFile;
+        }
         else {
             scanner_.next();
             ec = Error::IllegalStatement;
@@ -316,7 +320,7 @@ public:
             uint8_t ch = scanner_.getu();
             if (likely(ch != '}')) {
                 ec = parseStatements();
-                if (!ec.isOk())
+                if (ec.isError() || ec.isEof())
                     break;
             }
             else {
@@ -2952,7 +2956,7 @@ NextToken_Continue:
                 break;
             }
 
-            if (ec.isError()) {
+            if (ec.isError() || ec.isEof()) {
                 break;
             }
         } while (1);
@@ -2962,6 +2966,9 @@ NextToken_Continue:
 
     Error parse() {
         Error ec = parseScript();
+        if (ec.isEof()) {
+            ec = Error::Ok;
+        }
         return ec;
     }
 };

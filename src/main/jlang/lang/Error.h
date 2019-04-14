@@ -65,7 +65,11 @@ public:
         return (this->ec_ != Type::Ok);
     }
 
-    bool hasErrors() const {
+    bool isEof() const {
+        return (this->ec_ == Type::EndOfFile);
+    }
+
+    bool hasError() const {
         return (this->ec_ < Type::Ok);
     }
 
