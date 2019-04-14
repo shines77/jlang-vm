@@ -15,6 +15,9 @@
     #define _Err(err)
     #endif
 
+    // Standard
+    _Err(NotImplement)
+
     // FileSystem
     _Err(IllegalPathOrFilename)
 
@@ -71,7 +74,7 @@
     // Pod type
     _Err(IllegalPodType)
     _Err(UnknownPodType)
-    _Err(UnsupportPodType)
+    _Err(UnsupportedPodType)
 
     // Single character constant errors
     _Err(IllegalSingleCharacterFormat)

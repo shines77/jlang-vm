@@ -42,39 +42,28 @@ enum SkipMasks {
 };
 
 struct IParser {
-    virtual bool skipLineComment() = 0;
-    virtual bool skipBlockComment() = 0;
-
-    virtual bool parseLineComment(Error & ec) = 0;
-    virtual bool parseBlockComment(Error & ec) = 0;
-
-    virtual bool parseComment(TokenInfo & ti, Error & ec) = 0;
-
     virtual Error parseScript(bool inBlock = false) = 0;
 };
 
-class Parser : public IParser {
-public:
-    typedef Parser this_type;
-
+class ParserBase : public IParser {
 protected:
     StringScanner scanner_;
-    std::string filename_;
     Token token_;
+    std::string filename_;
     std::string identifier_;
 
 public:
-    Parser() : token_(Token::Unknown) {}
-    Parser(const std::string & filename)
-        : filename_(filename), token_(Token::Unknown) {
+    ParserBase() : token_(Token::Unknown) {}
+    ParserBase(const std::string & filename)
+        : token_(Token::Unknown), filename_(filename) {
         // Do nothing !!
     }
-    virtual ~Parser() {}
+    virtual ~ParserBase() {}
 
     // NonCopyable
-    Parser(const Parser & src) = delete;
-    Parser(Parser && src) = delete;
-    Parser & operator = (const Parser & rhs) = delete;
+    ParserBase(const ParserBase & src) = delete;
+    ParserBase(ParserBase && src) = delete;
+    ParserBase & operator = (const ParserBase & rhs) = delete;
 
     void setStream(StringStream & stream) {
         scanner_.copy(stream);
@@ -85,14 +74,28 @@ public:
         setStream(stream);
     }
 
-private:
-    uint32_t getHashCode(const char * keyword) const {
-        return HashAlgorithm::getHash(keyword);
+    Error parseScript(bool inBlock = false) {
+        return Error::Ok;
     }
+};
 
-    uint32_t getHashCode(const char * keyword, size_t length) const {
-        return HashAlgorithm::getHash(keyword, length);
+class Parser : public ParserBase {
+public:
+    typedef Parser      this_type;
+    typedef ParserBase  base_type;
+
+public:
+    Parser() : base_type() {}
+    Parser(const std::string & filename)
+        : base_type(filename) {
+        // Do nothing !!
     }
+    virtual ~Parser() {}
+
+    // NonCopyable
+    Parser(const Parser & src) = delete;
+    Parser(Parser && src) = delete;
+    Parser & operator = (const Parser & rhs) = delete;
 
 public:
     void parseIdentifier(IdentInfo & identInfo) {
@@ -484,7 +487,7 @@ public:
                 }
                 else {
                     // Error: After "signed"/"unsigned", it's a unsupport POD type.
-                    ec = Error::UnsupportPodType;
+                    ec = Error::UnsupportedPodType;
                     goto Parse_Exit;
                 }
             }
@@ -527,7 +530,7 @@ Parse_Exit:
             if (iter != keyMapping.end()) {
                 const Keyword & keyword = iter->second;
                 if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
-                    // Function or identifier declare.
+                    // Function or identifier declaration.
                     ec = parseIdentifierDeclaration(keyword, identInfo);
                 }
                 else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
@@ -550,8 +553,6 @@ Parse_Exit:
         keywordInfo.makeIdent(marker);
         if (keywordInfo.length() > 0) {
             std::string & keywordName = keywordInfo.name();
-
-            uint32_t hashCode = getHashCode(keywordName.c_str(), keywordName.size());
 
             KeywordMapping & keyMapping = Global::getKeywordMapping();
             assert(keyMapping.inited());
@@ -1904,103 +1905,19 @@ ParseStringSection_Entry:
                 }
                 break;
 
+            case Token::Int:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // int foo();
+                    IdentInfo identInfo;
+                    ec = parseIdentifierDeclaration(keyword, identInfo);
+                }
+                break;
+
             default:
                 break;
         }
-        return ec;
-    }
-
-    // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Enum | Interface |
-    //                  Template | Preprocessing | Comment | Function | FunctionDeclaration |
-    //                  VariableDeclaration | IdentifierDeclaration |
-    //                  ';' }
-    Error parseScript(bool inBlock = false) {
-        Error ec;
-        StreamMarker marker(scanner_, false);
-        TokenInfo ti;
-
-        do {
-            scanner_.skipWhiteSpaces();
-
-            marker.remark();
-            uint8_t ch = scanner_.get();
-            if (likely(scanner_.isIdentifierFirst(ch))) {
-                scanner_.next();
-
-                // Parse identifier body
-                scanner_.skipIdentifierBody();
-
-                IdentInfo identInfo;
-                identInfo.makeIdent(marker);
-                assert(identInfo.length() > 0);
-
-                std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
-
-                const std::string & identName = identInfo.name();
-
-                Keyword * keyword = identInfo.getKeyword();
-                if (likely(keyword != nullptr)) {
-                    if (likely((keyword->getKind() & KeywordKind::IsDataType) != 0)) {
-                        // It's a function or identifier declaration.
-                        ec = parseIdentifierDeclaration(*keyword, identInfo);
-                    }
-                    else if (likely((keyword->getKind() & KeywordKind::IsKeyword) != 0)) {
-                        // It's a keyword
-                        ec = handleScriptKeyword(*keyword);
-                    }
-                    else if (likely(keyword->id() == Keyword::NotFound)) {
-                        // Not found
-                    }
-                    else {
-                        // Error
-                    }
-                }
-            }
-            else if (likely(ch == '.')) {
-                // Section statement
-                scanner_.next();
-
-                IdentInfo identInfo;
-                parseIdentifier(identInfo);
-
-                if (likely(identInfo.length() > 0)) {
-                    Keyword * keyword = identInfo.getKeyword();
-                    if (likely(keyword != nullptr)) {
-                        ec = handleSectionStatement(keyword->token(), ti);
-                    }
-                    else {
-                        // The keyword has not Found.
-                    }
-                }
-            }
-            else if (likely(ch == '/')) {
-                // Comment statement
-                scanner_.next();
-
-                bool is_comment = parseComment(ti, ec);
-            }
-            else if (likely(ch == '#')) {
-                // Preprocessing statement
-                scanner_.next();
-            }
-            else if (likely(ch == ';')) {
-                // Semicolon
-                scanner_.next();
-            }
-            else if (likely(ch == '\0' || !scanner_.has_next())) {
-                // Eof
-                break;
-            }
-            else {
-                // Error
-                break;
-            }
-
-            if (ec.isError()) {
-                break;
-            }
-        } while (1);
-
         return ec;
     }
 
@@ -2947,6 +2864,100 @@ NextToken_Continue:
 
         ec_ = ec;
         return (ec == Error::Ok);
+    }
+
+    // EBNF: Script = { Import | Using | Include | NameSpace | TypeDef | Class | Struct | Enum | Interface |
+    //                  Template | Preprocessing | Comment | Function | FunctionDeclaration |
+    //                  VariableDeclaration | IdentifierDeclaration |
+    //                  ';' }
+    Error parseScript(bool inBlock = false) {
+        Error ec;
+        StreamMarker marker(scanner_, false);
+        TokenInfo ti;
+
+        do {
+            scanner_.skipWhiteSpaces();
+
+            marker.remark();
+            uint8_t ch = scanner_.get();
+            if (likely(scanner_.isIdentifierFirst(ch))) {
+                scanner_.next();
+
+                // Parse identifier body
+                scanner_.skipIdentifierBody();
+
+                IdentInfo identInfo;
+                identInfo.makeIdent(marker);
+                assert(identInfo.length() > 0);
+
+                std::cout << ">>> Identifier name = [" << identInfo.name().c_str() << "]" << std::endl;
+
+                const std::string & identName = identInfo.name();
+
+                Keyword * keyword = identInfo.getKeyword();
+                if (likely(keyword != nullptr)) {
+                    if (likely((keyword->getKind() & KeywordKind::IsDataType) != 0)) {
+                        // It's a function or identifier declaration.
+                        ec = parseIdentifierDeclaration(*keyword, identInfo);
+                    }
+                    else if (likely((keyword->getKind() & KeywordKind::IsKeyword) != 0)) {
+                        // It's a keyword
+                        ec = handleScriptKeyword(*keyword);
+                    }
+                    else if (likely(keyword->id() == Keyword::NotFound)) {
+                        // Not found
+                    }
+                    else {
+                        // Error
+                    }
+                }
+            }
+            else if (likely(ch == '.')) {
+                // Section statement
+                scanner_.next();
+
+                IdentInfo identInfo;
+                parseIdentifier(identInfo);
+
+                if (likely(identInfo.length() > 0)) {
+                    Keyword * keyword = identInfo.getKeyword();
+                    if (likely(keyword != nullptr)) {
+                        ec = handleSectionStatement(keyword->token(), ti);
+                    }
+                    else {
+                        // The keyword has not Found.
+                    }
+                }
+            }
+            else if (likely(ch == '/')) {
+                // Comment statement
+                scanner_.next();
+
+                bool is_comment = parseComment(ti, ec);
+            }
+            else if (likely(ch == '#')) {
+                // Preprocessing statement
+                scanner_.next();
+            }
+            else if (likely(ch == ';')) {
+                // Semicolon
+                scanner_.next();
+            }
+            else if (likely(ch == '\0' || !scanner_.has_next())) {
+                // Eof
+                break;
+            }
+            else {
+                // Error
+                break;
+            }
+
+            if (ec.isError()) {
+                break;
+            }
+        } while (1);
+
+        return ec;
     }
 
     Error parse() {
