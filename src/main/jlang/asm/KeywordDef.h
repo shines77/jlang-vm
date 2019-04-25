@@ -90,12 +90,29 @@
     KEYWORD_DEF(Strings,            Strings,        .strings,       Section)
     KEYWORD_DEF(EntryPoint,         EntryPoint,     .entrypoint,    Section)
 
+    // Stack about
+    KEYWORD_DEF(InstPush,           InstPush,       push,           Instruction)
+    KEYWORD_DEF(InstPop,            InstPop,        pop,            Instruction)
+    KEYWORD_DEF(InstCall,           InstCall,       call,           Instruction)
+    KEYWORD_DEF(InstReturn,         InstReturn,     ret,            Instruction)
+
+    // Load and store
+    KEYWORD_DEF(InstMove,           InstMove,       mov,            Instruction)
+    KEYWORD_DEF(InstLoad,           InstLoad,       load,           Instruction)
+    KEYWORD_DEF(InstStore,          InstStore,      store,          Instruction)
+
     // Operators
-    KEYWORD_DEF(Add,                Add,            add,            Keyword)
-    KEYWORD_DEF(Sub,                Sub,            sub,            Keyword)
-    KEYWORD_DEF(Multiply,           Mul,            mul,            Keyword)
-    KEYWORD_DEF(Div,                Div,            div,            Keyword)
-    KEYWORD_DEF(Mod,                Mod,            mod,            Keyword)
+    KEYWORD_DEF(Add,                Add,            +,              Operator)
+    KEYWORD_DEF(Sub,                Sub,            -,              Operator)
+    KEYWORD_DEF(Multiply,           Multiply,       *,              Operator)
+    KEYWORD_DEF(Div,                Div,            /,              Operator)
+    KEYWORD_DEF(Mod,                Mod,            %,              Operator)
+
+    KEYWORD_DEF(InstAdd,            InstAdd,        add,            Instruction)
+    KEYWORD_DEF(InstSub,            InstSub,        sub,            Instruction)
+    KEYWORD_DEF(InstMul,            InstMul,        mul,            Instruction)
+    KEYWORD_DEF(InstDiv,            InstDiv,        div,            Instruction)
+    KEYWORD_DEF(InstMod,            InstMod,        mod,            Instruction)
     KEYWORD_DEF(Assignment,         Assign,         assign,         Keyword)
 
     KEYWORD_DEF(AddEqual,           AddEqual,       add_eq,         Keyword)
@@ -105,39 +122,49 @@
     KEYWORD_DEF(ModEqual,           ModEqual,       mod_eq,         Keyword)
 
     // Bitwise operators
-    KEYWORD_DEF(BitNot,             BitNot,         not,            Keyword)
-    KEYWORD_DEF(BitAnd,             BitAnd,         and,            Keyword)
-    KEYWORD_DEF(BitOr,              BitOr,          or,             Keyword)
-    KEYWORD_DEF(BitXor,             BitXor,         xor,            Keyword)
+    KEYWORD_DEF(BitNot,             BitNot,         !,              Operator)
+    KEYWORD_DEF(BitAnd,             BitAnd,         &,              Operator)
+    KEYWORD_DEF(BitOr,              BitOr,          |,              Operator)
+    KEYWORD_DEF(BitXor,             BitXor,         ^,              Operator)
+
+    KEYWORD_DEF(InstNot,            InstNot,        not,            Instruction)
+    KEYWORD_DEF(InstAnd,            InstAnd,        and,            Instruction)
+    KEYWORD_DEF(InstOr,             InstOr,         or,             Instruction)
+    KEYWORD_DEF(InstXor,            InstXor,        xor,            Instruction)
+
     KEYWORD_DEF(BoolNot,            BoolNot,        bool_not,       Keyword)   // (exclamation mark)
     KEYWORD_DEF(BoolAnd,            BoolAnd,        bool_and,       Keyword)
     KEYWORD_DEF(BoolOr,             BoolOr,         bool_or,        Keyword)
     KEYWORD_DEF(BoolXor,            BoolXor,        bool_xor,       Keyword)
-    KEYWORD_DEF(ShiftLeft,          Shl,            shl,            Keyword)
-    KEYWORD_DEF(ShiftRight,         Shr,            shr,            Keyword)
-    KEYWORD_DEF(RollShiftLeft,      Ror,            ror,            Keyword)
-    KEYWORD_DEF(RollShiftRight,     Rol,            rol,            Keyword)
+
+    KEYWORD_DEF(InstShl,            InstShl,        shl,            Instruction)
+    KEYWORD_DEF(InstShr,            InstShr,        shr,            Instruction)
+    KEYWORD_DEF(InstRor,            InstRor,        ror,            Instruction)
+    KEYWORD_DEF(InstRol,            InstRol,        rol,            Instruction)
 
     KEYWORD_DEF(BitNotEqual,        BitNotEqual,    not_eq,         Keyword)
     KEYWORD_DEF(AndEqual,           AndEqual,       and_eq,         Keyword)
     KEYWORD_DEF(OrEqual,            OrEqual,        or_eq,          Keyword)
     KEYWORD_DEF(XorEqual,           XorEqual,       xor_eq,         Keyword)
 
-    KEYWORD_DEF(Increase,           Inc,            inc,            Keyword)
-    KEYWORD_DEF(Decrease,           Dec,            dec,            Keyword)
+    KEYWORD_DEF(Increase,           Increase,       +,              Operator)
+    KEYWORD_DEF(Decrease,           Decrease,       -,              Operator)
+
+    KEYWORD_DEF(InstInc,            InstInc,        inc,            Instruction)
+    KEYWORD_DEF(InstDec,            InstDec,        dec,            Instruction)
 
     // Compare operators
-    KEYWORD_DEF(Compare,            Cmp,            cmp,            LogicFlow)
-    KEYWORD_DEF(Test,               Test,           test,           LogicFlow)
+    KEYWORD_DEF(InstCmp,            InstCmp,        cmp,            Instruction)
+    KEYWORD_DEF(InstTest,           InstTest,       test,           Instruction)
                  
     // Logic flow
-    KEYWORD_DEF(JmpEqual,           Je,             je,             LogicFlow)
-    KEYWORD_DEF(JmpNotEqual,        Jne,            jne,            LogicFlow)
+    KEYWORD_DEF(InstJe,             InstJe,         je,             Instruction)
+    KEYWORD_DEF(InstJne,            InstJne,        jne,            Instruction)
 
-    KEYWORD_DEF(JmpLessThan,        Jl,             jl,             LogicFlow)
-    KEYWORD_DEF(JmpGreaterThan,     Jg,             jg,             LogicFlow)
-    KEYWORD_DEF(JmpLessOrEqual,     Jle,            jle,            LogicFlow)
-    KEYWORD_DEF(JmpGreaterOrEqual,  Jge,            jge,            LogicFlow)
+    KEYWORD_DEF(InstJl,             InstJl,         jl,             Instruction)
+    KEYWORD_DEF(InstJg,             InstJg,         jg,             Instruction)
+    KEYWORD_DEF(InstJle,            InstJle,        jle,            Instruction)
+    KEYWORD_DEF(InstJge,            InstJge,        jge,            Instruction)
 
     // Operators
     KEYWORD_DEF(Equal,              Equal,          =,              Operator)

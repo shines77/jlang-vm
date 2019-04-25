@@ -131,7 +131,183 @@ public:
         return ec;
     }
 
-    Error parseStatements() {
+    Error parseInstCompare() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstPush() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstPop() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstInc() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstDec() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstAdd() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstSub() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstMove() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstCall() {
+        Error ec;
+        return ec;
+    }
+
+    Error parseInstReturn() {
+        Error ec;
+        return ec;
+    }
+
+    Error handleInstruction(const Keyword & instruction) {
+        Error ec;
+        switch (instruction.token()) {
+            case Token::InstCmp:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // cmp  args.0.i4, 3
+                    ec = parseInstCompare();
+                }
+                break;
+
+            case Token::InstPush:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // push  skip.1
+                    ec = parseInstPush();
+                }
+                break;
+
+            case Token::InstPop:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // namespace abcd {};
+                    ec = parseInstPop();
+                }
+                break;
+
+            case Token::InstInc:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // typedef int int32_t;
+                    ec = parseInstInc();
+                }
+                break;
+
+            case Token::InstDec:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // class abcd {};
+                    ec = parseInstDec();
+                }
+                break;
+
+            case Token::InstCall:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // struct abcd {};
+                    ec = parseInstCall();
+                }
+                break;
+
+            case Token::InstMove:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // interface abcd {};
+                    ec = parseInstMove();
+                }
+                break;
+
+            case Token::InstAdd:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // add  vars.1, 9
+                    ec = parseInstAdd();
+                }
+                break;
+
+            case Token::InstSub:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // sub  args.1, 5
+                    ec = parseInstSub();
+                }
+                break;
+
+            case Token::InstReturn:
+                {
+                    scanner_.skipWhiteSpaces();
+
+                    // ret  8
+                    ec = parseInstReturn();
+                }
+                break;
+
+            default:
+                ec = Error::IllegalStatement;
+                break;
+        }
+        return ec;
+    }
+
+    Error parseInstruction(const IdentInfo & instruction) {
+        Error ec;
+
+        std::cout << ">>> Instruction = [" << instruction.name().c_str() << "]" << std::endl;
+        const std::string & instName = instruction.name();
+
+        Keyword * keyword = instruction.getKeyword();
+        if (likely(keyword != nullptr)) {
+            if (likely((keyword->getKind() & KeywordKind::IsInstruction) != 0)) {
+                // It's a instruction
+                ec = handleInstruction(*keyword);
+            }
+            else if (likely(keyword->id() == Keyword::NotFound)) {
+                // Not found
+            }
+            else {
+                // Error
+                ec = Error::IllegalInstruction;
+            }
+        }
+        else {
+            // The keyword has not found.
+        }
+        return ec;
+    }
+
+    Error parseFunctionStatements() {
         Error ec;
 
         // Skip the whitespaces at the beginning of the stream.
@@ -143,126 +319,47 @@ public:
         if (likely(scanner_.isIdentifierFirst(ch))) {  // Identifier?
             scanner_.next();
 
-            IdentInfo identInfo;
-            parseIdentifierBody(ch, identInfo);
+            IdentInfo instruction;
+            parseIdentifierBody(ch, instruction);
 
             // Expect to skip N whitespace.
             scanner_.skipWhiteSpace();
 
             ch = scanner_.getu();
-            if (likely(ch == '=')) {
-                // It's a assignment statement.
+            if (likely(scanner_.isWhiteSpaces(ch))) {   // WhiteSpace
                 scanner_.next();
-            }
-            else if (likely(ch == '+')) {
-                // cnt++; or x += 1;
-                scanner_.next();
-            }
-            else if (likely(ch == '-')) {
-                // cnt--; or x -= 1;
-                scanner_.next();
-            }
-            else if (likely(ch == '.')) {
-                // object.read();
-                scanner_.next();
-            }
-            else if (likely(ch == '-')) {
-                // object->read();
-                scanner_.next();
-            }
-            else if (likely(ch == '(')) {
-                // It's a function call.
-                scanner_.next();
+                scanner_.skipWhiteSpaces();
+
+                ec = parseInstruction(instruction);
             }
             else if (likely(ch == ':')) {
-                ch = scanner_.getu(1);
-                if (likely(ch == ':')) {
-                    // It's a identifier namespace.
-                    scanner_.next(2);
-                }
-                else {
-                    // It's a label name.
-                    scanner_.next();
-
-                    // TODO: Append the label name.
-                }
-            }
-        }
-        else if (likely(scanner_.isWhiteSpace(ch))) {   // WhiteSpace
-            scanner_.next();
-        }
-        else if (likely(scanner_.isDigital(ch))) {   // Digital
-            scanner_.next();
-        }
-        else if (likely(ch == '{')) {
-            // Scope begin
-            scanner_.next();
-        }
-        else if (likely(ch == '}')) {
-            // Scope end
-            scanner_.next();
-        }
-        else if (likely(ch == '+')) {   // ++cnt;
-            scanner_.next();
-
-            ch = scanner_.getu();
-            if (likely(ch == '+')) {
-                // It's a ++cnt;
+                // It's a label name.
                 scanner_.next();
+
+                // TODO: Append the label name.
             }
             else {
                 // Error
-                ec = Error::Unknown;
+                ec = Error::IllegalStatement;
             }
         }
-        else if (likely(ch == '-')) {   // --cnt;
+        else if (likely(scanner_.isWhiteSpaces(ch))) {   // WhiteSpaces
             scanner_.next();
-
-            ch = scanner_.getu();
-            if (likely(ch == '-')) {
-                // It's a --cnt;
-                scanner_.next();
-            }
-            else {
-                // Error
-                ec = Error::Unknown;
-            }
+            scanner_.skipWhiteSpaces();
         }
         else if (likely(ch == '.')) {   // Dot
             scanner_.next();
         }
-        else if (likely(ch == ',')) {   // Comma
-            scanner_.next();
-        }
-        else if (likely(ch == '<')) {   // &lt;
-            scanner_.next();
-        }
-        else if (likely(ch == '>')) {   // &gt;
-            scanner_.next();
-        }
-        else if (likely(ch == '=')) {   // EqualSign
-            scanner_.next();
-        }
-        else if (likely(ch == '(')) {   // (
-            scanner_.next();
-        }
-        else if (likely(ch == ')')) {   // )
-            scanner_.next();
-        }
-        else if (likely(ch == '?')) {   // Question
-            scanner_.next();
-        }
         else if (likely(ch == ';')) {   // Semicolon
             scanner_.next();
-
-            scanner_.skipWhiteSpaces();
+            bool is_complted = parseLineComment(ec);
         }
         else if (likely(ch == '\0')) {
             // Eof
             ec = Error::EndOfFile;
         }
         else {
-            scanner_.next();
+            //scanner_.next();
             ec = Error::IllegalStatement;
         }
 
@@ -275,7 +372,7 @@ public:
         do {
             uint8_t ch = scanner_.getu();
             if (likely(ch != '}')) {
-                ec = parseStatements();
+                ec = parseFunctionStatements();
                 if (ec.isError() || ec.isEof())
                     break;
             }
@@ -1849,6 +1946,7 @@ ParseStringSection_Entry:
                 break;
 
             default:
+                ec = Error::IllegalStatement;
                 break;
         }
         return ec;

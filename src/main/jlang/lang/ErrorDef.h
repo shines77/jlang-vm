@@ -100,6 +100,9 @@
     // Statements
     _Err(IllegalStatement)
 
+    // Instruction
+    _Err(IllegalInstruction)
+
     // Identifer
     _Err(IllegalIdentifer)
 

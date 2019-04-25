@@ -100,7 +100,7 @@ public:
         std::swap(this->length_, src.length_);
     }
 
-    Keyword * getKeyword() {
+    Keyword * getKeyword() const {
         KeywordMapping & keyMapping = Global::getKeywordMapping();
         assert(keyMapping.inited());
         KeywordMapping::iterator iter = keyMapping.find(this->name_);
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    bool getKeyword(Keyword & keyword) {
+    bool getKeyword(Keyword & keyword) const {
         KeywordMapping & keyMapping = Global::getKeywordMapping();
         assert(keyMapping.inited());
         KeywordMapping::iterator iter = keyMapping.find(this->name_);
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    Keyword * getSection() {
+    Keyword * getSection() const {
         KeywordMapping & sectionMapping = Global::getSectionMapping();
         assert(sectionMapping.inited());
         KeywordMapping::iterator iter = sectionMapping.find(this->name_);
@@ -139,7 +139,7 @@ public:
         }
     }
 
-    bool getSection(Keyword & keyword) {
+    bool getSection(Keyword & keyword) const {
         KeywordMapping & sectionMapping = Global::getSectionMapping();
         assert(sectionMapping.inited());
         KeywordMapping::iterator iter = sectionMapping.find(this->name_);

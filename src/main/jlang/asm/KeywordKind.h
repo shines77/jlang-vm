@@ -32,33 +32,35 @@ public:
         Default         = 1 << 0,
         Section         = 1 << 1,
         Keyword         = 1 << 2,
-        Others          = 1 << 3,
+        Instruction     = 1 << 3,
+        Others          = 1 << 4,
 
         // POD
-        Pod             = 1 << 4,
-        PodSign         = 1 << 5,
+        Pod             = 1 << 5,
+        PodSign         = 1 << 6,
 
         // Normal
-        Operator        = 1 << 6,
-        Constant        = 1 << 7,
+        Operator        = 1 << 7,
+        Constant        = 1 << 8,
 
         TypeDef         = 1 << 8,
         InnerTypeDef    = 1 << 9,
-        LogicFlow       = 1 << 10,
-        Classes         = 1 << 11,
+        LogicFlow       = 1 << 11,
+        Classes         = 1 << 12,
 
         // UserDefine
-        UserDefine      = 1 << 12,
+        UserDefine      = 1 << 13,
 
         // Precompile
-        Preprocessing   = 1 << 13,
-        Macro           = 1 << 14,
+        Preprocessing   = 1 << 14,
+        Macro           = 1 << 15,
 
         // Masks
         IsDataType      = Pod | PodSign | TypeDef | InnerTypeDef | UserDefine,
         IsIdentifier    = Default,
         IsSection       = Section,
-        IsKeyword       = Keyword | Classes | LogicFlow,
+        IsKeyword       = Keyword | Instruction | Classes | LogicFlow,
+        IsInstruction   = Instruction,
         IsOperator      = Operator,
         IsPreprocessing = Preprocessing,
 
