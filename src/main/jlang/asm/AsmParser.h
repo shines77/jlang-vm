@@ -254,7 +254,7 @@ public:
         return ec;
     }
 
-    Error parseStackVarsOperand(OperandInfo & opInfo, int index) {
+    Error parseInstVarsOperand(OperandInfo & opInfo, int index) {
         Error ec;
 
         uint8_t ch = scanner_.getu();
@@ -351,21 +351,21 @@ public:
         case Token::OpArgs:
             {
                 // args.0.i4
-                ec = parseStackVarsOperand(opInfo, index);
+                ec = parseInstVarsOperand(opInfo, index);
             }
             break;
 
         case Token::OpVars:
             {
                 // vars.0.i8
-                ec = parseStackVarsOperand(opInfo, index);
+                ec = parseInstVarsOperand(opInfo, index);
             }
             break;
 
         case Token::OpSkip:
             {
                 // skip.1
-                ec = parseStackVarsOperand(opInfo, index);
+                ec = parseInstVarsOperand(opInfo, index);
             }
             break;
 
