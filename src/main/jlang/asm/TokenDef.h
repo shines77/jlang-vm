@@ -88,7 +88,13 @@
 
     // Classes
     TOKEN_DEF(Function)                 // function
-    TOKEN_DEF(IncludeFileName)          // include file name    
+    TOKEN_DEF(IncludeFileName)          // include file name
+
+    TOKEN_DEF(LabelName)
+
+    // Instruction
+    TOKEN_DEF(OpImm)                    // Immediate operand number
+    TOKEN_DEF(OpDataType)               // Operand data type
 
     // Preprocessing
     //

@@ -35,6 +35,71 @@
 namespace jlang {
 namespace jasm {
 
+struct OpDataType {
+    enum Type {
+        Default = 0,
+        I1,
+        I2,
+        I4,
+        I8,
+        I16,
+        Last
+    };
+};
+
+class OperandToken {
+private:
+    Token::Type token_;
+    int32_t index_;
+
+    union {
+        uint32_t dataType_;
+        uint32_t count_;
+        uint32_t value_;
+        uint64_t value64_;
+    };
+
+public:
+    OperandToken() : token_(Token::Unknown), index_(-1), value64_(0) {}
+    ~OperandToken() {}
+
+    Token::Type getToken() const { return this->token_; }
+    int32_t     getIndex() const { return this->index_; }
+    uint32_t    getDataType() const { return this->dataType_; }
+    uint32_t    getCount() const { return this->count_; }
+    uint32_t    getValue() const { return this->value_; }
+    uint64_t    getValue64() const { return this->value64_; }
+
+    void setToken(Token::Type token) { this->token_ = token; }
+    void setIndex(int32_t index) { this->index_ = index; }
+    void setDataType(uint32_t dataType) { this->dataType_ = dataType; }
+    void setCount(uint32_t count) { this->count_ = count; }
+    void setValue(uint32_t value) { this->value_ = value; }
+    void setValue64(uint64_t value) { this->value64_ = value; }
+};
+
+class OperandInfo {
+private:
+    Token::Type token_;
+    uint32_t opNums_;
+
+public:
+    OperandToken ops[3];
+
+public:
+    OperandInfo() : token_(Token::Unknown), opNums_(0) {}
+    ~OperandInfo() {}
+
+    Token::Type getToken() const { return this->token_; }
+    uint32_t    getOpNums() const { return this->opNums_; }
+
+    void setToken(Token::Type token) { this->token_ = token; }
+    void setOpNums(int opNums) { this->opNums_ = opNums; }
+
+    void incOps() { this->opNums_++; }
+    void decOps() { this->opNums_--; }
+};
+
 class AsmParser : public ParserBase {
 public:
     typedef AsmParser   this_type;
@@ -122,57 +187,6 @@ public:
         return ec;
     }
 
-    Error parseInstCompare() {
-        Error ec;
-
-        return ec;
-    }
-
-    Error parseInstPush() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstPop() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstInc() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstDec() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstAdd() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstSub() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstMove() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstCall() {
-        Error ec;
-        return ec;
-    }
-
-    Error parseInstReturn() {
-        Error ec;
-        return ec;
-    }
-
     Error parseIdentifierToKeyword(IdentInfo & identInfo, Keyword & keyword) {
         Error ec;
         
@@ -183,17 +197,16 @@ public:
             parseIdentifier(identInfo);
 
             const std::string & identName = identInfo.name();
-            std::cout << ">>> identifier = [" << identName.c_str() << "]" << std::endl;
+            std::cout << ">>> Identifier = [" << identName.c_str() << "]" << std::endl;
 
             keyword = identInfo.getKeyword();
             if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
                 // It's a keyword
-                // TODO: xxxxxx
                 ec = Error::Ok;
             }
             else if (likely(keyword.id() == Keyword::NotFound)) {
                 // Not found
-                ec = Error::UnsupportedInstruction;
+                ec = Error::KeywordNotFound;
             }
             else {
                 // Error
@@ -201,8 +214,394 @@ public:
             }
         }
         else {
-            ec = Error::IllegalInstruction;
+            ec = Error::IsNotIdentifier;
         }
+        return ec;
+    }
+
+    Error parseOperandDataType(uint32_t & dataType) {
+        Error ec;
+        IdentInfo typeIdent;
+        Keyword typeKeyword;
+
+        assert(scanner_.isIdentifierFirst());
+        ec = parseIdentifierToKeyword(typeIdent, typeKeyword);
+
+        switch (typeKeyword.token()) {
+        case Token::OpInt8:
+            dataType = OpDataType::I1;
+            break;
+
+        case Token::OpInt16:
+            dataType = OpDataType::I2;
+            break;
+
+        case Token::OpInt32:
+            dataType = OpDataType::I4;
+            break;
+
+        case Token::OpInt64:
+            dataType = OpDataType::I8;
+            break;
+
+        case Token::OpInt128:
+            dataType = OpDataType::I16;
+            break;
+
+        default:
+            break;
+        }
+        return ec;
+    }
+
+    Error parseStackVarsOperand(OperandInfo & opInfo, int index) {
+        Error ec;
+
+        uint8_t ch = scanner_.getu();
+        if (likely(ch == '.')) {
+            scanner_.next();
+
+            ch = scanner_.getu();
+            if (likely(scanner_.isDigital(ch))) {
+                uint32_t index;
+                bool is_valid = parseSimpleRadixNumberImpl<10>(index);
+                if (is_valid) {
+                    opInfo.ops[index].setIndex(index);
+
+                    ch = scanner_.getu();
+                    if (likely(ch == '.')) {
+                        // DataType
+                        scanner_.next();
+
+                        ch = scanner_.getu();
+                        if (likely(scanner_.isIdentifierFirst(ch))) {
+                            uint32_t dataType;
+                            ec = parseOperandDataType(dataType);
+                            opInfo.ops[index].setDataType(dataType);
+                        }
+                        else {
+                            ec = Error::IllegalOperand;
+                        }
+                    }
+                    else if (likely(ch == ',')) {
+                        // It's has a second operand
+                    }
+                    else if (likely(ch == ';')) {
+                        // It's maybe a comment
+                    }
+                    else if (likely(scanner_.isWhiteSpaces())) {
+                        // It's a whitespaces
+#ifndef NDEBUG
+                        if (likely(scanner_.isNewLine(ch))) {
+                            ch = ch;    // Only for debug test
+                        }
+#endif
+                    }
+                    else {
+                        ec = Error::IllegalOperand;
+                    }
+                }
+                else {
+                    ec = Error::IllegalRadix10Number;
+                }
+            }
+            else if (likely(scanner_.isIdentifierFirst(ch))) {
+                // args.n (function argument value [n])
+                IdentInfo argName;
+                parseIdentifier(argName);
+
+                // TODO: Deal with function argument name.
+                // ec = parseFunctionArgName(argName);
+            }
+            else {
+                ec = Error::IllegalOperand;
+            }
+        }
+        else if (likely(scanner_.isDigital(ch))) {
+            int sign;
+            uint64_t value;
+            ec = parseSimpleDecimalNumber<uint64_t>(sign, value);
+            if (ec.isOk()) {
+                // Decimal number literal
+                value = (sign > 0) ? value : (uint64_t)-value;
+                opInfo.ops[index].setToken(Token::OpImm);
+                opInfo.ops[index].setValue64(value);
+                std::cout << ">>> DecimalNumber = [ sign = " << sign << ", value = " << value << "]" << std::endl;
+            }
+        }
+        else if (likely(scanner_.isWhiteSpaces())) {
+            scanner_.next();
+            scanner_.skipWhiteSpaces();
+        }
+        else if (likely(ch == ';')) {
+            scanner_.next();
+            bool is_completed = parseLineComment(ec);
+        }
+        else {
+            ec = Error::IllegalOperand;
+        }
+        return ec;
+    }
+
+    Error parseInstOperand(const Keyword & operand, OperandInfo & opInfo, int index = 0) {
+        Error ec;
+        opInfo.ops[index].setToken(operand.token());
+
+        switch (operand.token()) {
+        case Token::OpArgs:
+            {
+                // args.0.i4
+                ec = parseStackVarsOperand(opInfo, index);
+            }
+            break;
+
+        case Token::OpVars:
+            {
+                // vars.0.i8
+                ec = parseStackVarsOperand(opInfo, index);
+            }
+            break;
+
+        case Token::OpSkip:
+            {
+                // skip.1
+                ec = parseStackVarsOperand(opInfo, index);
+            }
+            break;
+
+        case Token::OpEAX:
+            {
+                // eax
+            }
+            break;
+
+        case Token::OpEBX:
+            {
+                // ebx
+            }
+            break;
+
+        case Token::OpECX:
+            {
+                // ecx
+            }
+            break;
+
+        case Token::OpEDX:
+            {
+                // edx
+            }
+            break;
+
+        case Token::NotFound:
+            {
+                // The operand has not found
+                ec = Error::UnsupportedOperand;
+            }
+            break;
+
+        default:
+            {
+                // The operand is unknown
+                ec = Error::IllegalOperand;
+            }
+            break;
+        }
+        return ec;
+    }
+
+    Error parseInstOperandNumber(OperandInfo & opInfo, int index = 0) {
+        Error ec;
+        uint8_t ch = scanner_.getu();
+        if (likely(scanner_.isDigital(ch))) {
+            int sign;
+            uint64_t value;
+            ec = parseSimpleDecimalNumber<uint64_t>(sign, value);
+            if (ec.isOk()) {
+                // Decimal number literal
+                value = (sign > 0) ? value : (uint64_t)-value;
+                opInfo.ops[index].setToken(Token::OpImm);
+                opInfo.ops[index].setValue64(value);
+                std::cout << ">>> DecimalNumber = [ sign = " << sign << ", value = " << value << "]" << std::endl;
+            }
+        }
+        else {
+            ec = Error::IllegalOperandNumber;
+        }
+        return ec;
+    }
+
+    Error parseTwoOpInstruction(const Keyword & firstOp, OperandInfo & opInfo) {
+        Error ec;
+        bool hasNext = false;
+        ec = parseInstOperand(firstOp, opInfo, 0);
+        if (ec.isOk()) {
+            uint8_t ch = scanner_.getu();
+            if (likely(ch == ',')) {
+                // It's has a second operand
+                scanner_.next();
+                scanner_.skipWhiteSpace();
+
+                hasNext = true;
+            }
+            else if (likely(scanner_.isWhiteSpace())) {
+                scanner_.next();
+                scanner_.skipWhiteSpace();
+
+                ch = scanner_.getu();
+                if (likely(ch == ',')) {
+                    // It's has a second operand.
+                    scanner_.next();
+                    scanner_.skipWhiteSpace();
+
+                    hasNext = true;
+                }
+                else if (likely(ch == ';')) {
+                    // Maybe is a comment
+                    scanner_.next();
+                    bool is_completed = parseLineComment(ec);
+                }
+                else {
+                    ec = Error::ExpectedSecondOperand;
+                }
+            }
+            else {
+                // Expect the second operand
+                ec = Error::ExpectedSecondOperand;
+            }
+
+            if (ec.isOk() && hasNext) {
+                IdentInfo opIdent;
+                Keyword secondOp;
+                uint8_t ch = scanner_.getu();
+                if (likely(scanner_.isIdentifierFirst(ch))) {
+                    ec = parseIdentifierToKeyword(opIdent, secondOp);
+                    if (ec.hasError()) {
+                        return ec;
+                    }
+                    ec = parseInstOperand(secondOp, opInfo, 1);
+                }
+                else if (likely(scanner_.isDigital(ch))) {
+                    int sign;
+                    uint64_t value;
+                    ec = parseSimpleDecimalNumber<uint64_t>(sign, value);
+                    if (ec.isOk()) {
+                        // Decimal number literal
+                        value = (sign > 0) ? value : (uint64_t)-value;
+                        opInfo.ops[1].setToken(Token::OpImm);
+                        opInfo.ops[1].setValue64(value);
+                        std::cout << ">>> DecimalNumber = [ sign = " << sign << ", value = " << value << "]" << std::endl;
+                    }
+                }
+                else {
+                    ec = Error::IllegalOperand;
+                }
+            }
+        }
+        return ec;
+    }
+
+    Error parseLabelName(const IdentInfo & labelName, OperandInfo & opInfo) {
+        Error ec;
+        opInfo.ops[0].setToken(Token::LabelName);
+        return ec;
+    }
+
+    Error parseInstCompare(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstCmp);
+        ec = parseTwoOpInstruction(firstOp, opInfo);
+        return ec;
+    }
+
+    Error parseInstPush(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstPush);
+        ec = parseInstOperand(firstOp, opInfo, 0);
+        return ec;
+    }
+
+    Error parseInstPop(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstPop);
+        ec = parseInstOperand(firstOp, opInfo, 0);
+        return ec;
+    }
+
+    Error parseInstInc(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstInc);
+        ec = parseInstOperand(firstOp, opInfo, 0);
+        return ec;
+    }
+
+    Error parseInstDec(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstDec);
+        ec = parseInstOperand(firstOp, opInfo, 0);
+        return ec;
+    }
+
+    Error parseInstAdd(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstAdd);
+        ec = parseTwoOpInstruction(firstOp, opInfo);
+        return ec;
+    }
+
+    Error parseInstSub(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstSub);
+        ec = parseTwoOpInstruction(firstOp, opInfo);
+        return ec;
+    }
+
+    Error parseInstMove(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstMove);
+        ec = parseTwoOpInstruction(firstOp, opInfo);
+        return ec;
+    }
+
+    Error parseInstJl(const IdentInfo & labelIdent) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstJl);
+        // TODO: append the label name
+        ec = parseLabelName(labelIdent, opInfo);
+        return ec;
+    }
+
+    Error parseInstCall(const IdentInfo & labelIdent) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstCall);
+        // TODO: append the label name
+        ec = parseLabelName(labelIdent, opInfo);
+        return ec;
+    }
+
+    Error parseInstReturn(const Keyword & firstOp) {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstReturn);
+        ec = parseTwoOpInstruction(firstOp, opInfo);
+        return ec;
+    }
+
+    Error parseInstReturnImm() {
+        Error ec;
+        OperandInfo opInfo;
+        opInfo.setToken(Token::InstReturn);
+        ec = parseInstOperandNumber(opInfo);
         return ec;
     }
 
@@ -211,10 +610,34 @@ public:
 
         scanner_.skipWhiteSpaces();
 
-        IdentInfo paramIdent;
-        Keyword firstParam;
-        ec = parseIdentifierToKeyword(paramIdent, firstParam);
-        if (ec.isError()) {
+        bool isImmMode = false;
+        IdentInfo opIdent;
+        Keyword firstOp;
+        uint8_t ch = scanner_.getu();
+        if (likely(scanner_.isIdentifierFirst(ch))) {  // Instruction?
+            ec = parseIdentifierToKeyword(opIdent, firstOp);
+            if (instruction.token() != Token::InstJl &&
+                instruction.token() != Token::InstCall &&
+                instruction.token() != Token::InstReturn) {
+                if (ec.hasError()) {
+                    return ec;
+                }
+            }
+        }
+        else if (likely(scanner_.isDigital(ch))) {  // Digital?
+            // It's a immediate operand number.
+            isImmMode = true;
+        }
+        else if (likely(ch == ';')) {
+            // It's a comment.
+            return ec;
+        }
+        else if (likely(ch == '}')) {
+            // It's function end.
+            return ec;
+        }
+        else {
+            ec = Error::IllegalInstruction;
             return ec;
         }
 
@@ -222,70 +645,83 @@ public:
             case Token::InstCmp:
                 {
                     // cmp  args.0.i4, 3
-                    ec = parseInstCompare();
+                    ec = parseInstCompare(firstOp);
                 }
                 break;
 
             case Token::InstPush:
                 {
                     // push  skip.1
-                    ec = parseInstPush();
+                    ec = parseInstPush(firstOp);
                 }
                 break;
 
             case Token::InstPop:
                 {
-                    // namespace abcd {};
-                    ec = parseInstPop();
+                    // pop  skip.1
+                    ec = parseInstPop(firstOp);
                 }
                 break;
 
             case Token::InstInc:
                 {
-                    // typedef int int32_t;
-                    ec = parseInstInc();
+                    // inc  args.1
+                    ec = parseInstInc(firstOp);
                 }
                 break;
 
             case Token::InstDec:
                 {
-                    // class abcd {};
-                    ec = parseInstDec();
+                    // dec  args.1
+                    ec = parseInstDec(firstOp);
+                }
+                break;
+
+            case Token::InstJl:
+                {
+                    // jl  recur_exit
+                    ec = parseInstJl(opIdent);
                 }
                 break;
 
             case Token::InstCall:
                 {
-                    // struct abcd {};
-                    ec = parseInstCall();
+                    // call  fib_start
+                    ec = parseInstCall(opIdent);
                 }
                 break;
 
             case Token::InstMove:
                 {
-                    // interface abcd {};
-                    ec = parseInstMove();
+                    // mov  args.3, 11
+                    ec = parseInstMove(firstOp);
                 }
                 break;
 
             case Token::InstAdd:
                 {
                     // add  vars.1, 9
-                    ec = parseInstAdd();
+                    ec = parseInstAdd(firstOp);
                 }
                 break;
 
             case Token::InstSub:
                 {
                     // sub  args.1, 5
-                    ec = parseInstSub();
+                    ec = parseInstSub(firstOp);
                 }
                 break;
 
             case Token::InstReturn:
                 {
                     // ret  8
-                    ec = parseInstReturn();
+                    if (!isImmMode) {
+                        ec = parseInstReturn(firstOp);
+                    }
+                    else {
+                        ec = parseInstReturnImm();
+                    }
+                    
                 }
                 break;
 
@@ -343,12 +779,23 @@ public:
             if (likely(scanner_.isIdentifierFirst(ch))) {   // Instruction parameter?
                 ec = parseInstruction(instruction);
             }
+            else if (likely(scanner_.isDigital(ch))) {   // Digitals?
+                ec = parseInstruction(instruction);
+            }
             else if (likely(ch == ':')) {
                 // It's a label name.
                 scanner_.next();
 
                 // TODO: Append the label name.
                 ec = appendLabelName(instruction);
+            }
+            else if (likely(scanner_.isNewLine(ch))) {   // NewLine?
+                ec = parseInstruction(instruction);
+
+                scanner_.skipNewLine();
+            }
+            else if (likely(ch == '\0')) {
+                ec = Error::EndOfFile;
             }
             else {
                 // Error
@@ -358,6 +805,14 @@ public:
         else if (likely(scanner_.isWhiteSpaces(ch))) {   // WhiteSpaces
             scanner_.next();
             scanner_.skipWhiteSpaces();
+        }
+        else if (likely(scanner_.isDigital(ch))) {   // Digitals?
+            int sign;
+            uint64_t value;
+            ec = parseSimpleDecimalNumber<uint64_t>(sign, value);
+            if (ec.isOk()) {
+                value = (sign > 0) ? value : (uint64_t)-value;
+            }
         }
         else if (likely(ch == '.')) {   // Dot
             scanner_.next();
@@ -378,6 +833,9 @@ public:
         else if (likely(ch == ';')) {   // Semicolon
             scanner_.next();
             bool is_complted = parseLineComment(ec);
+        }
+        else if (likely(ch == '}')) {   // Function end
+            ec = Error::Ok;
         }
         else if (likely(ch == '\0')) {
             // Eof
@@ -901,6 +1359,115 @@ Parse_Exit:
         return is_comment;
     }
 
+    template <uint32_t radix = 10, typename DataType = size_t>
+    bool parseSimpleRadixNumberImpl(DataType & value) {
+        bool is_valid;
+        value = 0;
+        const char * marker = scanner_.current();
+        if (radix == 16) {
+            char ch;
+            while ((ch = scanner_.get()) != '\0') {
+                if (ch >= '0' && ch <= '9') {
+                    ch -= '0';
+                }
+                else if (ch >= 'A' && ch <= 'F') {
+                    ch -= 'A' - 10;
+                }
+                else if (ch >= 'a' && ch <= 'f') {
+                    ch -= 'a' - 10;
+                }
+                else {
+                    break;
+                }
+                value = value * radix + ch;
+                scanner_.next();
+            }
+            is_valid = (scanner_.current() > marker);
+        }
+        else if (radix == 10) {
+            char ch;
+            while ((ch = scanner_.get()) != '\0') {
+                if (ch >= '0' && ch <= '9') {
+                    ch -= '0';
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
+                    break;
+                }
+            }
+            is_valid = (scanner_.current() > marker);
+        }
+        else if (radix == 8) {
+            char ch;
+            while ((ch = scanner_.get()) != '\0') {
+                if (ch >= '0' && ch <= '7') {
+                    ch -= '0';
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
+                    break;
+                }
+            }
+            is_valid = (scanner_.current() > marker);
+        }
+        else if (radix == 2) {
+            char ch;
+            while ((ch = scanner_.get()) != '\0') {
+                if (ch >= '0' && ch <= '1') {
+                    ch -= '0';
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
+                    break;
+                }
+            }
+            is_valid = (scanner_.current() > marker);
+        }
+        else {
+            is_valid = false;
+        }
+        return is_valid;
+    }
+
+    template <uint32_t radix = 10, typename DataType = size_t>
+    Error parseSimpleRadixNumber(int & sign, DataType & value) {
+        uint8_t ch = scanner_.getu();
+        if (likely(scanner_.isDigital(ch))) {
+            sign = 1;
+            bool is_valid = parseSimpleRadixNumberImpl<radix, DataType>(value);
+            if (is_valid)
+                return Error::Ok;
+            else
+                return Error::IllegalRadix10Number;
+        }
+        else if (likely(ch == '-')) {
+            // It's negative
+            scanner_.next();
+            scanner_.skipWhiteSpaces();
+            sign = -1;
+        }
+        else if (likely(ch == '+')) {
+            // It's positive
+            scanner_.next();
+            scanner_.skipWhiteSpaces();
+            sign = 1;
+        }
+
+        bool is_valid = parseSimpleRadixNumberImpl<radix, DataType>(value);
+        if (is_valid)
+            return Error::Ok;
+        else
+            return Error::IllegalRadix10Number;
+    }
+
+    template <typename DataType = uint64_t>
+    Error parseSimpleDecimalNumber(int & sign, DataType & value) {
+        return parseSimpleRadixNumber<10, DataType>(sign, value);
+    }
+
     bool parseNumberSuffix(int & valueType) {
         int8_t ch = scanner_.get();
         intptr_t remain = scanner_.remain();
@@ -957,8 +1524,8 @@ Parse_Exit:
         return (valueType != ValueType::Unknown);
     }
 
-    template <uint32_t radix = 10>
-    bool parseRadixNumberImpl(uint64_t & value) {
+    template <uint32_t radix = 10, typename DataType = uint64_t>
+    bool parseRadixNumberImpl(DataType & value) {
         bool is_valid;
         value = 0;
         const char * marker = scanner_.current();
@@ -989,12 +1556,14 @@ Parse_Exit:
             int valueType = ValueType::Unknown;
             char ch;
             while ((ch = scanner_.get()) != '\0') {
-                if (ch >= '0' && ch <= '9')
+                if (ch >= '0' && ch <= '9') {
                     ch -= '0';
-                else
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
                     break;
-                value = value * radix + ch;
-                scanner_.next();
+                }
             }
             is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
@@ -1004,12 +1573,14 @@ Parse_Exit:
             int valueType = ValueType::Unknown;
             char ch;
             while ((ch = scanner_.get()) != '\0') {
-                if (ch >= '0' && ch <= '7')
+                if (ch >= '0' && ch <= '7') {
                     ch -= '0';
-                else
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
                     break;
-                value = value * radix + ch;
-                scanner_.next();
+                }
             }
             is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
@@ -1019,12 +1590,14 @@ Parse_Exit:
             int valueType = ValueType::Unknown;
             char ch;
             while ((ch = scanner_.get()) != '\0') {
-                if (ch >= '0' && ch <= '1')
+                if (ch >= '0' && ch <= '1') {
                     ch -= '0';
-                else
+                    value = value * radix + ch;
+                    scanner_.next();
+                }
+                else {
                     break;
-                value = value * radix + ch;
-                scanner_.next();
+                }
             }
             is_valid = (scanner_.current() > marker);
             parseNumberSuffix(valueType);
@@ -1036,15 +1609,15 @@ Parse_Exit:
         return is_valid;
     }
 
-    Error parseRadixNumber(Token & token,
-                               int & radix, uint64_t & number) {
+    template <typename DataType = uint64_t>
+    Error parseRadixNumber(Token & token, int & radix, DataType & number) {
         Error ec;
         bool is_valid;
         char ch1 = scanner_.get(1);
         if (likely(ch1 == 'x' || ch1 == 'X')) {
             radix = 16;
             scanner_.next(2);
-            is_valid = parseRadixNumberImpl<16>(number);
+            is_valid = parseRadixNumberImpl<16, DataType>(number);
             token = Token::HexLiteral;
             if (!is_valid) {
                 ec = Error::IllegalRadix16Number;
@@ -1053,7 +1626,7 @@ Parse_Exit:
         else if (likely(ch1 == 'o' || ch1 == 'O')) {
             radix = 8;
             scanner_.next(2);
-            is_valid = parseRadixNumberImpl<8>(number);
+            is_valid = parseRadixNumberImpl<8, DataType>(number);
             token = Token::OcxLiteral;
             if (!is_valid) {
                 ec = Error::IllegalRadix8Number;
@@ -1062,7 +1635,7 @@ Parse_Exit:
         else if (likely(ch1 == 'b' || ch1 == 'B')) {
             radix = 2;
             scanner_.next(2);
-            is_valid = parseRadixNumberImpl<2>(number);
+            is_valid = parseRadixNumberImpl<2, DataType>(number);
             token = Token::BinaryLiteral;
             if (!is_valid) {
                 ec = Error::IllegalRadix2Number;
@@ -1071,7 +1644,7 @@ Parse_Exit:
         else if (likely(ch1 == 'd' || ch1 == 'D')) {
             radix = 10;
             scanner_.next(2);
-            is_valid = parseRadixNumberImpl<10>(number);
+            is_valid = parseRadixNumberImpl<10, DataType>(number);
             token = Token::DecLiteral;
             if (!is_valid) {
                 ec = Error::IllegalRadix10Number;
@@ -1084,8 +1657,9 @@ Parse_Exit:
         return ec;
     }
 
-    Error parseDecimalNumber(uint64_t & number) {
-        bool is_valid = parseRadixNumberImpl<10>(number);
+    template <typename DataType = uint64_t>
+    Error parseDecimalNumber(DataType & number) {
+        bool is_valid = parseRadixNumberImpl<10, DataType>(number);
         if (is_valid)
             return Error::Ok;
         else
@@ -1093,8 +1667,8 @@ Parse_Exit:
     }
 
     Error parseRealNumber(Token & token,
-                              uint64_t & integer, uint64_t & fractional,
-                              int & exponent, bool & is_float) {
+                          uint64_t & integer, uint64_t & fractional,
+                          int & exponent, bool & is_float) {
         Error ec;
         int integer_len = 0;
         int fractional_len = 0;
@@ -2936,6 +3510,22 @@ NextToken_Continue:
             case '\0':
                 // Eof
                 isEof = true;
+                break;
+
+            case '\t':  // Whitespace chars and next line
+            case '\v':
+            case '\f':
+            case ' ':
+                scanner_.next();
+                scanner_.skipWhiteSpace();
+                ti.setToken(Token::WhiteSpace);
+                break;
+
+            case '\n':
+            case '\r':
+                scanner_.next();
+                scanner_.skipNewLine();
+                ti.setToken(Token::NewLine);
                 break;
 
             case 'A': case 'B': case 'C': case 'D': case 'E':

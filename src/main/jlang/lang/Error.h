@@ -31,10 +31,14 @@ public:
         #include "jlang/lang/ErrorDef.h"
 
         // Standard errors
+        KeywordNotFound = -4,
+        IsNotIdentifier = -3,
+
         Unknown = -2,
         Failed = -1,
         Ok = 0,
         Success = Ok,
+        
         ErrorInsufficientBuffer =  122L,
         Status_AlreadyExists = 256,
         LastError

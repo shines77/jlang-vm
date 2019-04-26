@@ -105,6 +105,12 @@
     _Err(UnsupportedInstruction)
     _Err(IllegalInstruction)
 
+    // Operand
+    _Err(UnsupportedOperand)
+    _Err(IllegalOperand)
+    _Err(IllegalOperandNumber)
+    _Err(ExpectedSecondOperand)
+
     // Identifer
     _Err(IllegalIdentifer)
 

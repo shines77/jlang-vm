@@ -166,6 +166,23 @@
     KEYWORD_DEF(InstJle,            InstJle,        jle,            Instruction)
     KEYWORD_DEF(InstJge,            InstJge,        jge,            Instruction)
 
+    // Instruction operands keyword
+    KEYWORD_DEF(OpArgs,             OpArgs,         args,           Keyword)
+    KEYWORD_DEF(OpVars,             OpVars,         vars,           Keyword)
+    KEYWORD_DEF(OpSkip,             OpSkip,         skip,           Keyword)
+
+    KEYWORD_DEF(OpEAX,              OpEAX,          eax,            Keyword)
+    KEYWORD_DEF(OpEBX,              OpEBX,          ebx,            Keyword)
+    KEYWORD_DEF(OpECX,              OpECX,          ecx,            Keyword)
+    KEYWORD_DEF(OpEDX,              OpEDX,          edx,            Keyword)
+
+    // Instruction datatype
+    KEYWORD_DEF(OpInt8,             OpInt8,         i1,             Keyword)
+    KEYWORD_DEF(OpInt16,            OpInt16,        i2,             Keyword)
+    KEYWORD_DEF(OpInt32,            OpInt32,        i4,             Keyword)
+    KEYWORD_DEF(OpInt64,            OpInt64,        i8,             Keyword)
+    KEYWORD_DEF(OpInt128,           OpInt128,       i16,            Keyword)
+
     // Operators
     KEYWORD_DEF(Equal,              Equal,          =,              Operator)
     KEYWORD_DEF(NotEqual,           NotEqual,       !=,             Operator)
