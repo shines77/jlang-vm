@@ -88,6 +88,7 @@
     _Err(IllegalStringLiteralIsNotCompleted)
 
     // Section statement
+    _Err(IllegalSectionStatement)
     _Err(UnsupportedSectionStatement)
 
     // String section
@@ -101,6 +102,7 @@
     _Err(IllegalStatement)
 
     // Instruction
+    _Err(UnsupportedInstruction)
     _Err(IllegalInstruction)
 
     // Identifer

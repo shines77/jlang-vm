@@ -2898,22 +2898,20 @@ NextToken_Continue:
 
                 const std::string & identName = identInfo.name();
 
-                Keyword * keyword = identInfo.getKeyword();
-                if (likely(keyword != nullptr)) {
-                    if (likely((keyword->getKind() & KeywordKind::IsDataType) != 0)) {
-                        // It's a function or identifier declaration.
-                        ec = parseIdentifierDeclaration(*keyword, identInfo);
-                    }
-                    else if (likely((keyword->getKind() & KeywordKind::IsKeyword) != 0)) {
-                        // It's a keyword
-                        ec = handleScriptKeyword(*keyword);
-                    }
-                    else if (likely(keyword->id() == Keyword::NotFound)) {
-                        // Not found
-                    }
-                    else {
-                        // Error
-                    }
+                const Keyword & keyword = identInfo.getKeyword();
+                if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
+                    // It's a function or identifier declaration.
+                    ec = parseIdentifierDeclaration(keyword, identInfo);
+                }
+                else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                    // It's a keyword
+                    ec = handleScriptKeyword(keyword);
+                }
+                else if (likely(keyword.id() == Keyword::NotFound)) {
+                    // Not found
+                }
+                else {
+                    // Error
                 }
             }
             else if (likely(ch == '.')) {
@@ -2924,13 +2922,8 @@ NextToken_Continue:
                 parseIdentifier(identInfo);
 
                 if (likely(identInfo.length() > 0)) {
-                    Keyword * keyword = identInfo.getKeyword();
-                    if (likely(keyword != nullptr)) {
-                        ec = handleSectionStatement(keyword->token(), ti);
-                    }
-                    else {
-                        // The keyword has not Found.
-                    }
+                    const Keyword & keyword = identInfo.getKeyword();
+                    ec = handleSectionStatement(keyword.token(), ti);
                 }
             }
             else if (likely(ch == '/')) {

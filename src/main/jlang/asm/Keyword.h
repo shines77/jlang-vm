@@ -123,7 +123,7 @@ static const KeywordInfoDef gKeywordList[] = {
 
     {
         (int32_t)jasm::KeywordId::NotFound,
-        (int32_t)jasm::Token::Unknown,
+        (int32_t)jasm::Token::NotFound,
         (uint32_t)jasm::KeywordKind::Unknown,
         0,
         ""

@@ -100,7 +100,45 @@ public:
         std::swap(this->length_, src.length_);
     }
 
-    Keyword * getKeyword() const {
+    bool isKeywordExists() const {
+        KeywordMapping & keyMapping = Global::getKeywordMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    Keyword & getKeyword() {
+        KeywordMapping & keyMapping = Global::getKeywordMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
+    }
+
+    const Keyword & getKeyword() const {
+        KeywordMapping & keyMapping = Global::getKeywordMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            const Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
+    }
+
+    Keyword * getKeywordPtr() const {
         KeywordMapping & keyMapping = Global::getKeywordMapping();
         assert(keyMapping.inited());
         KeywordMapping::iterator iter = keyMapping.find(this->name_);
@@ -113,12 +151,11 @@ public:
         }
     }
 
-    bool getKeyword(Keyword & keyword) const {
-        KeywordMapping & keyMapping = Global::getKeywordMapping();
-        assert(keyMapping.inited());
-        KeywordMapping::iterator iter = keyMapping.find(this->name_);
-        if (likely(iter != keyMapping.end())) {
-            keyword = iter->second;
+    bool isSectionExists() const {
+        KeywordMapping & sectionMapping = Global::getSectionMapping();
+        assert(sectionMapping.inited());
+        KeywordMapping::iterator iter = sectionMapping.find(this->name_);
+        if (likely(iter != sectionMapping.end())) {
             return true;
         }
         else {
@@ -126,7 +163,33 @@ public:
         }
     }
 
-    Keyword * getSection() const {
+    Keyword & getSection() {
+        KeywordMapping & keyMapping = Global::getSectionMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
+    }
+
+    const Keyword & getSection() const {
+        KeywordMapping & keyMapping = Global::getSectionMapping();
+        assert(keyMapping.inited());
+        KeywordMapping::iterator iter = keyMapping.find(this->name_);
+        if (likely(iter != keyMapping.end())) {
+            const Keyword & keyword = iter->second;
+            return keyword;
+        }
+        else {
+            return Keyword::NotFoundKeyword;
+        }
+    }
+
+    Keyword * getSectionPtr() const {
         KeywordMapping & sectionMapping = Global::getSectionMapping();
         assert(sectionMapping.inited());
         KeywordMapping::iterator iter = sectionMapping.find(this->name_);
@@ -136,19 +199,6 @@ public:
         }
         else {
             return nullptr;
-        }
-    }
-
-    bool getSection(Keyword & keyword) const {
-        KeywordMapping & sectionMapping = Global::getSectionMapping();
-        assert(sectionMapping.inited());
-        KeywordMapping::iterator iter = sectionMapping.find(this->name_);
-        if (likely(iter != sectionMapping.end())) {
-            keyword = iter->second;
-            return true;
-        }
-        else {
-            return false;
         }
     }
 

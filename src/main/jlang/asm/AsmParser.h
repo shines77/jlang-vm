@@ -62,15 +62,6 @@ public:
         identInfo.appendIdent(marker);
     }
 
-    void parseIdentifier(IdentInfo & identInfo, TokenInfo & ti) {
-        StreamMarker marker(scanner_);
-        scanner_.skipIdentifier();
-        assert(marker.length() > 0);
-
-        identInfo.appendIdent(marker);
-        ti.setToken(Token::Identifier, identInfo.start(), identInfo.length());
-    }
-
     void parseIdentifier(IdentInfo & identInfo, int offset) {
         StreamMarker marker(scanner_, false);
         marker.setmark(-1);
@@ -133,6 +124,7 @@ public:
 
     Error parseInstCompare() {
         Error ec;
+
         return ec;
     }
 
@@ -181,13 +173,54 @@ public:
         return ec;
     }
 
-    Error handleInstruction(const Keyword & instruction) {
+    Error parseIdentifierToKeyword(IdentInfo & identInfo, Keyword & keyword) {
         Error ec;
+        
+        uint8_t ch = scanner_.getu();
+
+        // Check first non-whitespace char.
+        if (likely(scanner_.isIdentifierFirst(ch))) {  // Identifier?
+            parseIdentifier(identInfo);
+
+            const std::string & identName = identInfo.name();
+            std::cout << ">>> identifier = [" << identName.c_str() << "]" << std::endl;
+
+            keyword = identInfo.getKeyword();
+            if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                // It's a keyword
+                // TODO: xxxxxx
+                ec = Error::Ok;
+            }
+            else if (likely(keyword.id() == Keyword::NotFound)) {
+                // Not found
+                ec = Error::UnsupportedInstruction;
+            }
+            else {
+                // Error
+                ec = Error::IllegalInstruction;
+            }
+        }
+        else {
+            ec = Error::IllegalInstruction;
+        }
+        return ec;
+    }
+
+    Error parseInstructionImpl(const Keyword & instruction) {
+        Error ec;
+
+        scanner_.skipWhiteSpaces();
+
+        IdentInfo paramIdent;
+        Keyword firstParam;
+        ec = parseIdentifierToKeyword(paramIdent, firstParam);
+        if (ec.isError()) {
+            return ec;
+        }
+
         switch (instruction.token()) {
             case Token::InstCmp:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // cmp  args.0.i4, 3
                     ec = parseInstCompare();
                 }
@@ -195,8 +228,6 @@ public:
 
             case Token::InstPush:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // push  skip.1
                     ec = parseInstPush();
                 }
@@ -204,8 +235,6 @@ public:
 
             case Token::InstPop:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // namespace abcd {};
                     ec = parseInstPop();
                 }
@@ -213,8 +242,6 @@ public:
 
             case Token::InstInc:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // typedef int int32_t;
                     ec = parseInstInc();
                 }
@@ -222,8 +249,6 @@ public:
 
             case Token::InstDec:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // class abcd {};
                     ec = parseInstDec();
                 }
@@ -231,8 +256,6 @@ public:
 
             case Token::InstCall:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // struct abcd {};
                     ec = parseInstCall();
                 }
@@ -240,8 +263,6 @@ public:
 
             case Token::InstMove:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // interface abcd {};
                     ec = parseInstMove();
                 }
@@ -249,8 +270,6 @@ public:
 
             case Token::InstAdd:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // add  vars.1, 9
                     ec = parseInstAdd();
                 }
@@ -258,8 +277,6 @@ public:
 
             case Token::InstSub:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // sub  args.1, 5
                     ec = parseInstSub();
                 }
@@ -267,8 +284,6 @@ public:
 
             case Token::InstReturn:
                 {
-                    scanner_.skipWhiteSpaces();
-
                     // ret  8
                     ec = parseInstReturn();
                 }
@@ -281,29 +296,30 @@ public:
         return ec;
     }
 
-    Error parseInstruction(const IdentInfo & instruction) {
+    Error parseInstruction(const IdentInfo & instIndent) {
         Error ec;
 
-        std::cout << ">>> Instruction = [" << instruction.name().c_str() << "]" << std::endl;
-        const std::string & instName = instruction.name();
+        const std::string & instName = instIndent.name();
+        std::cout << ">>> Instruction = [" << instName.c_str() << "]" << std::endl;
 
-        Keyword * keyword = instruction.getKeyword();
-        if (likely(keyword != nullptr)) {
-            if (likely((keyword->getKind() & KeywordKind::IsInstruction) != 0)) {
-                // It's a instruction
-                ec = handleInstruction(*keyword);
-            }
-            else if (likely(keyword->id() == Keyword::NotFound)) {
-                // Not found
-            }
-            else {
-                // Error
-                ec = Error::IllegalInstruction;
-            }
+        const Keyword & instruction = instIndent.getKeyword();
+        if (likely((instruction.getKind() & KeywordKind::IsInstruction) != 0)) {
+            // It's a instruction
+            ec = parseInstructionImpl(instruction);
+        }
+        else if (likely(instruction.id() == Keyword::NotFound)) {
+            // Not found
+            ec = Error::UnsupportedInstruction;
         }
         else {
-            // The keyword has not found.
+            // Error
+            ec = Error::IllegalInstruction;
         }
+        return ec;
+    }
+
+    Error appendLabelName(const IdentInfo & labelName) {
+        Error ec;
         return ec;
     }
 
@@ -316,20 +332,15 @@ public:
         uint8_t ch = scanner_.getu();
 
         // Check first non-whitespace char.
-        if (likely(scanner_.isIdentifierFirst(ch))) {  // Identifier?
-            scanner_.next();
-
+        if (likely(scanner_.isIdentifierFirst(ch))) {  // Instruction?
             IdentInfo instruction;
-            parseIdentifierBody(ch, instruction);
+            parseIdentifier(instruction);
 
             // Expect to skip N whitespace.
             scanner_.skipWhiteSpace();
 
             ch = scanner_.getu();
-            if (likely(scanner_.isWhiteSpaces(ch))) {   // WhiteSpace
-                scanner_.next();
-                scanner_.skipWhiteSpaces();
-
+            if (likely(scanner_.isIdentifierFirst(ch))) {   // Instruction parameter?
                 ec = parseInstruction(instruction);
             }
             else if (likely(ch == ':')) {
@@ -337,6 +348,7 @@ public:
                 scanner_.next();
 
                 // TODO: Append the label name.
+                ec = appendLabelName(instruction);
             }
             else {
                 // Error
@@ -349,6 +361,19 @@ public:
         }
         else if (likely(ch == '.')) {   // Dot
             scanner_.next();
+
+            ch = scanner_.get();
+            if (scanner_.isAlphabet(ch)) {
+                // It's a section declare
+                IdentInfo sectionIdent;
+                parseIdentifier(sectionIdent, -1);
+
+                const Keyword & section = sectionIdent.getSection();
+                ec = parseSectionStatementImpl(section);
+            }
+            else {
+                ec = Error::IllegalSectionStatement;
+            }
         }
         else if (likely(ch == ';')) {   // Semicolon
             scanner_.next();
@@ -1630,33 +1655,33 @@ Parse_Exit:
         return ec;
     }
 
-    Error parseLiteral(std::string & content, TokenInfo & token) {
+    Error parseLiteral(std::string & content, TokenInfo & ti) {
         Error ec;
         
         if (likely(scanner_.isNumber())) {
             // A integer or a real number.
             // Starting with numbers: "[0-9]", or ".[0-9]"
-            return parseNumberLiteral(token);
+            return parseNumberLiteral(ti);
         }
         else if (likely(scanner_.get() == '\"')) {
             // String literal or single char literal
             scanner_.next();
-            return parseStringLiteral(content, token);
+            return parseStringLiteral(content, ti);
         }
         else if (likely(scanner_.get() == '\'')) {
             // Single character literal
             scanner_.next();
-            return parseSingleCharLiteral(content, token);
+            return parseSingleCharLiteral(content, ti);
         }
         else if (likely(scanner_.get() == '-')) {
             // Negative sign
             scanner_.next();
-            return parseStringLiteral(content, token);
+            return parseStringLiteral(content, ti);
         }
         else if (likely(scanner_.get() == '+')) {
             // Positive sign
             scanner_.next();
-            return parseStringLiteral(content, token);
+            return parseStringLiteral(content, ti);
         }
 
         return ec;
@@ -1679,10 +1704,10 @@ Parse_Exit:
         }
     }
 
-    Error handleSectionStatement(Token sectionToken, TokenInfo & ti) {
+    Error parseSectionStatementImpl(const Keyword & section) {
         Error ec;
 
-        switch (sectionToken.value()) {
+        switch (section.token()) {
         case Token::Align:
             {
                 std::cout << ">>> Section [.align] begin." << std::endl;
@@ -1707,8 +1732,7 @@ ParseAlignBytes_Start:
                 }
                 else if (likely(scanner_.isAlphabet())) {
                     IdentInfo identInfo;
-                    TokenInfo identToken;
-                    parseIdentifier(identInfo, identToken);
+                    parseIdentifier(identInfo);
                     if (identInfo.name() == "default") {   // Setting default align bytes.
                         scanner_.skipWhiteSpace();
                         uint8_t ch = scanner_.getu();
@@ -1740,7 +1764,7 @@ ParseAlignBytes_Start:
 
 ParseStringSection_Entry:
                     IdentInfo identInfo;
-                    ec = parseIdentifierStrict(identInfo, ti);
+                    ec = parseIdentifierStrict(identInfo);
                     if (ec.isOk()) {
                         scanner_.skipWhiteSpace();
 
@@ -1748,6 +1772,7 @@ ParseStringSection_Entry:
                         if (likely(ch == '\"')) {
                             scanner_.next();
 
+                            TokenInfo ti;
                             std::string stringValue;
                             ec = parseStringLiteral(stringValue, ti);
                             if (ec.isOk()) {
@@ -1793,10 +1818,16 @@ ParseStringSection_Entry:
             }
             break;
 
+        case Token::NotFound:
+            {
+                // The section keyword has not found
+                ec = Error::UnsupportedSectionStatement;
+            }
+            break;
+
         default:
             {
                 // Unsupported section keyword
-                ti.setToken(Token::Unsupported);
                 ec = Error::UnsupportedSectionStatement;
             }
             break;
@@ -2101,20 +2132,15 @@ NextToken_Continue:
                 scanner_.next();
                 {
                     ch = scanner_.get();
-                    if (scanner_.isAlphabet(ch)) {
-                        // It's a section declare
-                        IdentInfo sectionInfo;
-                        sectionInfo.setName(".");
-                        parseIdentifier(sectionInfo, ti);
+                    if (scanner_.isAlphabet()) {
+                        // It's a section declaration
+                        IdentInfo sectionIdent;
+                        parseIdentifier(sectionIdent, -1);
 
-                        KeywordMapping & sectionMapping = Global::getSectionMapping();
-                        auto iter = sectionMapping.find(sectionInfo.name());
-                        if (iter != sectionMapping.end()) {
-                            Keyword section = iter->second;
-                            ec = handleSectionStatement(section.getType(), ti);
-                            if (ec.isOk()) {
-                                // success
-                            }
+                        const Keyword & section = sectionIdent.getSection();
+                        ec = parseSectionStatementImpl(section);
+                        if (ec.isOk()) {
+                            // success
                         }
                     }
                     else if (scanner_.isDigital(ch)) {
@@ -2566,18 +2592,13 @@ NextToken_Continue:
                 {
                     if (scanner_.isAlphabet()) {
                         // It's a section declare
-                        IdentInfo sectionInfo;
-                        sectionInfo.setName(".");
-                        parseIdentifier(sectionInfo, ti);
+                        IdentInfo sectionIdent;
+                        parseIdentifier(sectionIdent, -1);
 
-                        KeywordMapping & sectionMapping = Global::getSectionMapping();
-                        auto iter = sectionMapping.find(sectionInfo.name());
-                        if (iter != sectionMapping.end()) {
-                            Keyword section = iter->second;
-                            ec = handleSectionStatement(section.getType(), ti);
-                            if (ec.isOk()) {
-                                // success
-                            }
+                        const Keyword & section = sectionIdent.getSection();
+                        ec = parseSectionStatementImpl(section);
+                        if (ec.isOk()) {
+                            // success
                         }
                     }
                     else if (scanner_.isDigital()) {
@@ -2945,25 +2966,20 @@ NextToken_Continue:
 
                     const std::string & identName = identInfo.name();
 
-                    Keyword * keyword = identInfo.getKeyword();
-                    if (likely(keyword != nullptr)) {
-                        if (likely((keyword->getKind() & KeywordKind::IsDataType) != 0)) {
-                            // It's a function or identifier declaration.
-                            ec = parseIdentifierDeclaration(*keyword, identInfo);
-                        }
-                        else if (likely((keyword->getKind() & KeywordKind::IsKeyword) != 0)) {
-                            // It's a keyword
-                            ec = handleScriptKeyword(*keyword);
-                        }
-                        else if (likely(keyword->id() == Keyword::NotFound)) {
-                            // Not found
-                        }
-                        else {
-                            // Error
-                        }
+                    const Keyword & keyword = identInfo.getKeyword();
+                    if (likely((keyword.getKind() & KeywordKind::IsDataType) != 0)) {
+                        // It's a function or identifier declaration.
+                        ec = parseIdentifierDeclaration(keyword, identInfo);
+                    }
+                    else if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+                        // It's a keyword
+                        ec = handleScriptKeyword(keyword);
+                    }
+                    else if (likely(keyword.id() == Keyword::NotFound)) {
+                        // Not found
                     }
                     else {
-                        // The keyword has not found.
+                        // Error
                     }
                 }
                 break;
@@ -2977,14 +2993,8 @@ NextToken_Continue:
                     parseIdentifier(identInfo, -1);
 
                     if (likely(identInfo.length() > 0)) {
-                        Keyword * section = identInfo.getSection();
-                        if (likely(section != nullptr)) {
-                            ec = handleSectionStatement(section->token(), ti);
-                        }
-                        else {
-                            // The section keywrod has not found.
-                            ec = Error::UnsupportedSectionStatement;
-                        }
+                        const Keyword & section = identInfo.getSection();
+                        ec = parseSectionStatementImpl(section);
                     }
                 }
                 break;

@@ -30,13 +30,16 @@ public:
     #define PREPROCESSING_DEF(keyword)                      pp_##keyword,
 
     enum Type {
+        NotFound = -3,
         Unrecognized = -2,
         Unsupported = -1,
+
+        FirstToken = NotFound,
+
         Unknown = 0,
 
         #include "jlang/asm/TokenDef.h"
 
-        FirstToken = Unrecognized,
         LastToken
     };
 
@@ -252,6 +255,7 @@ public:
 
     static const char * format(Type token) {
         switch (token) {
+            CASE_TOKEN(NotFound);
             CASE_TOKEN(Unrecognized);
             CASE_TOKEN(Unknown);
 
