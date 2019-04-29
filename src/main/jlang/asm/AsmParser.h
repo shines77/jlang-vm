@@ -32,12 +32,16 @@
 
 #include "jlang/asm/Parser.h"
 
+#pragma warning(push)
+#pragma warning(disable : 4146)
+
 namespace jlang {
 namespace jasm {
 
 struct OpDataType {
     enum Type {
         Default = 0,
+        Unknown,
         I1,
         I2,
         I4,
@@ -219,15 +223,37 @@ public:
         return ec;
     }
 
+    bool parseIdentifierIsKeyword(Keyword & keyword) {
+        assert(scanner_.isIdentifierFirst());
+        IdentInfo identInfo;
+        parseIdentifier(identInfo);
+
+        const std::string & identName = identInfo.name();
+        std::cout << ">>> Identifier = [" << identName.c_str() << "]" << std::endl;
+
+        keyword = identInfo.getKeyword();
+        if (likely((keyword.getKind() & KeywordKind::IsKeyword) != 0)) {
+            // It's a keyword
+            return true;
+        }
+        else if (likely(keyword.id() == Keyword::NotFound)) {
+            // Not found
+            return false;
+        }
+        else {
+            // Error
+            return false;
+        }
+    }
+
     Error parseOperandDataType(uint32_t & dataType) {
         Error ec;
-        IdentInfo typeIdent;
-        Keyword typeKeyword;
 
         assert(scanner_.isIdentifierFirst());
-        ec = parseIdentifierToKeyword(typeIdent, typeKeyword);
+        Keyword keyword;
+        bool isKeyword = parseIdentifierIsKeyword(keyword);
 
-        switch (typeKeyword.token()) {
+        switch (keyword.token()) {
         case Token::OpInt8:
             dataType = OpDataType::I1;
             break;
@@ -249,6 +275,8 @@ public:
             break;
 
         default:
+            dataType = OpDataType::Unknown;
+            ec = Error::UnsupportedOperandDataType;
             break;
         }
         return ec;
@@ -277,7 +305,13 @@ public:
                         if (likely(scanner_.isIdentifierFirst(ch))) {
                             uint32_t dataType;
                             ec = parseOperandDataType(dataType);
-                            opInfo.ops[index].setDataType(dataType);
+                            if (ec.isOk()) {
+                                opInfo.ops[index].setDataType(dataType);
+                            }
+                            else {
+                                // Error: UnsupportedOperandDataType
+                                //writeError(scanner_, ec);
+                            }
                         }
                         else {
                             ec = Error::IllegalOperand;
@@ -3636,5 +3670,7 @@ NextToken_Continue:
 
 } // namespace jasm
 } // namespace jlang
+
+#pragma warning(pop)
 
 #endif // JLANG_ASM_ASMPARSER_H

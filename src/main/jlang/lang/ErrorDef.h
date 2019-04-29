@@ -107,6 +107,7 @@
 
     // Operand
     _Err(UnsupportedOperand)
+    _Err(UnsupportedOperandDataType)
     _Err(IllegalOperand)
     _Err(IllegalOperandNumber)
     _Err(ExpectedSecondOperand)

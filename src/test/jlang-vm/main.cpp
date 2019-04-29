@@ -468,7 +468,7 @@ int main(int argc, char * argv[])
 
     test_Assembler();
 
-#if 0
+#if 1
 
 #ifdef NDEBUG
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
@@ -483,8 +483,8 @@ int main(int argc, char * argv[])
     test_Interpreter_v3_inline();
     test_Interpreter_v4();
     test_Interpreter_v3();
-    test_Interpreter_v2();
-    test_Interpreter_v1();
+    //test_Interpreter_v2();
+    //test_Interpreter_v1();
 
 #endif
 
