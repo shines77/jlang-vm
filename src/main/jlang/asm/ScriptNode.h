@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <type_traits>
 #include <memory>
-#include <xmemory>
 #include <functional>
 
 namespace jlang {
