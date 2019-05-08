@@ -3528,7 +3528,7 @@ NextToken_Continue:
     }
 
     ScriptNodePtr createScriptNode() {
-        return new ScriptNode(); 
+        return ScriptNodePtr(new ScriptNode()); 
     }
 
     // EBNF: Script = { Include | Preprocessing | Comment | Function | FunctionDeclaration
