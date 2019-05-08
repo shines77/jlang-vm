@@ -40,6 +40,9 @@ public:
     onetime_ptr(onetime_ptr & src) {
         this->assign(src);
     }
+    onetime_ptr(onetime_ptr && src) {
+        this->assign(std::forward<onetime_ptr>(src));
+    }
     ~onetime_ptr() {
         this->destroy();
     }
@@ -152,6 +155,9 @@ public:
         : value_(value), shifted_(false), deleter_(deleter) {}
     custom_onetime_ptr(custom_onetime_ptr & src) {
         this->assign(src);
+    }
+    custom_onetime_ptr(custom_onetime_ptr && src) {
+        this->assign(std::forward<custom_onetime_ptr>(src));
     }
     ~custom_onetime_ptr() {
         this->destroy();
