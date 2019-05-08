@@ -72,7 +72,7 @@ private:
         }
     }
 
-    void assign(onetime_ptr & src) {
+    void assign(onetime_ptr && src) {
         assert(&src != this);
         this->value_ = src.value_;
         this->shifted_ = src.shifted_;
@@ -190,7 +190,7 @@ private:
         }
     }
 
-    void assign(custom_onetime_ptr & src) {
+    void assign(custom_onetime_ptr && src) {
         assert(&src != this);
         this->value_ = src.value_;
         this->shifted_ = src.shifted_;
