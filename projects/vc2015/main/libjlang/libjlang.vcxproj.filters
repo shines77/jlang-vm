@@ -196,6 +196,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\AsmParser.h">
       <Filter>src\asm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\asm\ScriptNode.h">
+      <Filter>src\asm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

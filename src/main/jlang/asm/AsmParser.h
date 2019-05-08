@@ -23,6 +23,7 @@
 #include "jlang/asm/Token.h"
 #include "jlang/asm/TokenInfo.h"
 #include "jlang/asm/IdentInfo.h"
+#include "jlang/asm/ScriptNode.h"
 #include "jlang/stream/StringScanner.h"
 #include "jlang/stream/StringStream.h"
 #include "jlang/stream/StreamMarker.h"
@@ -94,7 +95,7 @@ public:
     OperandInfo() : token_(Token::Unknown), opNums_(0) {}
     ~OperandInfo() {}
 
-    Token::Type getToken() const { return this->token_; }
+    Token::Type getToken() const  { return this->token_;  }
     uint32_t    getOpNums() const { return this->opNums_; }
 
     void setToken(Token::Type token) { this->token_ = token; }
@@ -3526,6 +3527,10 @@ NextToken_Continue:
         return (ec == Error::Ok);
     }
 
+    ScriptNodePtr createScriptNode() {
+        return new ScriptNode(); 
+    }
+
     // EBNF: Script = { Include | Preprocessing | Comment | Function | FunctionDeclaration
     //                  AlignmentStatement | EntryPointStatement | StringsDeclaration
     //                  ';' }
@@ -3534,6 +3539,9 @@ NextToken_Continue:
         StreamMarker marker(scanner_, false);
         TokenInfo ti;
         bool isEof = false;
+
+        ScriptNodePtr node = createScriptNode();
+        node.append(nullptr);
 
         while (scanner_.has_next()) {
             scanner_.skipWhiteSpaces();
