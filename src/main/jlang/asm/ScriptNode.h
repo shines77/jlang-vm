@@ -93,11 +93,10 @@ public:
         return *(this->value_);
     }
 
-    void reset(element_type * value) {
+    void reset(element_type * value = nullptr) {
         if (value != this->value_) {
             this->destroy();
-            this->shifted_ = false;
-            this->value_ = value_;
+            this->assign(value);
         }
     }
 
@@ -204,6 +203,13 @@ private:
         this->shifted_ = false;
     }
 
+    void assign(element_type * value, const deleter_type & deleter) {
+        assert((value == nullptr) || (value != nullptr && value != this->value));
+        this->value_ = value;
+        this->shifted_ = false;
+        this->deleter_ = deleter;
+    }
+
 public:
     element_type * value() const { return this->value_; }
     element_type * deleter() const { return this->deleter_; }
@@ -213,20 +219,17 @@ public:
         return *(this->value_);
     }
 
-    void reset(element_type * value) {
+    void reset(element_type * value = nullptr) {
         if (value != this->value_) {
             this->destroy();
-            this->shifted_ = false;
-            this->value_ = value_;
+            this->assign(value);
         }
     }
 
     void reset(element_type * value, const deleter_type & deleter) {
         if (value != this->value_) {
             this->destroy();
-            this->shifted_ = false;
-            this->value_ = value_;
-            this->deleter_ = deleter;
+            this->assign(value, deleter);
         }
     }
 
