@@ -3547,7 +3547,7 @@ NextToken_Continue:
             scanner_.skipWhiteSpaces();
 
             marker.remark();
-            uint8_t ch = scanner_.get();
+            uint8_t ch = scanner_.getu();
             switch (ch) {
             case '\0':
                 // Eof
