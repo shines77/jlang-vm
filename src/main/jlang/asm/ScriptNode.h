@@ -88,6 +88,17 @@ private:
 public:
     element_type * value() const { return this->value_; }
 
+    template <typename ...Args>
+    JM_FORCEINLINE void create_new(Args && ... args) {
+        if (!this->shifted_) {
+            if (this->value_) {
+                delete this->value_;
+            }
+        }
+        this->value_ = new element_type(std::forward<Args>(args)...);
+        this->shifted_ = false;
+    }
+
     element_type & get() const {
         assert(this->value_ != nullptr);
         return *(this->value_);
@@ -175,9 +186,8 @@ public:
 private:
     void internal_destroy() {
         if (this->value_) {
-            if (this->deleter_) {
-                this->deleter_(this->value_, sizeof(element_type));
-            }
+            assert(this->deleter_);
+            this->deleter_(this->value_, sizeof(element_type));
             this->value_ = nullptr;
         }
     }
@@ -213,6 +223,18 @@ private:
 public:
     element_type * value() const { return this->value_; }
     element_type * deleter() const { return this->deleter_; }
+
+    template <typename ...Args>
+    JM_FORCEINLINE void create_new(Args && ... args) {
+        if (!this->shifted_) {
+            if (this->value_) {
+                assert(this->deleter_);
+                this->deleter_(this->value_, sizeof(element_type));
+            }
+        }
+        this->value_ = new element_type(std::forward<Args>(args)...);
+        this->shifted_ = false;
+    }
 
     element_type & get() const {
         assert(this->value_ != nullptr);

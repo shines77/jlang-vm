@@ -328,7 +328,7 @@ public:
                         // It's a whitespaces
 #ifndef NDEBUG
                         if (likely(scanner_.isNewLine(ch))) {
-                            ch = ch;    // Only for debug test
+                            ch = ch;    // Just for debug only.
                         }
 #endif
                     }
@@ -908,6 +908,37 @@ public:
         Error ec;
         uint8_t ch = scanner_.getu();
         if (likely(ch == '{')) {
+            // It's a function body
+            scanner_.next();
+
+            ec = parseFunctionBody();
+        }
+        else if (likely(ch == ';')) {
+            // It's a function declaration.
+            scanner_.next();
+
+            // TODO: Append the function declaration.
+        }
+        else {
+            // Error
+            scanner_.next();
+            ec = Error::IllegalFunctionBody;
+        }
+        return ec;
+    }
+
+    Error parseFunctionBodyWrapper_N() {
+        Error ec;
+parseStart:
+        uint8_t ch = scanner_.getu();
+        if (likely(scanner_.isWhiteSpaces(ch))) {
+            // It's a whitespace
+            scanner_.next();
+            scanner_.skipWhiteSpaces();
+
+            goto parseStart;
+        }
+        else if (likely(ch == '{')) {
             // It's a function body
             scanner_.next();
 
@@ -3527,7 +3558,7 @@ NextToken_Continue:
         return (ec == Error::Ok);
     }
 
-    ScriptNodePtr createScriptNode() {
+    JM_FORCEINLINE ScriptNodePtr createScriptNode() {
         return ScriptNodePtr(new ScriptNode()); 
     }
 
@@ -3540,7 +3571,8 @@ NextToken_Continue:
         TokenInfo ti;
         bool isEof = false;
 
-        ScriptNodePtr node = createScriptNode();
+        ScriptNodePtr node(new ScriptNode());
+        node.create_new();
         node.append(nullptr);
 
         while (scanner_.has_next()) {
