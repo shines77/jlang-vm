@@ -79,15 +79,15 @@ class StopWatchBase {
 public:
     typedef T                                   implementer;
     typedef typename implementer::time_float_t  time_float_t;
-    typedef typename implementer::time_stamp_t  time_stamp_t;
     typedef typename implementer::time_point_t  time_point_t;
+    typedef typename implementer::time_stamp_t  time_stamp_t;
     typedef typename implementer::duration_type duration_type;
 
 private:
     time_point_t start_time_;
     time_point_t stop_time_;
 
-    static time_point_t base_time_;
+    static time_point_t s_start_time;
 
     // 1 second = 1000 millisecond
     static time_float_t kMillisecCoff;      // static_cast<time_float_t>(1000.0);
@@ -129,7 +129,7 @@ public:
 
     static time_stamp_t timestamp() {
         __COMPILER_BARRIER();
-        time_stamp_t _timestamp = implementer::timestamp(implementer::now(), base_time_);
+        time_stamp_t _timestamp = implementer::timestamp(this_type::s_start_time);
         __COMPILER_BARRIER();
         return _timestamp;
     }
@@ -142,7 +142,7 @@ public:
         return _duration;
     }
 
-    time_float_t peekElapsedSecond() const {
+    time_float_t peekElapsedTime() const {
         __COMPILER_BARRIER();
         time_float_t elapsed_time = implementer::duration_time(implementer::now(), start_time_);
         __COMPILER_BARRIER();
@@ -150,10 +150,10 @@ public:
     }
 
     time_float_t peekElapsedMillisec() const {
-        return (this->peekElapsedSecond() * kMillisecCoff);
+        return (this->peekElapsedTime() * kMillisecCoff);
     }
 
-    time_float_t getElapsedSecond() {
+    time_float_t getElapsedTime() {
         __COMPILER_BARRIER();
         time_float_t elapsed_time = implementer::duration_time(stop_time_, start_time_);
         __COMPILER_BARRIER();
@@ -161,13 +161,13 @@ public:
     }
 
     time_float_t getElapsedMillisec() {
-        return (this->getElapsedSecond() * kMillisecCoff);
+        return (this->getElapsedTime() * kMillisecCoff);
     }
 };
 
 template <typename T>
 typename StopWatchBase<T>::time_point_t
-StopWatchBase<T>::base_time_ = StopWatchBase<T>::implementer::now();
+StopWatchBase<T>::s_start_time = StopWatchBase<T>::implementer::now();
 
 // 1 second = 1000 millisec
 template <typename T>
@@ -180,8 +180,8 @@ public:
     typedef T                                   implementer;
     typedef StopWatchExBase<T>                  this_type;
     typedef typename implementer::time_float_t  time_float_t;
-    typedef typename implementer::time_stamp_t  time_stamp_t;
     typedef typename implementer::time_point_t  time_point_t;
+    typedef typename implementer::time_stamp_t  time_stamp_t;
     typedef typename implementer::duration_type duration_type;
 
 private:
@@ -191,7 +191,7 @@ private:
     time_float_t total_elapsed_time_;
     bool         running_;
 
-    static time_point_t base_time_;
+    static time_point_t s_start_time;
 
     // The zero value time.
     static time_float_t kTimeZero;      // static_cast<time_float_t>(0.0);
@@ -295,7 +295,7 @@ public:
 
     static time_stamp_t timestamp() {
         __COMPILER_BARRIER();
-        time_stamp_t _timestamp = implementer::timestamp(implementer::now(), this_type::base_time_);
+        time_stamp_t _timestamp = implementer::timestamp(this_type::s_start_time);
         __COMPILER_BARRIER();
         return _timestamp;
     }
@@ -315,54 +315,43 @@ public:
         return _duration_time;
     }
 
-    time_float_t getDurationSecond() {
-        __COMPILER_BARRIER();
-        if (!running_) {
-            this->elapsed_time_ = this->getDurationTime();
-        }
-        return this->elapsed_time_;
-    }
-
-    time_float_t getDurationMillisec() {
-        return (this->getDurationSecond() * kMillisecCoff);
-    }
-
-    time_float_t peekSecond() const {
+    time_float_t peekElapsedTime() const {
         __COMPILER_BARRIER();
         time_float_t elapsed_time = implementer::duration_time(implementer::now(), start_time_);
         __COMPILER_BARRIER();
         return elapsed_time;
     }
 
-    time_float_t peekMillisec() const {
-        return (this->peekSecond() * kMillisecCoff);
+    time_float_t peekElapsedMillisec() const {
+        return (this->peekElapsedTime() * kMillisecCoff);
     }
 
-    time_float_t getSecond() {
+    time_float_t getElapsedTime() {
         __COMPILER_BARRIER();
         stop();
         __COMPILER_BARRIER();
         return this->elapsed_time_;
     }
 
-    time_float_t getMillisec() {
-        return (this->getSecond() * kMillisecCoff);
+    time_float_t getElapsedMillisec() {
+        return (this->getElapsedTime() * kMillisecCoff);
     }
 
-    time_float_t getTotalSecond() const {
+    time_float_t getTotalTime() const {
+        assert(running_ == false);
         __COMPILER_BARRIER();
         return this->total_elapsed_time_;
     }
 
     time_float_t getTotalMillisec() const {
         __COMPILER_BARRIER();
-        return (this->total_elapsed_time_ * kMillisecCoff);
+        return (this->getTotalTime() * kMillisecCoff);
     }
 };
 
 template <typename T>
 typename StopWatchExBase<T>::time_point_t
-StopWatchExBase<T>::base_time_ = StopWatchExBase<T>::implementer::now();
+StopWatchExBase<T>::s_start_time = StopWatchExBase<T>::implementer::now();
 
 // The zero value time.
 template <typename T>
@@ -376,12 +365,12 @@ StopWatchExBase<T>::kMillisecCoff = static_cast<typename StopWatchExBase<T>::tim
 
 #if !defined(_MSC_VER) || (_MSC_VER >= 1800)
 
-template <typename TimeFloatTy>
+template <typename T>
 class StdStopWatchImpl {
 public:
-    typedef TimeFloatTy                                     time_float_t;
-    typedef double                                          time_stamp_t;
+    typedef T                                               time_float_t;
     typedef std::chrono::time_point<high_resolution_clock>  time_point_t;
+    typedef double                                          time_stamp_t;
     typedef std::chrono::duration<time_stamp_t>             duration_type;
 
 public:
@@ -401,8 +390,8 @@ public:
         return _duration_time.count();
     }
 
-    static time_stamp_t timestamp(time_point_t now_time, time_point_t base_time) {
-        return static_cast<time_stamp_t>(duration_time(now_time, base_time));
+    static time_stamp_t timestamp(time_point_t start_time) {
+        return static_cast<time_stamp_t>(duration_time(this->now(), start_time));
     }
 };
 
@@ -413,13 +402,13 @@ typedef StopWatchExBase< StdStopWatchImpl<double> >     StopWatchEx;
 
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_)
 
-template <typename TimeFloatTy>
+template <typename T>
 class timeGetTimeImpl {
 public:
-    typedef TimeFloatTy     time_float_t;
-    typedef DWORD           time_stamp_t;
-    typedef DWORD           time_point_t;
-    typedef time_float_t    duration_type;
+    typedef T       time_float_t;
+    typedef DWORD   time_point_t;
+    typedef DWORD   time_stamp_t;
+    typedef T       duration_type;
 
 public:
     timeGetTimeImpl() {}
@@ -434,8 +423,8 @@ public:
         return (static_cast<time_float_t>(_duration_time) / static_cast<time_float_t>(1000));
     }
 
-    static time_stamp_t timestamp(time_point_t now_time, time_point_t base_time) {
-        return now_time;
+    static time_stamp_t timestamp(time_point_t start_time) {
+        return static_cast<time_stamp_t>(this->now());
     }
 };
 
@@ -451,13 +440,13 @@ typedef StopWatchExBase< StdStopWatchImpl<double> > timeGetTimeStopWatchEx;
 
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_)
 
-template <typename TimeFloatTy>
+template <typename T>
 class getTickCountImpl {
 public:
-    typedef TimeFloatTy     time_float_t;
-    typedef DWORD           time_stamp_t;
-    typedef DWORD           time_point_t;
-    typedef time_float_t    duration_type;
+    typedef T       time_float_t;
+    typedef DWORD   time_point_t;
+    typedef DWORD   time_stamp_t;
+    typedef T       duration_type;
 
 public:
     getTickCountImpl() {}
@@ -472,8 +461,8 @@ public:
         return (static_cast<time_float_t>(_duration_time) / static_cast<time_float_t>(1000));
     }
 
-    static time_stamp_t timestamp(time_point_t now_time, time_point_t base_time) {
-        return now_time;
+    static time_stamp_t timestamp(time_point_t start_time) {
+        return static_cast<time_stamp_t>(this->now());
     }
 };
 
