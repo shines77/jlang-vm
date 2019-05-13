@@ -38,7 +38,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileSystem.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jlang.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\jstd\allocator.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\min_max.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\jstd\onetime_ptr.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\Singleton.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\SmallString.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Char.h" />
