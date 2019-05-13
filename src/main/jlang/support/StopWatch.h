@@ -83,6 +83,8 @@ public:
     typedef typename implementer::time_stamp_t  time_stamp_t;
     typedef typename implementer::duration_type duration_type;
 
+    typedef StopWatchBase<T> this_type;
+
 private:
     time_point_t start_time_;
     time_point_t stop_time_;
@@ -137,14 +139,14 @@ public:
     template <typename U>
     static detail::duration_time<time_float_t> duration(U now, U old) {
         __COMPILER_BARRIER();
-        detail::duration_time<time_float_t> _duration(implementer::duration_time(now, old));
+        detail::duration_time<time_float_t> _duration(implementer::duration_cast(now, old));
         __COMPILER_BARRIER();
         return _duration;
     }
 
     time_float_t peekElapsedTime() const {
         __COMPILER_BARRIER();
-        time_float_t elapsed_time = implementer::duration_time(implementer::now(), start_time_);
+        time_float_t elapsed_time = implementer::duration_cast(implementer::now(), start_time_);
         __COMPILER_BARRIER();
         return elapsed_time;
     }
@@ -155,7 +157,7 @@ public:
 
     time_float_t getElapsedTime() {
         __COMPILER_BARRIER();
-        time_float_t elapsed_time = implementer::duration_time(stop_time_, start_time_);
+        time_float_t elapsed_time = implementer::duration_cast(stop_time_, start_time_);
         __COMPILER_BARRIER();
         return elapsed_time;
     }
@@ -303,21 +305,21 @@ public:
     template <typename U>
     static detail::duration_time<time_float_t> duration(U now, U old) {
         __COMPILER_BARRIER();
-        detail::duration_time<time_float_t> _duration(implementer::duration_time(now, old));
+        detail::duration_time<time_float_t> _duration(implementer::duration_cast(now, old));
         __COMPILER_BARRIER();
         return _duration;
     }
 
     time_float_t getDurationTime() const {
         __COMPILER_BARRIER();
-        detail::duration_time<time_float_t> _duration_time = implementer::duration_time(stop_time_, start_time_);
+        detail::duration_time<time_float_t> _duration_time = implementer::duration_cast(stop_time_, start_time_);
         __COMPILER_BARRIER();
         return _duration_time;
     }
 
     time_float_t peekElapsedTime() const {
         __COMPILER_BARRIER();
-        time_float_t elapsed_time = implementer::duration_time(implementer::now(), start_time_);
+        time_float_t elapsed_time = implementer::duration_cast(implementer::now(), start_time_);
         __COMPILER_BARRIER();
         return elapsed_time;
     }
@@ -371,7 +373,7 @@ public:
     typedef T                                               time_float_t;
     typedef std::chrono::time_point<high_resolution_clock>  time_point_t;
     typedef double                                          time_stamp_t;
-    typedef std::chrono::duration<time_stamp_t>             duration_type;
+    typedef std::chrono::duration<time_float_t>             duration_type;
 
 public:
     StdStopWatchImpl() {}
@@ -381,17 +383,17 @@ public:
         return std::chrono::high_resolution_clock::now();
     }
 
-    static time_float_t duration_time(time_stamp_t now_time, time_stamp_t old_time) {
+    static time_float_t duration_cast(time_stamp_t now_time, time_stamp_t old_time) {
         return static_cast<time_float_t>(now_time - old_time);
     }
 
-    static time_float_t duration_time(time_point_t now_time, time_point_t old_time) {
-        duration_type _duration_time = std::chrono::duration_cast<duration_type>(now_time - old_time);
-        return _duration_time.count();
+    static time_float_t duration_cast(time_point_t now_time, time_point_t old_time) {
+        duration_type duration_time = std::chrono::duration_cast<duration_type>(now_time - old_time);
+        return duration_time.count();
     }
 
     static time_stamp_t timestamp(time_point_t start_time) {
-        return static_cast<time_stamp_t>(duration_time(this->now(), start_time));
+        return static_cast<time_stamp_t>(duration_cast(StdStopWatchImpl<T>::now(), start_time));
     }
 };
 
@@ -418,13 +420,12 @@ public:
         return ::timeGetTime();
     }
 
-    static time_float_t duration_time(time_point_t now_time, time_point_t old_time) {
-        time_point_t _duration_time = now_time - old_time;
-        return (static_cast<time_float_t>(_duration_time) / static_cast<time_float_t>(1000));
+    static time_float_t duration_cast(time_point_t now_time, time_point_t old_time) {
+        return (static_cast<time_float_t>(now_time - old_time) / static_cast<time_float_t>(1000.0));
     }
 
     static time_stamp_t timestamp(time_point_t start_time) {
-        return static_cast<time_stamp_t>(this->now());
+        return static_cast<time_stamp_t>(timeGetTimeImpl<T>::now());
     }
 };
 
@@ -456,13 +457,12 @@ public:
         return ::GetTickCount();
     }
 
-    static time_float_t duration_time(time_point_t now_time, time_point_t old_time) {
-        time_point_t _duration_time = now_time - old_time;
-        return (static_cast<time_float_t>(_duration_time) / static_cast<time_float_t>(1000));
+    static time_float_t duration_cast(time_point_t now_time, time_point_t old_time) {
+        return (static_cast<time_float_t>(now_time - old_time) / static_cast<time_float_t>(1000.0));
     }
 
     static time_stamp_t timestamp(time_point_t start_time) {
-        return static_cast<time_stamp_t>(this->now());
+        return static_cast<time_stamp_t>(getTickCountImpl<T>::now());
     }
 };
 
