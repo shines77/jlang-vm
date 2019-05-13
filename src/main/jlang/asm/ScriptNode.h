@@ -35,16 +35,16 @@ struct pure_type {
 template <typename T>
 class onetime_ptr : public pure_type<T>::type {
 public:
-    typedef typename pure_type<T>::type element_type;
+    typedef typename pure_type<T>::type value_type;
 
-    typedef std::function<void(element_type *, size_t)> deleter_type;
+    typedef std::function<void(value_type *, size_t)> deleter_type;
 
 protected:
-    element_type * value_;
+    value_type * value_;
     bool shifted_;
 
 public:
-    onetime_ptr(element_type * value = nullptr) : value_(value), shifted_(false) {}
+    onetime_ptr(value_type * value = nullptr) : value_(value), shifted_(false) {}
     onetime_ptr(onetime_ptr & src) {
         this->assign(src);
     }
@@ -60,7 +60,7 @@ public:
         return *this;
     }
 
-    onetime_ptr & operator = (element_type * value) {
+    onetime_ptr & operator = (value_type * value) {
         this->copy_from(value);
         return *this;
     }
@@ -87,14 +87,14 @@ private:
         src.set_shifted();
     }
 
-    void assign(element_type * value) {
+    void assign(value_type * value) {
         assert((value == nullptr) || (value != nullptr && value != this->value));
         this->value_ = value;
         this->shifted_ = false;
     }
 
 public:
-    element_type * value() const { return this->value_; }
+    value_type * value() const { return this->value_; }
 
     template <typename ...Args>
     JM_FORCEINLINE void create_new(Args && ... args) {
@@ -103,16 +103,16 @@ public:
                 delete this->value_;
             }
         }
-        this->value_ = new element_type(std::forward<Args>(args)...);
+        this->value_ = new value_type(std::forward<Args>(args)...);
         this->shifted_ = false;
     }
 
-    element_type & get() const {
+    value_type & get() const {
         assert(this->value_ != nullptr);
         return *(this->value_);
     }
 
-    void reset(element_type * value = nullptr) {
+    void reset(value_type * value = nullptr) {
         if (value != this->value_) {
             this->destroy();
             this->assign(value);
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    void copy_from(element_type * value) {
+    void copy_from(value_type * value) {
         if (value != nullptr) {
             if (value != this->value_) {
                 this->destroy();
@@ -147,31 +147,30 @@ public:
         this->shifted_ = isShifted;
     }
 
-    element_type * shift() {
+    value_type * shift() {
         this->shifted_ = true;
         return this->value_;
     }
 };
 
 inline
-void * _Allocate(std::size_t element_count, std::size_t element_size,
+void * _Allocate(std::size_t size,
 		         bool try_aligned_allocation = true,
                  std::size_t alignment = 8) {
     void * ptr = nullptr;
 
-    if (element_count == 0)
+    if (size == 0)
         return ptr;
 
-    const std::size_t total_size = element_size * element_count;
     if (try_aligned_allocation) {
 #ifdef _WIN32
-        ptr = _aligned_malloc(total_size, alignment);
+        ptr = _aligned_malloc(size, alignment);
 #else
-        ptr = memalign(alignment, total_size);
+        ptr = memalign(alignment, size);
 #endif
     }
     else {
-        ptr = ::operator new(total_size);
+        ptr = ::operator new(size);
     }
     return ptr;
 }
@@ -219,16 +218,25 @@ public:
         return std::addressof(value);
     }
 
-    pointer allocate(size_type count) {
-        // TODO:
-        return static_cast<pointer>(_Allocate(count, sizeof(value_type)));
+    inline pointer allocate() {
+        static_cast<pointer>(_Allocate(sizeof(value_type)));
     }
 
-    pointer allocate(size_type count, const void *) {
+    inline pointer allocate(size_type count) {
+        // TODO:
+        return static_cast<pointer>(_Allocate(count * sizeof(value_type)));
+    }
+
+    inline pointer allocate(size_type count, const void *) {
         return this->allocate(count);
     }
 
-    void deallocate(pointer ptr, size_type count) {
+    inline void deallocate(pointer ptr) {
+        // TODO:
+        //_Deallocate(ptr, sizeof(value_type));
+    }
+
+    inline void deallocate(pointer ptr, size_type count) {
         // TODO:
         //_Deallocate(ptr, count, sizeof(value_type));
     }
@@ -284,18 +292,19 @@ public:
 template <typename T, typename Allocator = allocator<T>>
 class custom_onetime_ptr : public pure_type<T>::type {
 public:
-    typedef typename pure_type<T>::type     element_type;
+    typedef typename pure_type<T>::type     value_type;
     typedef Allocator                       allocator_type;
 
-    typedef std::function<void(element_type *, size_t)> deleter_type;
+    typedef std::function<void(value_type *, size_t)> deleter_type;
+    typedef custom_onetime_ptr
 
 protected:
-    element_type * value_;
+    value_type * value_;
     bool shifted_;
     allocator_type allocator_;
 
 public:
-    custom_onetime_ptr(element_type * value = nullptr) : value_(value), shifted_(false) {}
+    custom_onetime_ptr(value_type * value = nullptr) : value_(value), shifted_(false) {}
     custom_onetime_ptr(custom_onetime_ptr & src) {
         this->assign(src);
     }
@@ -311,7 +320,7 @@ public:
         return *this;
     }
 
-    custom_onetime_ptr & operator = (element_type * value) {
+    custom_onetime_ptr & operator = (value_type * value) {
         this->copy_from(value);
         return *this;
     }
@@ -320,7 +329,7 @@ private:
     void internal_destroy() {
         if (this->value_) {
             assert(this->deleter_);
-            this->allocator_.destroy(this->value_, sizeof(element_type));
+            this->allocator_.destroy(this->value_, sizeof(value_type));
             this->value_ = nullptr;
         }
     }
@@ -340,13 +349,13 @@ private:
         src.set_shifted();
     }
 
-    void assign(element_type * value) {
+    void assign(value_type * value) {
         assert((value == nullptr) || (value != nullptr && value != this->value));
         this->value_ = value;
         this->shifted_ = false;
     }
 
-    void assign(element_type * value, const deleter_type & deleter) {
+    void assign(value_type * value, const deleter_type & deleter) {
         assert((value == nullptr) || (value != nullptr && value != this->value));
         this->value_ = value;
         this->shifted_ = false;
@@ -354,32 +363,33 @@ private:
     }
 
 public:
-    element_type * value() const { return this->value_; }
+    value_type * value() const { return this->value_; }
 
     template <typename ...Args>
     JM_FORCEINLINE void create_new(Args && ... args) {
         if (!this->shifted_) {
             if (this->value_) {
-                this->allocator_.destroy(this->value_, sizeof(element_type));
+                this->allocator_.destroy(this->value_, sizeof(value_type));
             }
         }
-        this->value_ = new element_type(std::forward<Args>(args)...);
+        //this->value_ = new value_type(std::forward<Args>(args)...);
+        this->value_ = this->allocator_.create(std::forward<Args>(args)...);
         this->shifted_ = false;
     }
 
-    element_type & get() const {
+    value_type & get() const {
         assert(this->value_ != nullptr);
         return *(this->value_);
     }
 
-    void reset(element_type * value = nullptr) {
+    void reset(value_type * value = nullptr) {
         if (value != this->value_) {
             this->destroy();
             this->assign(value);
         }
     }
 
-    void reset(element_type * value, const deleter_type & deleter) {
+    void reset(value_type * value, const deleter_type & deleter) {
         if (value != this->value_) {
             this->destroy();
             this->assign(value, deleter);
@@ -393,7 +403,7 @@ public:
         }
     }
 
-    void copy_from(element_type * value) {
+    void copy_from(value_type * value) {
         if (value != nullptr) {
             if (value != this->value_) {
                 this->destroy();
@@ -414,7 +424,7 @@ public:
         this->shifted_ = isShifted;
     }
 
-    element_type * shift() {
+    value_type * shift() {
         this->shifted_ = true;
         return this->value_;
     }
