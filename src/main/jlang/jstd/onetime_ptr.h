@@ -35,6 +35,7 @@ template <typename T>
 class onetime_ptr : public pure_type<T>::type {
 public:
     typedef typename pure_type<T>::type value_type;
+    typedef std::size_t                 size_type;
     typedef onetime_ptr<T>              this_type;
 
 protected:
@@ -155,6 +156,7 @@ template <typename T, typename Assigner = generic_assigner<T>>
 class custom_onetime_ptr : public pure_type<T>::type {
 public:
     typedef typename pure_type<T>::type         value_type;
+    typedef std::size_t                         size_type;
     typedef Assigner                            assigner_type;
     typedef custom_onetime_ptr<T, Assigner>     this_type;
 
@@ -164,7 +166,9 @@ protected:
     assigner_type assigner_;
 
 public:
-    custom_onetime_ptr(value_type * value = nullptr) : value_(value), shifted_(false) {}
+    custom_onetime_ptr(bool createNew = true) : value_(nullptr), shifted_(false) {
+        this->internal_create_new();
+    }
     custom_onetime_ptr(this_type & src) {
         this->assign(src);
     }
@@ -186,9 +190,15 @@ public:
     }
 
 private:
+    template <typename ...Args>
+    JM_FORCEINLINE void internal_create_new(Args && ... args) {
+        this->value_ = this->assigner_.create(std::forward<Args>(args)...);
+        this->shifted_ = false;
+    }
+
     void internal_destroy() {
         if (this->value_) {
-            this->assigner_.destroy_array(this->value_, 1);
+            this->assigner_.destroy(this->value_);
             this->value_ = nullptr;
         }
     }
@@ -220,10 +230,21 @@ public:
     JM_FORCEINLINE void create_new(Args && ... args) {
         if (!this->shifted_) {
             if (this->value_) {
-                this->assigner_.destroy_array(this->value_, 1);
+                this->assigner_.destroy(this->value_);
             }
         }
-        this->value_ = this->assigner_.create_array(1, std::forward<Args>(args)...);
+        this->value_ = this->assigner_.create(std::forward<Args>(args)...);
+        this->shifted_ = false;
+    }
+
+    template <typename ...Args>
+    JM_FORCEINLINE void create_new_array(size_type count, Args && ... args) {
+        if (!this->shifted_) {
+            if (this->value_) {
+                this->assigner_.destroy_array(this->value_, count);
+            }
+        }
+        this->value_ = this->assigner_.create_array(count, std::forward<Args>(args)...);
         this->shifted_ = false;
     }
 

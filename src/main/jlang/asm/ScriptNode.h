@@ -34,10 +34,10 @@ private:
 
 public:
     ScriptNode() : inited_(false) {
-        init();
+        this->init();
     }
     virtual ~ScriptNode() {
-        destroy();
+        this->destroy();
     }
 
     bool isInited() const { return inited_; }

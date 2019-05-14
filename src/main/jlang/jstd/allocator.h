@@ -230,7 +230,7 @@ struct generic_assigner {
     static const size_type kAlignment = Alignment;
 
     generic_assigner() {}
-    ~generic_assigner() {}
+    virtual ~generic_assigner() {}
 
     inline pointer create() {
         pointer ptr = ::new value_type();
@@ -308,7 +308,7 @@ public:
         return *this;
     }
 
-    ~generic_allocator() {}
+    virtual ~generic_allocator() {}
 
     size_type alignment() const { return kAlignment; }
 

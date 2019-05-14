@@ -3559,7 +3559,7 @@ NextToken_Continue:
     }
 
     JM_FORCEINLINE ScriptNodePtr createScriptNode() {
-        return ScriptNodePtr(new ScriptNode()); 
+        return ScriptNodePtr(true);
     }
 
     // EBNF: Script = { Include | Preprocessing | Comment | Function | FunctionDeclaration
@@ -3571,7 +3571,7 @@ NextToken_Continue:
         TokenInfo ti;
         bool isEof = false;
 
-        ScriptNodePtr node(new ScriptNode());
+        ScriptNodePtr node;
         node.create_new();
         node.append(nullptr);
 
