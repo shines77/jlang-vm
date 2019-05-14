@@ -38,20 +38,14 @@ void * _Allocate(std::size_t size) {
 // TODO: _Deallocate()
 
 inline
-void _Deallocate(void * p, std::size_t element_size = 0) {
+void _Deallocate(void * p, std::size_t size = 0) {
     ::free(p);
-}
-
-inline
-void _Deallocate(void * p, std::size_t count, std::size_t element_size) {
-    _Deallocate(p, count * element_size);
 }
 
 // TODO: _AlignedAllocate()
 
 inline
-void * _AlignedAllocate(std::size_t size,
-                 std::size_t alignment = 8) {
+void * _AlignedAllocate(std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) {
     void * ptr = nullptr;
     if (likely(size != 0)) {
 #ifdef _WIN32
@@ -66,17 +60,12 @@ void * _AlignedAllocate(std::size_t size,
 // TODO: _AlignedDeallocate()
 
 inline
-void _AlignedDeallocate(void * p, std::size_t element_size = 0) {
+void _AlignedDeallocate(void * p, std::size_t size = 0) {
 #ifdef _WIN32
     ::_aligned_free(p);
 #else
     ::free(p);
 #endif
-}
-
-inline
-void _AlignedDeallocate(void * p, std::size_t count, std::size_t element_size) {
-    _AlignedDeallocate(p, count * element_size);
 }
 
 template <typename T>
@@ -146,10 +135,6 @@ public:
             return static_cast<pointer>(_Allocate(count * sizeof(value_type)));
     }
 
-    inline pointer allocate(size_type count, const void *) {
-        return this->allocate(count, kAlignment);
-    }
-
     inline void deallocate(pointer ptr) {
         if (kAlignment != 0)
             _AlignedDeallocate(ptr, sizeof(value_type));
@@ -159,9 +144,9 @@ public:
 
     inline void deallocate(pointer ptr, size_type count) {
         if (kAlignment != 0)
-            _AlignedDeallocate(ptr, count, sizeof(value_type));
+            _AlignedDeallocate(ptr, count * sizeof(value_type));
         else
-            _Deallocate(ptr, count, sizeof(value_type));
+            _Deallocate(ptr, count * sizeof(value_type));
     }
 
     inline void constructor(pointer ptr) {
@@ -191,8 +176,21 @@ public:
 
     template <typename ...Args>
     inline pointer create(Args && ... args) {
-        pointer ptr = this->allocate(std::forward<Args>(args)...);
+        pointer ptr = this->allocate();
+        this->constructor(ptr, std::forward<Args>(args)...);
+        return ptr;
+    }
+
+    inline pointer create_array(size_type count) {
+        pointer ptr = this->allocate(count);
         this->constructor(ptr);
+        return ptr;
+    }
+
+    template <typename ...Args>
+    inline pointer create_array(size_type count, Args && ... args) {
+        pointer ptr = this->allocate(count);
+        this->constructor(ptr, std::forward<Args>(args)...);
         return ptr;
     }
 
@@ -202,7 +200,7 @@ public:
         this->deallocate(ptr);
     }
     
-    inline void destroy(pointer ptr, size_type count) {
+    inline void destroy_array(pointer ptr, size_type count) {
         assert(ptr != nullptr);
         for (size_type i = count; i != 0; --i) {
             this->destructor(ptr);
@@ -218,6 +216,58 @@ public:
 };
 
 template <typename T, std::size_t Alignment = minimum_alignment<T>::value>
+struct generic_assigner {
+    typedef typename std::remove_const<
+                typename std::remove_pointer<T>::type
+            >::type value_type;
+
+    typedef value_type *        pointer;
+    typedef const value_type *  const_pointer;
+
+    typedef std::size_t         size_type;
+
+    // TODO: kAlignment = round_to_power2(Alignment);
+    static const size_type kAlignment = Alignment;
+
+    generic_assigner() {}
+    ~generic_assigner() {}
+
+    inline pointer create() {
+        pointer ptr = ::new value_type();
+        return ptr;
+    }
+
+    template <typename ...Args>
+    inline pointer create(Args && ... args) {
+        pointer ptr = ::new value_type(std::forward<Args>(args)...);
+        return ptr;
+    }
+
+    inline pointer create_array(size_type count) {
+        pointer ptr = ::new value_type[count]();
+        return ptr;
+    }
+
+    template <typename ...Args>
+    inline pointer create_array(size_type count, Args && ... args) {
+        pointer ptr = ::new value_type[count](std::forward<Args>(args)...);
+        return ptr;
+    }
+
+    inline void destroy(pointer ptr) {
+        assert(ptr != nullptr);
+        ::delete ptr;
+    }
+    
+    inline void destroy_array(pointer ptr, size_type count) {
+        assert(ptr != nullptr);
+        ::delete[] ptr;
+    }
+};
+
+template <typename T, std::size_t Alignment = minimum_alignment<T>::value,
+          typename Assigner = generic_assigner<T, Alignment>
+         >
 class generic_allocator {
 public:
     typedef typename std::remove_const<
@@ -236,10 +286,15 @@ public:
     typedef true_type           propagate_on_container_move_assignment;
     typedef true_type           is_always_equal;
 
+    typedef Assigner            assigner_type;
+
     typedef generic_allocator<T, Alignment> this_type;
 
     // TODO: kAlignment = round_to_power2(Alignment);
     static const size_type kAlignment = Alignment;
+
+protected:
+    assigner_type assigner_;
 
 public:
     generic_allocator() {}
@@ -266,24 +321,29 @@ public:
     }
 
     inline pointer create() {
-        pointer ptr = ::new value_type();
-        return ptr;
+        return assigner_.create();
     }
 
     template <typename ...Args>
     inline pointer create(Args && ... args) {
-        pointer ptr = ::new value_type(std::forward<Args>(args)...);
-        return ptr;
+        return assigner_.create(std::forward<Args>(args)...);
+    }
+
+    inline pointer create_array(size_type count) {
+        return assigner_.create_array(count);
+    }
+
+    template <typename ...Args>
+    inline pointer create_array(size_type count, Args && ... args) {
+        return assigner_.create_array(count, std::forward<Args>(args)...);
     }
 
     inline void destroy(pointer ptr) {
-        assert(ptr != nullptr);
-        delete ptr;
+        assigner_.destroy(ptr);
     }
     
-    inline void destroy(pointer ptr, size_type count) {
-        assert(ptr != nullptr);
-        delete[] ptr;
+    inline void destroy_array(pointer ptr, size_type count) {
+        assigner_.destroy_array(ptr, count);
     }
 
     size_type max_size() const {

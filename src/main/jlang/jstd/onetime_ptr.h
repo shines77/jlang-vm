@@ -151,17 +151,17 @@ public:
     }
 };
 
-template <typename T, typename Allocator = generic_allocator<T>>
+template <typename T, typename Assigner = generic_assigner<T>>
 class custom_onetime_ptr : public pure_type<T>::type {
 public:
     typedef typename pure_type<T>::type         value_type;
-    typedef Allocator                           allocator_type;
-    typedef custom_onetime_ptr<T, Allocator>    this_type;
+    typedef Assigner                            assigner_type;
+    typedef custom_onetime_ptr<T, Assigner>     this_type;
 
 protected:
     value_type * value_;
     bool shifted_;
-    allocator_type allocator_;
+    assigner_type assigner_;
 
 public:
     custom_onetime_ptr(value_type * value = nullptr) : value_(value), shifted_(false) {}
@@ -188,7 +188,7 @@ public:
 private:
     void internal_destroy() {
         if (this->value_) {
-            this->allocator_.destroy(this->value_, sizeof(value_type));
+            this->assigner_.destroy_array(this->value_, 1);
             this->value_ = nullptr;
         }
     }
@@ -220,10 +220,10 @@ public:
     JM_FORCEINLINE void create_new(Args && ... args) {
         if (!this->shifted_) {
             if (this->value_) {
-                this->allocator_.destroy(this->value_, sizeof(value_type));
+                this->assigner_.destroy_array(this->value_, 1);
             }
         }
-        this->value_ = this->allocator_.create(std::forward<Args>(args)...);
+        this->value_ = this->assigner_.create_array(1, std::forward<Args>(args)...);
         this->shifted_ = false;
     }
 

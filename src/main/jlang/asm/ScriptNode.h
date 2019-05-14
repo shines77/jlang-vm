@@ -59,7 +59,7 @@ public:
     }
 };
 
-typedef jstd::onetime_ptr<ScriptNode> ScriptNodePtr;
+typedef jstd::custom_onetime_ptr<ScriptNode> ScriptNodePtr;
 
 } // namespace jasm
 } // namespace jlang
