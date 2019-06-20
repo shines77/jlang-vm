@@ -74,14 +74,22 @@ void test_Fibonacci32()
     printf("  test_Fibonacci32()  [native]\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -105,14 +113,22 @@ void test_Fibonacci64()
     printf("  test_Fibonacci64()  [native]\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -136,14 +152,22 @@ void test_Interpreter_v1()
     printf("  test_Interpreter_v1()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -183,14 +207,22 @@ void test_Interpreter_v2()
     printf("  test_Interpreter_v2()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -230,14 +262,22 @@ void test_Interpreter_v3()
     printf("  test_Interpreter_v3()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -277,14 +317,22 @@ void test_Interpreter_v3_inline()
     printf("  test_Interpreter_v3_inline()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -324,14 +372,22 @@ void test_Interpreter_v4()
     printf("  test_Interpreter_v4()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);
@@ -371,14 +427,22 @@ void test_Interpreter_v4_inline()
     printf("  test_Interpreter_v4_inline()\n");
     printf("--------------------------------------------\n\n");
 
-    uint32_t n;
-    printf("n = ? ");
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
 #if defined(_WIN32)
-    int r = scanf_s("%u", &n);
+        int r = scanf_s("%u", &n);
 #else
-    int r = scanf("%u", &n);
+        int r = scanf("%u", &n);
 #endif
-    printf("\n");
+        printf("\n");
+    } while (n > max_n);
 
     // Warm-up CPU for 500 ms.
     cpu_warmup(kWarmupMillsecs);

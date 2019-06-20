@@ -110,10 +110,13 @@ public:
     typedef AsmParser   this_type;
     typedef ParserBase  base_type;
 
+private:
+    int funcId_;
+
 public:
-    AsmParser() : base_type() {}
+    AsmParser() : base_type(), funcId_(0) {}
     AsmParser(const std::string & filename)
-        : base_type(filename) {
+        : base_type(filename), funcId_(0) {
         // Do nothing !!
     }
     virtual ~AsmParser() {}
@@ -328,7 +331,7 @@ public:
                         // It's a whitespaces
 #ifndef NDEBUG
                         if (likely(scanner_.isNewLine(ch))) {
-                            ch = ch;    // Just for debug only.
+                            ch = ch;    // This is a breakpoint just use on debug mode.
                         }
 #endif
                     }
@@ -789,7 +792,7 @@ public:
         return ec;
     }
 
-    Error appendLabelName(const IdentInfo & labelName) {
+    Error appendLabelName(int funcId, const IdentInfo & labelName) {
         Error ec;
         return ec;
     }
@@ -822,7 +825,7 @@ public:
                 scanner_.next();
 
                 // TODO: Append the label name.
-                ec = appendLabelName(instruction);
+                ec = appendLabelName(0, instruction);
             }
             else if (likely(scanner_.isNewLine(ch))) {   // NewLine?
                 ec = parseInstruction(instruction);
@@ -910,6 +913,8 @@ public:
         if (likely(ch == '{')) {
             // It's a function body
             scanner_.next();
+
+            funcId_++;
 
             ec = parseFunctionBody();
         }
@@ -3571,8 +3576,8 @@ NextToken_Continue:
         TokenInfo ti;
         bool isEof = false;
 
-        ScriptNodePtr node;
-        node.create_new();
+        ScriptNodePtr guarder;
+        ScriptNode & node = guarder.get();
         node.append(nullptr);
 
         while (scanner_.has_next()) {
