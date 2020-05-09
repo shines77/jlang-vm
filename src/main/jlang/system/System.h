@@ -19,8 +19,8 @@
 #endif // WIN32
 
 namespace jlang {
+namespace System {
 
-struct System {
     static void sleep(int millisec) {
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
  || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
@@ -38,8 +38,7 @@ struct System {
 #endif
     }
 
-}; // class System
-
+} // namespace System
 } // namespace jlang
 
 #endif // JLANG_SYSTEM_SYSTEM_H

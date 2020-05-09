@@ -2004,14 +2004,14 @@ Parse_Exit:
         return ('0' + ocx);
     } 
 
-    inline char toLowerHexChar(unsigned int dec) const {
-        assert(dec >= 0 && dec < 16);
-        return (dec < 10) ? ('0' + dec) : ('a' + (dec - 10));
+    inline char toLowerHexChar(unsigned int hex) const {
+        assert(hex >= 0 && hex < 16);
+        return (hex < 10) ? ('0' + hex) : ('a' + (hex - 10));
     }
 
-    inline char toUpperHexChar(unsigned int dec) const {
-        assert(dec >= 0 && dec < 16);
-        return (dec < 10) ? ('0' + dec) : ('A' + (dec - 10));
+    inline char toUpperHexChar(unsigned int hex) const {
+        assert(hex >= 0 && hex < 16);
+        return (hex < 10) ? ('0' + hex) : ('A' + (hex - 10));
     }
 
     bool getEscapedChars(unsigned char ch, std::string & chars) const {

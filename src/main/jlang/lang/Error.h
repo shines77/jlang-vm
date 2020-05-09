@@ -133,15 +133,15 @@ public:
     void setValue(int64_t ec)  { ec_ = static_cast<Type>(ec); }
     void setValue(uint64_t ec) { ec_ = static_cast<Type>(ec); }
 
-    bool isEquals(Error ec) const      { return (this->value() == ec.value()); }
+    bool isEquals(Error ec) const          { return (this->value() == ec.value()); }
     bool isEquals(int32_t ec) const        { return (this->value() == ec); }
     bool isEquals(int64_t ec) const        { return (this->value() == static_cast<int32_t>(ec)); }
 
-    bool isLessThan(Error ec) const    { return (this->value() <  ec.value()); }
+    bool isLessThan(Error ec) const        { return (this->value() <  ec.value()); }
     bool isLessThan(int32_t ec) const      { return (this->value() <  ec); }
     bool isLessThan(int64_t ec) const      { return (this->value() <  static_cast<int32_t>(ec)); }
 
-    bool isGreaterThan(Error ec) const { return (this->value() >  ec.value()); }
+    bool isGreaterThan(Error ec) const     { return (this->value() >  ec.value()); }
     bool isGreaterThan(int32_t ec) const   { return (this->value() >  ec); }
     bool isGreaterThan(int64_t ec) const   { return (this->value() >  static_cast<int32_t>(ec)); }
 
