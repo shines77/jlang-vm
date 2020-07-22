@@ -16,14 +16,14 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 #include <memory>
+#include <type_traits>
 #include <functional>
 
 namespace jstd {
 
 template <typename T>
-struct pure_type {
+struct remove_cv_rp {
     typedef typename std::remove_cv<
                 typename std::remove_reference<
                     typename std::remove_pointer<T>::type
@@ -32,15 +32,15 @@ struct pure_type {
 };
 
 template <typename T>
-class onetime_ptr : public pure_type<T>::type {
+class onetime_ptr : public remove_cv_rp<T>::type {
 public:
-    typedef typename pure_type<T>::type value_type;
-    typedef std::size_t                 size_type;
-    typedef onetime_ptr<T>              this_type;
+    typedef typename remove_cv_rp<T>::type  value_type;
+    typedef std::size_t                     size_type;
+    typedef onetime_ptr<T>                  this_type;
 
 protected:
     value_type * value_;
-    bool shifted_;
+    bool         shifted_;
 
 public:
     onetime_ptr(value_type * value = nullptr) : value_(value), shifted_(false) {}
@@ -64,21 +64,7 @@ public:
         return *this;
     }
 
-private:
-    void internal_destroy() {
-        if (this->value_) {
-            delete this->value_;
-            this->value_ = nullptr;
-        }
-    }
-
-    void destroy() {
-        if (!this->shifted_) {
-            this->internal_destroy();
-            this->shifted_ = true;
-        }
-    }
-
+protected:
     void assign(this_type && src) {
         assert(&src != this);
         this->value_ = src.value_;
@@ -90,6 +76,16 @@ private:
         assert((value == nullptr) || (value != nullptr && value != this->value));
         this->value_ = value;
         this->shifted_ = false;
+    }
+
+    void destroy() {
+        if (!this->shifted_) {
+            if (this->value_) {
+                delete this->value_;
+                this->value_ = nullptr;
+            }
+            this->shifted_ = true;
+        }
     }
 
 public:
@@ -152,17 +148,17 @@ public:
     }
 };
 
-template <typename T, typename Assigner = generic_assigner<T>>
-class custom_onetime_ptr : public pure_type<T>::type {
+template < typename T, typename Assigner = generic_assigner<T> >
+class custom_onetime_ptr : public remove_cv_rp<T>::type {
 public:
-    typedef typename pure_type<T>::type         value_type;
+    typedef typename remove_cv_rp<T>::type      value_type;
     typedef std::size_t                         size_type;
     typedef Assigner                            assigner_type;
     typedef custom_onetime_ptr<T, Assigner>     this_type;
 
 protected:
-    value_type * value_;
-    bool shifted_;
+    value_type *  value_;
+    bool          shifted_;
     assigner_type assigner_;
 
 public:
@@ -189,38 +185,34 @@ public:
         return *this;
     }
 
-private:
+protected:
     template <typename ...Args>
     JM_FORCEINLINE void internal_create_new(Args && ... args) {
-        this->value_ = this->assigner_.create(std::forward<Args>(args)...);
+        this->value_   = this->assigner_.create(std::forward<Args>(args)...);
         this->shifted_ = false;
-    }
-
-    void internal_destroy() {
-        if (this->value_) {
-            this->assigner_.destroy(this->value_);
-            this->value_ = nullptr;
-        }
-    }
-
-    void destroy() {
-        if (!this->shifted_) {
-            this->internal_destroy();
-            this->shifted_ = true;
-        }
     }
 
     void assign(this_type && src) {
         assert(&src != this);
-        this->value_ = src.value_;
+        this->value_   = src.value_;
         this->shifted_ = src.shifted_;
         src.set_shifted();
     }
 
     void assign(value_type * value) {
         assert((value == nullptr) || (value != nullptr && value != this->value));
-        this->value_ = value;
+        this->value_   = value;
         this->shifted_ = false;
+    }
+
+    void destroy() {
+        if (!this->shifted_) {
+            if (this->value_) {
+                this->assigner_.destroy(this->value_);
+                this->value_ = nullptr;
+            }
+            this->shifted_ = true;
+        }
     }
 
 public:
