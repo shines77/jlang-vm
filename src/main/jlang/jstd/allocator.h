@@ -19,8 +19,8 @@
 #include <memory>
 #include <functional>
 
-#define MINIMUM_ALIGNMENT   4
-#define DEFAULT_ALIGNMENT   8
+#define JSTD_MINIMUM_ALIGNMENT   4
+#define JSTD_DEFAULT_ALIGNMENT   std::max_align_t
 
 namespace jstd {
 
@@ -45,7 +45,7 @@ void _Deallocate(void * p, std::size_t size = 0) {
 // TODO: _AlignedAllocate()
 
 inline
-void * _AlignedAllocate(std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) {
+void * _AlignedAllocate(std::size_t size, std::size_t alignment = JSTD_DEFAULT_ALIGNMENT) {
     void * ptr = nullptr;
     if (likely(size != 0)) {
 #ifdef _WIN32
@@ -69,11 +69,11 @@ void _AlignedDeallocate(void * p, std::size_t size = 0) {
 }
 
 template <typename T>
-struct minimum_alignment {
-    static const std::size_t value = ((alignof(T) >= MINIMUM_ALIGNMENT) ? alignof(T) : MINIMUM_ALIGNMENT);
+struct align_of {
+    static const std::size_t value = alignof(T);
 };
 
-template <typename T, std::size_t Alignment = minimum_alignment<T>::value>
+template <typename T, std::size_t Alignment = align_of<T>::value>
 class allocator {
 public:
     typedef typename std::remove_const<
@@ -215,7 +215,7 @@ public:
     }
 };
 
-template <typename T, std::size_t Alignment = minimum_alignment<T>::value>
+template <typename T, std::size_t Alignment = align_of<T>::value>
 struct generic_assigner {
     typedef typename std::remove_const<
                 typename std::remove_pointer<T>::type
@@ -265,7 +265,7 @@ struct generic_assigner {
     }
 };
 
-template <typename T, std::size_t Alignment = minimum_alignment<T>::value,
+template <typename T, std::size_t Alignment = align_of<T>::value,
           typename Assigner = generic_assigner<T, Alignment>
          >
 class generic_allocator {
