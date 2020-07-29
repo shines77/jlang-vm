@@ -25,13 +25,13 @@ cd /home/git/jlang-vm
 2. 然后使用 `CMake` 生成 `makefile`，命令如下：
 
 ```bash
-cmake -G "Unix Makefiles"
+cmake .
 ```
 
 或者
 
 ```bash
-cmake .
+cmake -G "Unix Makefiles"
 ```
 
 3. 最后使用 `make` 命令编译工程：
@@ -66,13 +66,37 @@ make
     elapsed time: 4531 ms.
     ```
 
-## 测试数据
+## C# 版 Fibonacci Test
 
+由于 `C#` 中找不到有效的开启纯解释执行模式的方法，我们只能在 `Mono` 中测试，`Mono` 支持纯解释器模式。
+
+`Mono` 在 `Linux` 下测试：
+
+    ```bash
+    cd .\csharp\Fibonacci
+    run.sh
+    ```
+
+`run.sh` 文件的内容如下：
+
+    ```bash
+    #!/bin/bash
+
+    mcs ./mono/Fibonacci.cs
+    mono --interpreter ./mono/Fibonacci.exe
+    ```
+
+由于测试机器的 `CPU` 物理性能跟对比的笔记本不一样，且不是 `Windows` 环境，
+
+不方便对比，但比同机器同系统下的 `Java` 版相比，略慢。
+
+## 测试数据
 
 |测试对象|耗时 (毫秒)|
 |:--:|---:|
 |jlang-vm (C++, 64bit)|3750 ms|
 |Java 1.8 (64bit)|4531 ms|
+|C#(Mono, Linux, 64bit)|大约5000 ms|
 |AngelScript 2.31.0 (32bit)|10000+ ms|
 |Lua 5.x|未测试|
 |Python 2.7|22000+ ms|
