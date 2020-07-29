@@ -36,7 +36,7 @@ make
 
 ## Java 版 Fibonacci Test
 
-1. 在 `Windows` 下测速 (运行脚本中已包含编译过程)：
+1. 在 `Windows` 下测试 (运行脚本中已包含编译过程)：
 
     ```shell
     cd .\java\Fibonacci
