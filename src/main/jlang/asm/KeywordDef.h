@@ -11,196 +11,196 @@
 
 #else
 
-    #ifndef KEYWORD_DEF
-    #define KEYWORD_DEF(token, keywordId, keyword, kind)
+    #ifndef ASM_KEYWORD
+    #define ASM_KEYWORD(token, keywordId, keyword, kind)
     #endif
 
-    #ifndef PREPROCESSING_DEF
-    #define PREPROCESSING_DEF(keyword)
+    #ifndef ASM_PREPROCESSING
+    #define ASM_PREPROCESSING(keyword)
     #endif
 
     // Preprocessing
-    PREPROCESSING_DEF(if)
-    PREPROCESSING_DEF(ifdef)
-    PREPROCESSING_DEF(ifndef)
-    PREPROCESSING_DEF(elif)
-    PREPROCESSING_DEF(else)
-    PREPROCESSING_DEF(endif)
-    PREPROCESSING_DEF(define)
-    PREPROCESSING_DEF(undef)
-    PREPROCESSING_DEF(defined)
+    ASM_PREPROCESSING(if)
+    ASM_PREPROCESSING(ifdef)
+    ASM_PREPROCESSING(ifndef)
+    ASM_PREPROCESSING(elif)
+    ASM_PREPROCESSING(else)
+    ASM_PREPROCESSING(endif)
+    ASM_PREPROCESSING(define)
+    ASM_PREPROCESSING(undef)
+    ASM_PREPROCESSING(defined)
 
-    PREPROCESSING_DEF(include)
-    PREPROCESSING_DEF(pragma)
-    PREPROCESSING_DEF(warning)
-    PREPROCESSING_DEF(error)
+    ASM_PREPROCESSING(include)
+    ASM_PREPROCESSING(pragma)
+    ASM_PREPROCESSING(warning)
+    ASM_PREPROCESSING(error)
 
     // Pod type
-    KEYWORD_DEF(Void,               Void,           void,           Pod)
-    KEYWORD_DEF(Bool,               Bool,           bool,           Pod)
-    KEYWORD_DEF(Char,               Char,           char,           Pod)
-    KEYWORD_DEF(Short,              Short,          short,          Pod)
-    KEYWORD_DEF(Int,                Int,            int,            Pod)
-    KEYWORD_DEF(Long,               Long,           long,           Pod)
-    KEYWORD_DEF(Float,              Float,          float,          Pod)
-    KEYWORD_DEF(Double,             Double,         double,         Pod)
-    KEYWORD_DEF(Signed,             Signed,         signed,         PodSign)
-    KEYWORD_DEF(Unsigned,           Unsigned,       unsigned,       PodSign)
+    ASM_KEYWORD(Void,               Void,           void,           Pod)
+    ASM_KEYWORD(Bool,               Bool,           bool,           Pod)
+    ASM_KEYWORD(Char,               Char,           char,           Pod)
+    ASM_KEYWORD(Short,              Short,          short,          Pod)
+    ASM_KEYWORD(Int,                Int,            int,            Pod)
+    ASM_KEYWORD(Long,               Long,           long,           Pod)
+    ASM_KEYWORD(Float,              Float,          float,          Pod)
+    ASM_KEYWORD(Double,             Double,         double,         Pod)
+    ASM_KEYWORD(Signed,             Signed,         signed,         PodSign)
+    ASM_KEYWORD(Unsigned,           Unsigned,       unsigned,       PodSign)
 
     // Standard pod typedef (Alias)
-    KEYWORD_DEF(Int8,               Int8,           int8,           Pod)
-    KEYWORD_DEF(UInt8,              UInt8,          uint8,          Pod)
-    KEYWORD_DEF(Int16,              Int16,          int16,          Pod)
-    KEYWORD_DEF(UInt16,             UInt16,         uint16,         Pod)
-    KEYWORD_DEF(Int32,              Int32,          int32,          Pod)
-    KEYWORD_DEF(UInt32,             UInt32,         uint32,         Pod)
-    KEYWORD_DEF(Int64,              Int64,          int64,          Pod)
-    KEYWORD_DEF(UInt64,             UInt64,         uint64,         Pod)
+    ASM_KEYWORD(Int8,               Int8,           int8,           Pod)
+    ASM_KEYWORD(UInt8,              UInt8,          uint8,          Pod)
+    ASM_KEYWORD(Int16,              Int16,          int16,          Pod)
+    ASM_KEYWORD(UInt16,             UInt16,         uint16,         Pod)
+    ASM_KEYWORD(Int32,              Int32,          int32,          Pod)
+    ASM_KEYWORD(UInt32,             UInt32,         uint32,         Pod)
+    ASM_KEYWORD(Int64,              Int64,          int64,          Pod)
+    ASM_KEYWORD(UInt64,             UInt64,         uint64,         Pod)
 
     // Reserved keywords
     
-    KEYWORD_DEF(Import,             Import,         import,         Keyword)
-    KEYWORD_DEF(Using,              Using,          using,          Keyword)
-    KEYWORD_DEF(NameSpace,          NameSpace,      namespace,      Keyword)
-    KEYWORD_DEF(TypeDef,            TypeDef,        typedef,        Keyword)
-    KEYWORD_DEF(Class,              Class,          class,          Keyword)
-    KEYWORD_DEF(Struct,             Struct,         struct,         Keyword)
-    KEYWORD_DEF(Interface,          Interface,      interface,      Keyword)
-    KEYWORD_DEF(Enum,               Enum,           enum,           Keyword)
-    KEYWORD_DEF(Template,           Template,       template,       Keyword)
+    ASM_KEYWORD(Import,             Import,         import,         Keyword)
+    ASM_KEYWORD(Using,              Using,          using,          Keyword)
+    ASM_KEYWORD(NameSpace,          NameSpace,      namespace,      Keyword)
+    ASM_KEYWORD(TypeDef,            TypeDef,        typedef,        Keyword)
+    ASM_KEYWORD(Class,              Class,          class,          Keyword)
+    ASM_KEYWORD(Struct,             Struct,         struct,         Keyword)
+    ASM_KEYWORD(Interface,          Interface,      interface,      Keyword)
+    ASM_KEYWORD(Enum,               Enum,           enum,           Keyword)
+    ASM_KEYWORD(Template,           Template,       template,       Keyword)
 
-    KEYWORD_DEF(If,                 If,             if,             Keyword)
-    KEYWORD_DEF(Else,               Else,           else,           Keyword)
+    ASM_KEYWORD(If,                 If,             if,             Keyword)
+    ASM_KEYWORD(Else,               Else,           else,           Keyword)
 
-    KEYWORD_DEF(Do,                 Do,             do,             Keyword)
-    KEYWORD_DEF(While,              While,          while,          Keyword)
-    KEYWORD_DEF(Continue,           Continue,       continue,       Keyword)
+    ASM_KEYWORD(Do,                 Do,             do,             Keyword)
+    ASM_KEYWORD(While,              While,          while,          Keyword)
+    ASM_KEYWORD(Continue,           Continue,       continue,       Keyword)
 
-    KEYWORD_DEF(For,                For,            for,            Keyword)
+    ASM_KEYWORD(For,                For,            for,            Keyword)
 
-    KEYWORD_DEF(Switch,             Switch,         switch,         Keyword)
-    KEYWORD_DEF(Case,               Case,           case,           Keyword)
-    KEYWORD_DEF(Default,            Default,        default,        Keyword)
+    ASM_KEYWORD(Switch,             Switch,         switch,         Keyword)
+    ASM_KEYWORD(Case,               Case,           case,           Keyword)
+    ASM_KEYWORD(Default,            Default,        default,        Keyword)
 
-    KEYWORD_DEF(Break,              Break,          break,          Keyword)
-    KEYWORD_DEF(Goto,               Goto,           goto,           Keyword)
+    ASM_KEYWORD(Break,              Break,          break,          Keyword)
+    ASM_KEYWORD(Goto,               Goto,           goto,           Keyword)
 
     // Section
-    KEYWORD_DEF(Align,              Align,          .align,         Section)
-    KEYWORD_DEF(Strings,            Strings,        .strings,       Section)
-    KEYWORD_DEF(EntryPoint,         EntryPoint,     .entrypoint,    Section)
+    ASM_KEYWORD(Align,              Align,          .align,         Section)
+    ASM_KEYWORD(Strings,            Strings,        .strings,       Section)
+    ASM_KEYWORD(EntryPoint,         EntryPoint,     .entrypoint,    Section)
 
     // Stack about
-    KEYWORD_DEF(InstPush,           InstPush,       push,           Instruction)
-    KEYWORD_DEF(InstPop,            InstPop,        pop,            Instruction)
-    KEYWORD_DEF(InstCall,           InstCall,       call,           Instruction)
-    KEYWORD_DEF(InstReturn,         InstReturn,     ret,            Instruction)
+    ASM_KEYWORD(InstPush,           InstPush,       push,           Instruction)
+    ASM_KEYWORD(InstPop,            InstPop,        pop,            Instruction)
+    ASM_KEYWORD(InstCall,           InstCall,       call,           Instruction)
+    ASM_KEYWORD(InstReturn,         InstReturn,     ret,            Instruction)
 
     // Load and store
-    KEYWORD_DEF(InstMove,           InstMove,       mov,            Instruction)
-    KEYWORD_DEF(InstLoad,           InstLoad,       load,           Instruction)
-    KEYWORD_DEF(InstStore,          InstStore,      store,          Instruction)
+    ASM_KEYWORD(InstMove,           InstMove,       mov,            Instruction)
+    ASM_KEYWORD(InstLoad,           InstLoad,       load,           Instruction)
+    ASM_KEYWORD(InstStore,          InstStore,      store,          Instruction)
 
     // Operators
-    KEYWORD_DEF(Add,                Add,            +,              Operator)
-    KEYWORD_DEF(Sub,                Sub,            -,              Operator)
-    KEYWORD_DEF(Multiply,           Multiply,       *,              Operator)
-    KEYWORD_DEF(Div,                Div,            /,              Operator)
-    KEYWORD_DEF(Mod,                Mod,            %,              Operator)
+    ASM_KEYWORD(Add,                Add,            +,              Operator)
+    ASM_KEYWORD(Sub,                Sub,            -,              Operator)
+    ASM_KEYWORD(Multiply,           Multiply,       *,              Operator)
+    ASM_KEYWORD(Div,                Div,            /,              Operator)
+    ASM_KEYWORD(Mod,                Mod,            %,              Operator)
 
-    KEYWORD_DEF(InstAdd,            InstAdd,        add,            Instruction)
-    KEYWORD_DEF(InstSub,            InstSub,        sub,            Instruction)
-    KEYWORD_DEF(InstMul,            InstMul,        mul,            Instruction)
-    KEYWORD_DEF(InstDiv,            InstDiv,        div,            Instruction)
-    KEYWORD_DEF(InstMod,            InstMod,        mod,            Instruction)
-    KEYWORD_DEF(Assignment,         Assign,         assign,         Keyword)
+    ASM_KEYWORD(InstAdd,            InstAdd,        add,            Instruction)
+    ASM_KEYWORD(InstSub,            InstSub,        sub,            Instruction)
+    ASM_KEYWORD(InstMul,            InstMul,        mul,            Instruction)
+    ASM_KEYWORD(InstDiv,            InstDiv,        div,            Instruction)
+    ASM_KEYWORD(InstMod,            InstMod,        mod,            Instruction)
+    ASM_KEYWORD(Assignment,         Assign,         assign,         Keyword)
 
-    KEYWORD_DEF(AddEqual,           AddEqual,       add_eq,         Keyword)
-    KEYWORD_DEF(SubEqual,           SubEqual,       sub_eq,         Keyword)
-    KEYWORD_DEF(MultiplyEqual,      MultiplyEqual,  mul_eq,         Keyword)
-    KEYWORD_DEF(DivEqual,           DivEqual,       div_eq,         Keyword)
-    KEYWORD_DEF(ModEqual,           ModEqual,       mod_eq,         Keyword)
+    ASM_KEYWORD(AddEqual,           AddEqual,       add_eq,         Keyword)
+    ASM_KEYWORD(SubEqual,           SubEqual,       sub_eq,         Keyword)
+    ASM_KEYWORD(MultiplyEqual,      MultiplyEqual,  mul_eq,         Keyword)
+    ASM_KEYWORD(DivEqual,           DivEqual,       div_eq,         Keyword)
+    ASM_KEYWORD(ModEqual,           ModEqual,       mod_eq,         Keyword)
 
     // Bitwise operators
-    KEYWORD_DEF(BitNot,             BitNot,         !,              Operator)
-    KEYWORD_DEF(BitAnd,             BitAnd,         &,              Operator)
-    KEYWORD_DEF(BitOr,              BitOr,          |,              Operator)
-    KEYWORD_DEF(BitXor,             BitXor,         ^,              Operator)
+    ASM_KEYWORD(BitNot,             BitNot,         !,              Operator)
+    ASM_KEYWORD(BitAnd,             BitAnd,         &,              Operator)
+    ASM_KEYWORD(BitOr,              BitOr,          |,              Operator)
+    ASM_KEYWORD(BitXor,             BitXor,         ^,              Operator)
 
-    KEYWORD_DEF(InstNot,            InstNot,        not,            Instruction)
-    KEYWORD_DEF(InstAnd,            InstAnd,        and,            Instruction)
-    KEYWORD_DEF(InstOr,             InstOr,         or,             Instruction)
-    KEYWORD_DEF(InstXor,            InstXor,        xor,            Instruction)
+    ASM_KEYWORD(InstNot,            InstNot,        not,            Instruction)
+    ASM_KEYWORD(InstAnd,            InstAnd,        and,            Instruction)
+    ASM_KEYWORD(InstOr,             InstOr,         or,             Instruction)
+    ASM_KEYWORD(InstXor,            InstXor,        xor,            Instruction)
 
-    KEYWORD_DEF(BoolNot,            BoolNot,        bool_not,       Keyword)   // (exclamation mark)
-    KEYWORD_DEF(BoolAnd,            BoolAnd,        bool_and,       Keyword)
-    KEYWORD_DEF(BoolOr,             BoolOr,         bool_or,        Keyword)
-    KEYWORD_DEF(BoolXor,            BoolXor,        bool_xor,       Keyword)
+    ASM_KEYWORD(BoolNot,            BoolNot,        bool_not,       Keyword)   // (exclamation mark)
+    ASM_KEYWORD(BoolAnd,            BoolAnd,        bool_and,       Keyword)
+    ASM_KEYWORD(BoolOr,             BoolOr,         bool_or,        Keyword)
+    ASM_KEYWORD(BoolXor,            BoolXor,        bool_xor,       Keyword)
 
-    KEYWORD_DEF(InstShl,            InstShl,        shl,            Instruction)
-    KEYWORD_DEF(InstShr,            InstShr,        shr,            Instruction)
-    KEYWORD_DEF(InstRor,            InstRor,        ror,            Instruction)
-    KEYWORD_DEF(InstRol,            InstRol,        rol,            Instruction)
+    ASM_KEYWORD(InstShl,            InstShl,        shl,            Instruction)
+    ASM_KEYWORD(InstShr,            InstShr,        shr,            Instruction)
+    ASM_KEYWORD(InstRor,            InstRor,        ror,            Instruction)
+    ASM_KEYWORD(InstRol,            InstRol,        rol,            Instruction)
 
-    KEYWORD_DEF(BitNotEqual,        BitNotEqual,    not_eq,         Keyword)
-    KEYWORD_DEF(AndEqual,           AndEqual,       and_eq,         Keyword)
-    KEYWORD_DEF(OrEqual,            OrEqual,        or_eq,          Keyword)
-    KEYWORD_DEF(XorEqual,           XorEqual,       xor_eq,         Keyword)
+    ASM_KEYWORD(BitNotEqual,        BitNotEqual,    not_eq,         Keyword)
+    ASM_KEYWORD(AndEqual,           AndEqual,       and_eq,         Keyword)
+    ASM_KEYWORD(OrEqual,            OrEqual,        or_eq,          Keyword)
+    ASM_KEYWORD(XorEqual,           XorEqual,       xor_eq,         Keyword)
 
-    KEYWORD_DEF(Increase,           Increase,       +,              Operator)
-    KEYWORD_DEF(Decrease,           Decrease,       -,              Operator)
+    ASM_KEYWORD(Increase,           Increase,       +,              Operator)
+    ASM_KEYWORD(Decrease,           Decrease,       -,              Operator)
 
-    KEYWORD_DEF(InstInc,            InstInc,        inc,            Instruction)
-    KEYWORD_DEF(InstDec,            InstDec,        dec,            Instruction)
+    ASM_KEYWORD(InstInc,            InstInc,        inc,            Instruction)
+    ASM_KEYWORD(InstDec,            InstDec,        dec,            Instruction)
 
     // Compare operators
-    KEYWORD_DEF(InstCmp,            InstCmp,        cmp,            Instruction)
-    KEYWORD_DEF(InstTest,           InstTest,       test,           Instruction)
+    ASM_KEYWORD(InstCmp,            InstCmp,        cmp,            Instruction)
+    ASM_KEYWORD(InstTest,           InstTest,       test,           Instruction)
                  
     // Logic flow
-    KEYWORD_DEF(InstJe,             InstJe,         je,             Instruction)
-    KEYWORD_DEF(InstJne,            InstJne,        jne,            Instruction)
+    ASM_KEYWORD(InstJe,             InstJe,         je,             Instruction)
+    ASM_KEYWORD(InstJne,            InstJne,        jne,            Instruction)
 
-    KEYWORD_DEF(InstJl,             InstJl,         jl,             Instruction)
-    KEYWORD_DEF(InstJg,             InstJg,         jg,             Instruction)
-    KEYWORD_DEF(InstJle,            InstJle,        jle,            Instruction)
-    KEYWORD_DEF(InstJge,            InstJge,        jge,            Instruction)
+    ASM_KEYWORD(InstJl,             InstJl,         jl,             Instruction)
+    ASM_KEYWORD(InstJg,             InstJg,         jg,             Instruction)
+    ASM_KEYWORD(InstJle,            InstJle,        jle,            Instruction)
+    ASM_KEYWORD(InstJge,            InstJge,        jge,            Instruction)
 
     // Instruction operands keyword
-    KEYWORD_DEF(OpArgs,             OpArgs,         args,           Keyword)
-    KEYWORD_DEF(OpVars,             OpVars,         vars,           Keyword)
-    KEYWORD_DEF(OpSkip,             OpSkip,         skip,           Keyword)
+    ASM_KEYWORD(OpArgs,             OpArgs,         args,           Keyword)
+    ASM_KEYWORD(OpVars,             OpVars,         vars,           Keyword)
+    ASM_KEYWORD(OpSkip,             OpSkip,         skip,           Keyword)
 
-    KEYWORD_DEF(OpEAX,              OpEAX,          eax,            Keyword)
-    KEYWORD_DEF(OpEBX,              OpEBX,          ebx,            Keyword)
-    KEYWORD_DEF(OpECX,              OpECX,          ecx,            Keyword)
-    KEYWORD_DEF(OpEDX,              OpEDX,          edx,            Keyword)
+    ASM_KEYWORD(OpEAX,              OpEAX,          eax,            Keyword)
+    ASM_KEYWORD(OpEBX,              OpEBX,          ebx,            Keyword)
+    ASM_KEYWORD(OpECX,              OpECX,          ecx,            Keyword)
+    ASM_KEYWORD(OpEDX,              OpEDX,          edx,            Keyword)
 
     // Instruction datatype
-    KEYWORD_DEF(OpInt8,             OpInt8,         i1,             Keyword)
-    KEYWORD_DEF(OpInt16,            OpInt16,        i2,             Keyword)
-    KEYWORD_DEF(OpInt32,            OpInt32,        i4,             Keyword)
-    KEYWORD_DEF(OpInt64,            OpInt64,        i8,             Keyword)
-    KEYWORD_DEF(OpInt128,           OpInt128,       i16,            Keyword)
+    ASM_KEYWORD(OpInt8,             OpInt8,         i1,             Keyword)
+    ASM_KEYWORD(OpInt16,            OpInt16,        i2,             Keyword)
+    ASM_KEYWORD(OpInt32,            OpInt32,        i4,             Keyword)
+    ASM_KEYWORD(OpInt64,            OpInt64,        i8,             Keyword)
+    ASM_KEYWORD(OpInt128,           OpInt128,       i16,            Keyword)
 
     // Operators
-    KEYWORD_DEF(Equal,              Equal,          =,              Operator)
-    KEYWORD_DEF(NotEqual,           NotEqual,       !=,             Operator)
+    ASM_KEYWORD(Equal,              Equal,          =,              Operator)
+    ASM_KEYWORD(NotEqual,           NotEqual,       !=,             Operator)
 
-    KEYWORD_DEF(Question,           Question,       ?,              Operator)
-    KEYWORD_DEF(Colon,              Colon,          :,              Operator)
-    KEYWORD_DEF(Scope,              Scope,          ::,             Operator)
+    ASM_KEYWORD(Question,           Question,       ?,              Operator)
+    ASM_KEYWORD(Colon,              Colon,          :,              Operator)
+    ASM_KEYWORD(Scope,              Scope,          ::,             Operator)
 
-    KEYWORD_DEF(Dot,                Dot,            .,              Operator)
-    KEYWORD_DEF(Ellipsis,           Ellipsis,       ...,            Operator)
-    KEYWORD_DEF(Pointer,            Pointer,        ->,             Operator)
+    ASM_KEYWORD(Dot,                Dot,            .,              Operator)
+    ASM_KEYWORD(Ellipsis,           Ellipsis,       ...,            Operator)
+    ASM_KEYWORD(Pointer,            Pointer,        ->,             Operator)
 
-    KEYWORD_DEF(Annotation,         Annotation,     @,              Operator)
+    ASM_KEYWORD(Annotation,         Annotation,     @,              Operator)
     
     // Others
-    KEYWORD_DEF(Include,            Include,        include,        Others)
+    ASM_KEYWORD(Include,            Include,        include,        Others)
 
-    #undef KEYWORD_DEF
-    #undef PREPROCESSING_DEF
+    #undef ASM_KEYWORD
+    #undef ASM_PREPROCESSING
 
 #endif // JLANG_ASM_KEYWORD_H

@@ -48,8 +48,8 @@ namespace jasm {
 #define KEYWORD_ID(id)          id
 #define PREPROCESSING_ID(id)    pp_##id
 
-#define KEYWORD_DEF(token, id, keyword, kind)   KEYWORD_ID(id),
-#define PREPROCESSING_DEF(keyword)              PREPROCESSING_ID(keyword),
+#define ASM_KEYWORD(token, id, keyword, kind)   KEYWORD_ID(id),
+#define ASM_PREPROCESSING(keyword)              PREPROCESSING_ID(keyword),
 
 struct KeywordId {
     enum Type {
@@ -94,7 +94,7 @@ public:
 #define KEYWORD_ID(id)           jasm::KeywordId::id
 #define PREPROCESSING_ID(id)     jasm::KeywordId::pp_##id
 
-#define KEYWORD_DEF(token, id, keyword, kind)  \
+#define ASM_KEYWORD(token, id, keyword, kind)  \
     { \
         (int32_t)KEYWORD_ID(id), \
         (int32_t)jasm::Token::token, \
@@ -103,7 +103,7 @@ public:
         TO_STRING(keyword) \
     },
 
-#define PREPROCESSING_DEF(keyword) \
+#define ASM_PREPROCESSING(keyword) \
     { \
         (int32_t)PREPROCESSING_ID(keyword), \
         (int32_t)jasm::Token::pp_##keyword, \
