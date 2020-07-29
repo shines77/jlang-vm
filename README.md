@@ -12,25 +12,25 @@ A fast virtual machine written by C++.
 
 1. 先切换到本仓库所在的根路径，例如：
 
-```shell
+```bash
 cd /home/git/jlang-vm
 ```
 
 2. 然后使用 `CMake` 生成 `makefile`，命令如下：
 
-```shell
+```bash
 cmake -G "Unix Makefiles"
 ```
 
 或者
 
-```shell
+```bash
 cmake ./
 ```
 
 3. 最后使用 `make` 命令编译工程：
 
-```shell
+```bash
 make
 ```
 
@@ -38,21 +38,21 @@ make
 
 1. 在 `Windows` 下测试 (运行脚本中已包含编译过程)：
 
-    ```shell
+    ```bash
     cd .\java\Fibonacci
     run.bat
     ```
 
 2. 在 `Linux` 下测试 (运行脚本中已包含编译过程)：
 
-    ```shell
+    ```bash
     cd ./java/Fibonacci
     ./run.sh
     ```
 
     以上命令运行后的效果如下：
 
-    ```shell
+    ```bash
     Input a number (1-45): ? 40
 
     fibonacci(40) = 102334155
@@ -61,6 +61,29 @@ make
     ```
 
 ## 测试数据
+
+```bash
+    jlang-vm:   elapsed time: 4531 ms.
+    Java 1.8 (64bit):
+```
+
+> <center>
+
+> |:-:|:-:|
+> |测试对象|耗时 (毫秒)|
+> |:-:|:-:|
+> |jlang-vm (C++, 64bit)|3750 ms|
+> |:-:|:-:|
+> |Java 1.8 (64bit)|4531 ms|
+> |:-:|:-:|
+> |AngelScript 2.31.0 (32bit)|10000+ ms|
+> |:-:|:-:|
+> |Lua 5.x|未测试|
+> |:-:|:-:|
+> |Python 2.7|22000+ ms|
+> |:-:|:-:|
+
+> </center>
 
 1. `jlang-vm (64bit)` 最快的 `v3` 版本计算 fibonacci(40) 用时约 `3750` 毫秒；
 
