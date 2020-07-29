@@ -32,7 +32,13 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenDef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\TokenInfo.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\coredef.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\inttypes.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\inttypes.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\stdbool.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\stdint.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\stddef.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\stdint.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\stdsize.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\basic\ValueType.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileName.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileSystem.h" />

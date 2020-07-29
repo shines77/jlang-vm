@@ -7,6 +7,9 @@
 #endif
 
 #include "jlang/basic/stddef.h"
+#include "jlang/basic/stdint.h"
+#include "jlang/basic/stdsize.h"
+#include "jlang/basic/inttypes.h"
 #include "jlang/basic/coredef.h"
 #include "jlang/basic/ValueType.h"
 #include "jlang/asm/KeywordKind.h"

@@ -20,7 +20,7 @@
 #include <functional>
 
 #define JSTD_MINIMUM_ALIGNMENT   4
-#define JSTD_DEFAULT_ALIGNMENT   std::max_align_t
+#define JSTD_DEFAULT_ALIGNMENT   sizeof(std::max_align_t)
 
 namespace jstd {
 

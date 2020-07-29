@@ -10,7 +10,14 @@
 #include <string>
 #include <utility>
 
+#include <jlang/basic/inttypes.h>
 #include <jlang/jlang.h>
+
+#if !defined(_WIN32)
+#ifndef scanf_s
+#define scanf_s     scanf
+#endif
+#endif // _WIN32
 
 using namespace jlang;
 
@@ -83,15 +90,11 @@ void test_Fibonacci32()
         }
         printf("Please enter a number from 1 to %u.\n", max_n);
         printf("n = ? ");
-#if defined(_WIN32)
         int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
         printf("\n");
     } while (n > max_n);
 
-    // Warm-up CPU for 500 ms.
+    // Run the code in a loop for a while, to warm up the CPU.
     cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
@@ -122,15 +125,11 @@ void test_Fibonacci64()
         }
         printf("Please enter a number from 1 to %u.\n", max_n);
         printf("n = ? ");
-#if defined(_WIN32)
         int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
         printf("\n");
     } while (n > max_n);
 
-    // Warm-up CPU for 500 ms.
+    // Run the code in a loop for a while, to warm up the CPU.
     cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
@@ -146,10 +145,11 @@ void test_Fibonacci64()
     printf("\n");
 }
 
-void test_Interpreter_v1()
+template <typename InterpreterTy>
+void test_Interpreter(const std::string & name)
 {
     printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v1()\n");
+    printf("  test_%s()\n", name.c_str());
     printf("--------------------------------------------\n\n");
 
     uint32_t n = 1;
@@ -161,37 +161,28 @@ void test_Interpreter_v1()
         }
         printf("Please enter a number from 1 to %u.\n", max_n);
         printf("n = ? ");
-#if defined(_WIN32)
         int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
         printf("\n");
     } while (n > max_n);
 
-    // Warm-up CPU for 500 ms.
+    // Run the code in a loop for a while, to warm up the CPU.
     cpu_warmup(kWarmupMillsecs);
 
     StopWatch sw;
 
-    v1::Interpreter<> it;
+    InterpreterTy interpreter;
     vmReturn<> retVal;
     retVal.setDataType(vmReturn<>::Basic);
     retVal.setValue(n);
     
-    int ec = it.create();
+    int ec = interpreter.create();
 
     sw.start();
-    ec = it.run(retVal);
+    ec = interpreter.run(retVal);
     if (ec >= 0) {
         sw.stop();
         if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
+            printf("  fibonacci(%u) = %" PRIuPTR "\n", n, retVal.getValue());
         }
     }
     printf("\n");
@@ -199,281 +190,83 @@ void test_Interpreter_v1()
     double elapsed_time = sw.getElapsedMillisec();
     printf("  elapsed time:  %0.3f ms\n", elapsed_time);
     printf("\n");
+}
+
+template <typename InterpreterTy>
+void test_Interpreter_inline(const std::string & name)
+{
+    printf("--------------------------------------------\n");
+    printf("  test_%s()\n", name.c_str());
+    printf("--------------------------------------------\n\n");
+
+    uint32_t n = 1;
+    uint32_t max_n = 45;
+    do {
+        if (n == 0 || n > max_n) {
+            printf("\n");
+            printf("The number must be on range [1-%u].\n\n", max_n);
+        }
+        printf("Please enter a number from 1 to %u.\n", max_n);
+        printf("n = ? ");
+        int r = scanf_s("%u", &n);
+        printf("\n");
+    } while (n > max_n);
+
+    // Run the code in a loop for a while, to warm up the CPU.
+    cpu_warmup(kWarmupMillsecs);
+
+    StopWatch sw;
+
+    InterpreterTy interpreter;
+    vmReturn<> retVal;
+    retVal.setDataType(vmReturn<>::Basic);
+    retVal.setValue(n);
+    
+    int ec = interpreter.create();
+
+    sw.start();
+    ec = interpreter.run_inline(retVal);
+    if (ec >= 0) {
+        sw.stop();
+        if (retVal.isValid()) {
+            printf("  fibonacci(%u) = %" PRIuPTR "\n", n, retVal.getValue());
+        }
+    }
+    printf("\n");
+
+    double elapsed_time = sw.getElapsedMillisec();
+    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
+    printf("\n");
+}
+
+void test_Interpreter_v1()
+{
+    test_Interpreter<v1::Interpreter<>>("Interpreter_v1");
 }
 
 void test_Interpreter_v2()
 {
-    printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v2()\n");
-    printf("--------------------------------------------\n\n");
-
-    uint32_t n = 1;
-    uint32_t max_n = 45;
-    do {
-        if (n == 0 || n > max_n) {
-            printf("\n");
-            printf("The number must be on range [1-%u].\n\n", max_n);
-        }
-        printf("Please enter a number from 1 to %u.\n", max_n);
-        printf("n = ? ");
-#if defined(_WIN32)
-        int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
-        printf("\n");
-    } while (n > max_n);
-
-    // Warm-up CPU for 500 ms.
-    cpu_warmup(kWarmupMillsecs);
-
-    StopWatch sw;
-
-    v2::Interpreter<> it;
-    vmReturn<> retVal;
-    retVal.setDataType(vmReturn<>::Basic);
-    retVal.setValue(n);
-    
-    int ec = it.create();
-
-    sw.start();
-    ec = it.run(retVal);
-    if (ec >= 0) {
-        sw.stop();
-        if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
-        }
-    }
-    printf("\n");
-
-    double elapsed_time = sw.getElapsedMillisec();
-    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
-    printf("\n");
+    test_Interpreter<v2::Interpreter<>>("Interpreter_v2");
 }
 
 void test_Interpreter_v3()
 {
-    printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v3()\n");
-    printf("--------------------------------------------\n\n");
-
-    uint32_t n = 1;
-    uint32_t max_n = 45;
-    do {
-        if (n == 0 || n > max_n) {
-            printf("\n");
-            printf("The number must be on range [1-%u].\n\n", max_n);
-        }
-        printf("Please enter a number from 1 to %u.\n", max_n);
-        printf("n = ? ");
-#if defined(_WIN32)
-        int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
-        printf("\n");
-    } while (n > max_n);
-
-    // Warm-up CPU for 500 ms.
-    cpu_warmup(kWarmupMillsecs);
-
-    StopWatch sw;
-
-    v3::Interpreter<> it;
-    vmReturn<> retVal;
-    retVal.setDataType(vmReturn<>::Basic);
-    retVal.setValue(n);
-    
-    int ec = it.create();
-
-    sw.start();
-    ec = it.run(retVal);
-    if (ec >= 0) {
-        sw.stop();
-        if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
-        }
-    }
-    printf("\n");
-
-    double elapsed_time = sw.getElapsedMillisec();
-    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
-    printf("\n");
+    test_Interpreter<v3::Interpreter<>>("Interpreter_v3");
 }
 
 void test_Interpreter_v3_inline()
 {
-    printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v3_inline()\n");
-    printf("--------------------------------------------\n\n");
-
-    uint32_t n = 1;
-    uint32_t max_n = 45;
-    do {
-        if (n == 0 || n > max_n) {
-            printf("\n");
-            printf("The number must be on range [1-%u].\n\n", max_n);
-        }
-        printf("Please enter a number from 1 to %u.\n", max_n);
-        printf("n = ? ");
-#if defined(_WIN32)
-        int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
-        printf("\n");
-    } while (n > max_n);
-
-    // Warm-up CPU for 500 ms.
-    cpu_warmup(kWarmupMillsecs);
-
-    StopWatch sw;
-
-    v3::Interpreter<> it;
-    vmReturn<> retVal;
-    retVal.setDataType(vmReturn<>::Basic);
-    retVal.setValue(n);
-    
-    int ec = it.create();
-
-    sw.start();
-    ec = it.run_inline(retVal);
-    if (ec >= 0) {
-        sw.stop();
-        if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
-        }
-    }
-    printf("\n");
-
-    double elapsed_time = sw.getElapsedMillisec();
-    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
-    printf("\n");
+    test_Interpreter_inline<v3::Interpreter<>>("Interpreter_v3_inline");
 }
 
 void test_Interpreter_v4()
 {
-    printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v4()\n");
-    printf("--------------------------------------------\n\n");
-
-    uint32_t n = 1;
-    uint32_t max_n = 45;
-    do {
-        if (n == 0 || n > max_n) {
-            printf("\n");
-            printf("The number must be on range [1-%u].\n\n", max_n);
-        }
-        printf("Please enter a number from 1 to %u.\n", max_n);
-        printf("n = ? ");
-#if defined(_WIN32)
-        int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
-        printf("\n");
-    } while (n > max_n);
-
-    // Warm-up CPU for 500 ms.
-    cpu_warmup(kWarmupMillsecs);
-
-    StopWatch sw;
-
-    v4::Interpreter<> it;
-    vmReturn<> retVal;
-    retVal.setDataType(vmReturn<>::Basic);
-    retVal.setValue(n);
-    
-    int ec = it.create();
-
-    sw.start();
-    ec = it.run(retVal);
-    if (ec >= 0) {
-        sw.stop();
-        if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
-        }
-    }
-    printf("\n");
-
-    double elapsed_time = sw.getElapsedMillisec();
-    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
-    printf("\n");
+    test_Interpreter<v4::Interpreter<>>("Interpreter_v4");
 }
 
 void test_Interpreter_v4_inline()
 {
-    printf("--------------------------------------------\n");
-    printf("  test_Interpreter_v4_inline()\n");
-    printf("--------------------------------------------\n\n");
-
-    uint32_t n = 1;
-    uint32_t max_n = 45;
-    do {
-        if (n == 0 || n > max_n) {
-            printf("\n");
-            printf("The number must be on range [1-%u].\n\n", max_n);
-        }
-        printf("Please enter a number from 1 to %u.\n", max_n);
-        printf("n = ? ");
-#if defined(_WIN32)
-        int r = scanf_s("%u", &n);
-#else
-        int r = scanf("%u", &n);
-#endif
-        printf("\n");
-    } while (n > max_n);
-
-    // Warm-up CPU for 500 ms.
-    cpu_warmup(kWarmupMillsecs);
-
-    StopWatch sw;
-
-    v4::Interpreter<> it;
-    vmReturn<> retVal;
-    retVal.setDataType(vmReturn<>::Basic);
-    retVal.setValue(n);
-    
-    int ec = it.create();
-
-    sw.start();
-    ec = it.run_inline(retVal);
-    if (ec >= 0) {
-        sw.stop();
-        if (retVal.isValid()) {
-#if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
- || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
-            printf("  fibonacci(%u) = %llu\n", n, retVal.getValue());
-#else
-            printf("  fibonacci(%u) = %u\n", n, retVal.getValue());
-#endif
-        }
-    }
-    printf("\n");
-
-    double elapsed_time = sw.getElapsedMillisec();
-    printf("  elapsed time:  %0.3f ms\n", elapsed_time);
-    printf("\n");
+    test_Interpreter_inline<v4::Interpreter<>>("Interpreter_v4_inline");
 }
 
 void test_Assembler()
@@ -528,11 +321,10 @@ int main(int argc, char * argv[])
 {
     print_version();
 
+#if 0
     jasm::Initializer initializer;
-
     test_Assembler();
-
-#if 1
+#endif
 
 #ifdef NDEBUG
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
@@ -540,8 +332,8 @@ int main(int argc, char * argv[])
     test_Fibonacci64();
 #else
     test_Fibonacci32();
-#endif
-#endif
+#endif // __amd64__
+#endif // NDEBUG
 
     //test_Interpreter_v4_inline();
     test_Interpreter_v3_inline();
@@ -549,8 +341,6 @@ int main(int argc, char * argv[])
     test_Interpreter_v3();
     //test_Interpreter_v2();
     //test_Interpreter_v1();
-
-#endif
 
     printf("\n");
     System::pause();

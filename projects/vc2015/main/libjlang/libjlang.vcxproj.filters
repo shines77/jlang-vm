@@ -35,6 +35,9 @@
     <Filter Include="src\fs">
       <UniqueIdentifier>{ac65f910-75e5-44cc-95bb-2dd555492f06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\basic\msvc">
+      <UniqueIdentifier>{4c1e5797-ccfd-4e59-b0ea-a8b1496c6a44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h">
@@ -204,6 +207,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\jstd\allocator.h">
       <Filter>src\jstd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\inttypes.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\stdint.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\stdsize.h">
+      <Filter>src\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\inttypes.h">
+      <Filter>src\basic\msvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\stdbool.h">
+      <Filter>src\basic\msvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\basic\msvc\stdint.h">
+      <Filter>src\basic\msvc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
