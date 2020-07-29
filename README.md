@@ -8,7 +8,7 @@ A fast virtual machine written by C++.
 
 `Windows` 下的工程默认支持 `VS 2015` 及更高版本，如需创建比 `VS 2015` 更旧版本的 `Visual Studio` 工程，请自行使用 `CMake` 创建。代码已在 `Linux` 的 `GCC 4.8.4` 和 `GCC 6.4.0` 下测试并编译通过（2018年12月25日 更新）。
 
-本代码是在这篇 `知乎` 文章的启发下编写的，该文讨论的核心内容是：如何降低或减少虚拟机（解释器）中的物理 `CPU` 的流水线停滞问题。
+本项目是在这篇 `知乎` 文章的启发下编写的，该文讨论的核心内容是：如何降低或减少虚拟机（解释器）中的物理 `CPU` 的流水线停滞问题。
 
  [`在不使用JIT的前提下，解释器能达到多高的速度呢？`](https://www.zhihu.com/question/300109568)
  
@@ -29,11 +29,14 @@ A fast virtual machine written by C++.
 
 2. `Java 1.8 (64bit)` 关掉 JIT，计算 fibonacci(40) 用时约 `4500` 毫秒；
 
-3. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时约 `10000+` 毫秒；
+3. `C#(Mono, Linux 64bit)` 计算 fibonacci(40) 用时约 `5000+` 毫秒，
+由于是不同系统下测试的结果，耗时为大致估算，详细请看后面的 `C# 版 Fibonacci Test` 小节；
 
-4. `Lua 5.x` 没测，但用时肯定超过 `AngelScript`，有兴趣的朋友可以测一下；
+4. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时约 `10000+` 毫秒；
 
-5. `Python 2.7` 计算 fibonacci(40) 用时约 `22000+` 毫秒；
+5. `Lua 5.x` 没测，但用时肯定超过 `AngelScript`，有兴趣的朋友可以测一下；
+
+6. `Python 2.7` 计算 fibonacci(40) 用时约 `22000+` 毫秒；
 
 注：以上数据均为笔记本电脑 `Intel i5-4310M` (`DDR3 1866 MHz`) 上测试的结果。
 
@@ -97,19 +100,19 @@ make
 
 `Mono` 在 `Linux` 下测试：
 
-    ```bash
-    cd .\csharp\Fibonacci
-    run.sh
-    ```
+```bash
+cd .\csharp\Fibonacci
+run.sh
+```
 
 `run.sh` 文件的内容如下：
 
-    ```bash
-    #!/bin/bash
+```bash
+#!/bin/bash
 
-    mcs ./mono/Fibonacci.cs
-    mono --interpreter ./mono/Fibonacci.exe
-    ```
+mcs ./mono/Fibonacci.cs
+mono --interpreter ./mono/Fibonacci.exe
+```
 
 由于测试机器的 `CPU` 物理性能跟对比的笔记本不一样，且不是 `Windows` 环境，
 
