@@ -53,24 +53,24 @@ make
     以上命令运行后的效果如下：
 
     ```shell
-    Input a number (1-50): ? 40
+    Input a number (1-45): ? 40
 
     fibonacci(40) = 102334155
 
-    elapsed time: 27154 ms.
+    elapsed time: 4531 ms.
     ```
 
 ## 测试数据
 
-1. `jlang-vm (64bit)` 最快的 `v3` 版本计算 fibonacci(40) 用时 `3750` 毫秒；
+1. `jlang-vm (64bit)` 最快的 `v3` 版本计算 fibonacci(40) 用时约 `3750` 毫秒；
 
-2. `Java 1.8 (64bit)` 关掉 JIT，计算 fibonacci(40) 用时 `4500` 毫秒；
+2. `Java 1.8 (64bit)` 关掉 JIT，计算 fibonacci(40) 用时约 `4500` 毫秒；
 
-3. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时 `10000+` 毫秒；
+3. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时约 `10000+` 毫秒；
 
 4. `Lua 5.x` 没测，但用时肯定超过 `AngelScript`，有兴趣的朋友可以测一下；
 
-5. `Python 2.7` 计算 fibonacci(40) 用时 `22000+` 毫秒；
+5. `Python 2.7` 计算 fibonacci(40) 用时约 `22000+` 毫秒；
 
 注：以上测试数据来自笔记本 `Intel i5-4310M` (`DDR3 1866 MHz`)，操作系统 `Windows 10 64-bit`。
 

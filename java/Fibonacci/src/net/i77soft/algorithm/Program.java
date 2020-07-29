@@ -62,12 +62,23 @@ public class Program {
 	 * @param args
 	 */
     public static void main(String[] args) {
-        System.out.print("\n");
-        System.out.print("Input a number (1-50): ? ");
+        System.out.printf("\n");
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
-        int n = scanner.nextInt();
-        System.out.print("\n");
+
+        int n = 1;
+        int max_n = 45;
+        do {
+            if (n == 0 || n > max_n) {
+                System.out.printf("\n");
+                System.out.printf("The number must be on range [1-%d].\n\n", max_n);
+            }
+            //System.out.print("Please enter a number from 1 to %d.\n", max_n);
+            //System.out.print("n = ? ");
+            System.out.printf("Input a number [1-%d]: ? ", max_n);
+            n = scanner.nextInt();
+            System.out.printf("\n");
+        } while (n > max_n);
 
         test_fibonacci(n);
     }
