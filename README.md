@@ -20,7 +20,7 @@ A fast virtual machine written by C++.
 |:--:|---:|
 |jlang-vm (C++, 64bit)|3750 ms|
 |Java 1.8 (64bit)|4531 ms|
-|C#(Mono, Linux 64bit)|大约5000 ms|
+|C#(Mono, Linux 64bit)|大约 5000 ms|
 |AngelScript 2.31.0 (32bit)|10000+ ms|
 |Lua 5.x|未测试|
 |Python 2.7|22000+ ms|
@@ -29,8 +29,7 @@ A fast virtual machine written by C++.
 
 2. `Java 1.8 (64bit)` 关掉 JIT，计算 fibonacci(40) 用时约 `4500` 毫秒；
 
-3. `C#(Mono, Linux 64bit)` 计算 fibonacci(40) 用时约 `5000+` 毫秒，
-由于是不同系统下测试的结果，耗时为大致估算，详细请看后面的 `C# 版 Fibonacci Test` 小节；
+3. `C#(Mono, Linux 64bit)` 计算 fibonacci(40) 用时约 `5000+` 毫秒，由于是不同系统下测试的结果，耗时为大致估算，详细请看后面的 `C# 版 Fibonacci Test` 小节；
 
 4. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时约 `10000+` 毫秒；
 
