@@ -36,14 +36,14 @@ make
 
 ## Java 版 Fibonacci Test
 
-1. 在 `Windows` 下编译并运行：
+1. 在 `Windows` 下测速 (运行脚本中已包含编译过程)：
 
     ```shell
     cd .\java\Fibonacci
     run.bat
     ```
 
-2. 在 `Linux` 下编译并运行：
+2. 在 `Linux` 下测试 (运行脚本中已包含编译过程)：
 
     ```shell
     cd ./java/Fibonacci
