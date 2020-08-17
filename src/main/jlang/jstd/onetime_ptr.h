@@ -31,6 +31,9 @@ struct remove_cv_rp {
             >::type type;
 };
 
+//
+// disposable_ptr<T>
+//
 template <typename T>
 class onetime_ptr : public remove_cv_rp<T>::type {
 public:
