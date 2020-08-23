@@ -22,7 +22,7 @@ A fast virtual machine written by C++.
 |Java 1.8 (64bit)|4531 ms|
 |C#(Mono, Linux 64bit)|大约 5000 ms|
 |AngelScript 2.31.0 (32bit)|10000+ ms|
-|Lua 5.x|未测试|
+|Lua 5.x|大约 9000 ms|
 |Python 2.7|22000+ ms|
 
 1. `jlang-vm (64bit)` 最快的 `v3` 版本计算 fibonacci(40) 用时约 `3750` 毫秒；
@@ -33,7 +33,7 @@ A fast virtual machine written by C++.
 
 4. `AngelScript 2.31.0 (32bit)` 计算 fibonacci(40) 用时约 `10000+` 毫秒；
 
-5. `Lua 5.x` 没测，但用时肯定超过 `AngelScript`，有兴趣的朋友可以测一下；
+5. `Lua 5.4`：在我的 AMD Ryzen 1700X 台式机上测的，用时 9.759 秒，大概相当于 `Intel i5-4310M` 笔记本上 `9000` 毫秒左右；
 
 6. `Python 2.7` 计算 fibonacci(40) 用时约 `22000+` 毫秒；
 
