@@ -156,7 +156,7 @@ void test_Interpreter(const std::string & name)
     printf("--------------------------------------------\n\n");
 
     uint32_t n = 1;
-    uint32_t max_n = 45;
+    uint32_t max_n = 40;
     do {
         if (n == 0 || n > max_n) {
             printf("\n");
@@ -203,7 +203,7 @@ void test_Interpreter_inline(const std::string & name)
     printf("--------------------------------------------\n\n");
 
     uint32_t n = 1;
-    uint32_t max_n = 45;
+    uint32_t max_n = 40;
     do {
         if (n == 0 || n > max_n) {
             printf("\n");
