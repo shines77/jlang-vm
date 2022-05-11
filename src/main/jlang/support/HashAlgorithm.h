@@ -27,7 +27,7 @@ static inline uint32_t getHash(const char * key) {
     register const unsigned char * src = (const unsigned char *)key;
     register uint32_t hash = 0;
 
-    while (src != '\0') {
+    while (*src != '\0') {
         hash += (*src) * seed;
         src++;
     }
@@ -69,7 +69,7 @@ static inline uint64_t getHash64(const char * key) {
     register const unsigned char * src = (const unsigned char *)key;
     register uint64_t hash = 0;
 
-    while (src != '\0') {
+    while (*src != '\0') {
         hash += (*src) * seed;
         src++;
     }
