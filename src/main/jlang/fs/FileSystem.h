@@ -91,7 +91,7 @@ static std::string getExeName() {
     else {
         Global::lastError().setLastError(GetLastError());
     }
-    return std::move(exe_filename);
+    return exe_filename;
 }
 
 static std::string getAppPath(bool including_slash = true) {
@@ -129,7 +129,7 @@ static std::string getAppPath(bool including_slash = true) {
     else {
         Global::lastError().setLastError(GetLastError());
     }
-    return std::move(app_path);
+    return app_path;
 }
 
 #else // !_WIN32
@@ -165,7 +165,7 @@ static std::string getExeName() {
     else {
         Global::lastError().setLastError(errno);
     }
-    return std::move(exe_filename);
+    return exe_filename;
 }
 
 #else
@@ -191,7 +191,7 @@ static std::string getExeName() {
     else {
         Global::lastError().setLastError(errno);
     }
-    return std::move(exe_filename);
+    return exe_filename;
 }
 
 #endif
@@ -231,7 +231,7 @@ static std::string getAppPath(bool including_slash = true) {
     else {
         Global::lastError().setLastError(errno);
     }
-    return std::move(app_path);
+    return app_path;
 }
 
 #endif // _WIN32
@@ -293,14 +293,14 @@ static std::string appendPath(const std::string & base, const std::string & file
                 new_path.push_back(first_char);
                 new_path.push_back(second_char);
                 Global::lastError().setLastError(Error::IllegalPathOrFilename);
-                return std::move(new_path);
+                return new_path;
             }
         }
         else {
             // "E"
             new_path.push_back(first_char);
             Global::lastError().setLastError(Error::IllegalPathOrFilename);
-            return std::move(new_path);
+            return new_path;
         }
     }
     // "\\192.168.1.100\abc"
@@ -403,7 +403,7 @@ Next_Searching:
                 else {
                     // "..???"
                     Global::lastError().setLastError(Error::IllegalPathOrFilename);
-                    return std::move(new_path);
+                    return new_path;
                 }
                 if (path_depth > 0) {
                     int last = index_list[path_depth];
@@ -455,7 +455,7 @@ Next_Searching:
         }
     }
 
-    return std::move(new_path);
+    return new_path;
 }
 
 static std::string completePath(const std::string & filename) {
@@ -472,7 +472,7 @@ static std::string completePath(const std::string & filename) {
         // The base_dir is empty, filename is a absolute path.
         abs_filename = filename;
     }
-    return std::move(abs_filename);
+    return abs_filename;
 }
 
 static std::string completePath(const std::string & base_dir, const std::string & filename)
@@ -510,7 +510,7 @@ static std::string completePath(const std::string & base_dir, const std::string 
         }
         //abs_filename += filename;
         abs_filename = fs::appendPath(abs_filename, filename);
-        return std::move(abs_filename);
+        return abs_filename;
     }
     else {
         return fs::completePath(filename);

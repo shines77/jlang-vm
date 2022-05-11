@@ -1057,7 +1057,7 @@ JMP_START:
                 }
             }
 Execute_Finished:
-            (void *)(0);
+            (void)(0);
         }
 
         return 0;

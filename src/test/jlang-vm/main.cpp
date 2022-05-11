@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <inttypes.h>
 #include <time.h>
 
 #include <iostream>
@@ -138,7 +141,7 @@ void test_Fibonacci64()
     uint64_t fib_n = fibonacci64(n);
     sw.stop();
 
-    printf("  fibonacci(%u) = %llu\n\n", n, fib_n);
+    printf("  fibonacci(%u) = %" PRIuPTR "\n\n", n, fib_n);
 
     double elapsed_time = sw.getElapsedMillisec();
     printf("  elapsed time:  %0.3f ms\n", elapsed_time);
