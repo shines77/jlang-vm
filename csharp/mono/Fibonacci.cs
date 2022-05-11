@@ -36,8 +36,14 @@ namespace Fibonacci
         public static void Main(string[] args)
         {
             Console.WriteLine("");
-            Console.Write("Please input a number: [1-50] ? ");
+            Console.Write("Please input a number: [n = 1-40] ? ");
             int n = ReadInt();
+
+            if (n > 40) {
+                Console.WriteLine("");
+                Console.Write("Error: The n value is bigger than 40.");
+                return;
+            }
 
             Stopwatch sw = new Stopwatch();
             sw.Start();

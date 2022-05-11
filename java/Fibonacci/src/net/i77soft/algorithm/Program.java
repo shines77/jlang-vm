@@ -35,7 +35,7 @@ class StopWatch {
  * @author shines77
  *
  */
-public class Program {	
+public class Program {
 	/**
 	 * @param n
 	 */
@@ -67,15 +67,15 @@ public class Program {
         Scanner scanner = new Scanner(System.in);
 
         int n = 1;
-        int max_n = 45;
+        int max_n = 40;
         do {
             if (n == 0 || n > max_n) {
                 System.out.printf("\n");
-                System.out.printf("The number must be on range [1-%d].\n\n", max_n);
+                System.out.printf("Error: The number must be on range [1-%d].\n\n", max_n);
             }
             //System.out.print("Please enter a number from 1 to %d.\n", max_n);
             //System.out.print("n = ? ");
-            System.out.printf("Input a number [1-%d]: ? ", max_n);
+            System.out.printf("Input a number [n = 1-%d]: ? ", max_n);
             n = scanner.nextInt();
             System.out.printf("\n");
         } while (n > max_n);

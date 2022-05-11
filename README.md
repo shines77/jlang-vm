@@ -53,65 +53,107 @@ A fast virtual machine written by C++.
 
 ## 在 Linux 下编译 jlang-vm / Compile on Linux
 
-1. 先切换到本仓库所在的根路径，使用 `CMake` 生成 `makefile`，最后使用 `make` 命令编译，命令如下：：
+1. 先切换到本仓库所在的目录，使用 `CMake` 生成 `makefile`，最后使用 `make` 编译，如下：
 
     ```shell
-    cd /home/git/jlang-vm
+    cd {your_jlang-vm_dir}
     cmake .
     make
     ```
 
-## Java 版 Fibonacci Test / Java version: Fibonacci Test
+2. 运行 `jlang-vm` 测试：
 
-1. 在 `Windows` 下测试 (运行脚本中已包含编译过程)：
+    ```shell
+    .\jlang-cm
+    ```
 
-    ```bash
-    cd .\java\Fibonacci
+## python 版 / python version
+
+1. 在 `Linux` 下：
+
+    ```shell
+    cd ./python
+    ./run.sh
+    ```
+
+2. 在 `Windows` 下：
+
+    ```shell
+    cd .\python
     run.bat
     ```
 
-2. 在 `Linux` 下测试 (运行脚本中已包含编译过程)：
+3. 或者手动选择 python 版本，如下：
+
+    ```shell
+    cd ./python
+    python2 ./fibonacci/fibonacci.py
+    python3 ./fibonacci/fibonacci.py
+    ```
+
+## Java 版 / Java version
+
+1. 在 `Linux` 下：
 
     ```shell
     cd ./java/Fibonacci
     ./run.sh
     ```
 
-    以上命令运行后的效果如下：
+2. 在 `Windows` 下：
 
     ```shell
-    Input a number (n = 1-45): ? 40
+    cd .\java\Fibonacci
+    run.bat
+    ```
+
+3. 运行效果：
+
+    ```shell
+    Input a number (n = 1-40): ? 40
 
     fibonacci(40) = 102334155
 
     elapsed time: 4531 ms.
     ```
 
-3. `JDK 1.8` 的安装方法：
+4. `run.sh` 的内容如下：
+
+    ```bash
+    #!/bin/bash
+    # 编译源代码
+    javac ./src/net/i77soft/algorithm/Program.java
+
+    cd ./src/
+    # -Xint 表示禁用 JIT
+    java -Xint net.i77soft.algorithm.Program
+    ```
+
+5. `JDK 1.8` 的安装方法：
 
     ```shell
     sudo apt-get install openjdk-8-jdk
     ```
 
-## C# 版 Fibonacci Test / C# version: Fibonacci Test
+## C# 版 / C# version
 
 由于 Visual Studio 的 `C#` 中找不到有效的关闭 `JIT` 并开启纯解释执行模式的方法。纯解释器模式只有 `Mono`（`C#` 的克隆版）才支持，但 `Mono` 我只在 `Linux` 下安装过，`Windows` 下没尝试过。
 
-如何在 `Linux` 下的 `Mono` 测试 Fibonacci（`Mono` 的安装方法请自行百度）：
+1. 如何在 `Linux` 下的 `Mono` 测试 Fibonacci（`Mono` 的安装方法请自行百度）：
 
-```bash
-cd ./csharp/Fibonacci
-./run.sh
-```
+    ```shell
+    cd ./csharp/Fibonacci
+    ./run.sh
+    ```
 
-`run.sh` 文件的内容如下：
+2. `run.sh` 文件的内容如下：
 
-```bash
-#!/bin/bash
+    ```shell
+    #!/bin/bash
 
-mcs ./mono/Fibonacci.cs
-mono --interpreter ./mono/Fibonacci.exe
-```
+    mcs ./mono/Fibonacci.cs
+    mono --interpreter ./mono/Fibonacci.exe
+    ```
 
 由于测试机器的 `CPU` 物理性能跟对比的笔记本不一样，且不是 `Windows` 环境，
 
