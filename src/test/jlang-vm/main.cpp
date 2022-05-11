@@ -16,7 +16,7 @@
 #include <jlang/basic/inttypes.h>
 #include <jlang/jlang.h>
 
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #ifndef scanf_s
 #define scanf_s     scanf
 #endif
@@ -32,7 +32,7 @@ using namespace jlang;
 #endif
 #define JLANG_SCRIPT_PATH(path)     JLANG_SCRIPT_BASE_DIR path
 
-static const int kWarmupMillsecs = 600;
+static const int kWarmupMillsecs = 1000;
 
 void cpu_warmup(int delayTime)
 {
