@@ -8,7 +8,7 @@ function fibonacci(n)
 end
 
 function main()
-    print("Enter a number [1-45]: ")
+    print("Enter a number [n = 1-40]: ")
     local n = io.read("*number")
 
     print("");
@@ -16,7 +16,7 @@ function main()
     local fib_n = fibonacci(n)
     local endTime = os.clock()
 
-    print("fibonacci(40) = "..fib_n.."\n")
+    print("fibonacci("..n..") = "..fib_n.."\n")
     print("Used time: "..(endTime - startTime).." seconds")
 end
 
