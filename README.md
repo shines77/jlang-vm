@@ -15,7 +15,7 @@ A fast virtual machine written by C++.
 本项目是在下面这篇 `知乎` 帖子的启发下编写的，该文讨论的核心内容是：如何降低或减少虚拟机（解释器）中的物理 `CPU` 的流水线停滞问题。
 
  [`在不使用JIT的前提下，解释器能达到多高的速度呢？`](https://www.zhihu.com/question/300109568)
- 
+
  ( [https://www.zhihu.com/question/300109568](https://www.zhihu.com/question/300109568) )
 
 ## 测试数据 / Benchmark
@@ -87,7 +87,7 @@ A fast virtual machine written by C++.
     elapsed time: 4531 ms.
     ```
 
-3. 附：`JDK 1.8` 的安装方法：
+3. `JDK 1.8` 的安装方法：
 
     ```shell
     sudo apt-get install openjdk-8-jdk
@@ -95,7 +95,7 @@ A fast virtual machine written by C++.
 
 ## C# 版 Fibonacci Test / C# version: Fibonacci Test
 
-由于 Visual Studio 的 `C#` 中找不到有效的关闭 `JIT`，开启纯解释执行模式的方法。纯解释器模式只有 `C#` 的克隆版 `Mono` 才支持，但 `Mono` 我只在 `Linux` 下安装过，`Windows` 下没尝试过。
+由于 Visual Studio 的 `C#` 中找不到有效的关闭 `JIT` 并开启纯解释执行模式的方法。纯解释器模式只有 `Mono`（`C#` 的克隆版）才支持，但 `Mono` 我只在 `Linux` 下安装过，`Windows` 下没尝试过。
 
 如何在 `Linux` 下的 `Mono` 测试 Fibonacci（`Mono` 的安装方法请自行百度）：
 
