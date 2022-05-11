@@ -33,8 +33,10 @@
 
 #include "jlang/asm/Parser.h"
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4146)
+#endif
 
 namespace jlang {
 namespace jasm {
@@ -3716,6 +3718,8 @@ NextToken_Continue:
 } // namespace jasm
 } // namespace jlang
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #endif // JLANG_ASM_ASMPARSER_H
