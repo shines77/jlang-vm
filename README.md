@@ -1,6 +1,6 @@
 # jlang-vm
 
-## Introduction
+## Introduction [English]
 
 A fast virtual machine written by C++.
 
@@ -12,7 +12,7 @@ A fast virtual machine written by C++.
 
 ## 参考文章 / Reference Article
 
-本项目是在这篇 `知乎` 文章的启发下编写的，该文讨论的核心内容是：如何降低或减少虚拟机（解释器）中的物理 `CPU` 的流水线停滞问题。
+本项目是在下面这篇 `知乎` 帖子的启发下编写的，该文讨论的核心内容是：如何降低或减少虚拟机（解释器）中的物理 `CPU` 的流水线停滞问题。
 
  [`在不使用JIT的前提下，解释器能达到多高的速度呢？`](https://www.zhihu.com/question/300109568)
  
@@ -45,31 +45,21 @@ A fast virtual machine written by C++.
 
 操作系统：`Windows 10 64-bit`，编译环境：`VC 2015 update 3`。
 
+## 为什么要手动输入 Fibonacci 的参数 n ?
+
+因为很多语言如果不从外部输入，直接把 `n` 写在代码里，会被优化成常量输出，就失去了测试的意义。
+
+所以在所有语言的测试中，都统一使用手动输入参数 `n` 。
+
 ## 在 Linux 下编译 jlang-vm / Compile on Linux
 
-1. 先切换到本仓库所在的根路径，例如：
+1. 先切换到本仓库所在的根路径，使用 `CMake` 生成 `makefile`，最后使用 `make` 命令编译，命令如下：：
 
-```bash
-cd /home/git/jlang-vm
-```
-
-2. 然后使用 `CMake` 生成 `makefile`，命令如下：
-
-```bash
-cmake .
-```
-
-或者
-
-```bash
-cmake -G "Unix Makefiles"
-```
-
-3. 最后使用 `make` 命令编译工程：
-
-```bash
-make
-```
+    ```shell
+    cd /home/git/jlang-vm
+    cmake .
+    make
+    ```
 
 ## Java 版 Fibonacci Test / Java version: Fibonacci Test
 
@@ -82,30 +72,36 @@ make
 
 2. 在 `Linux` 下测试 (运行脚本中已包含编译过程)：
 
-    ```bash
+    ```shell
     cd ./java/Fibonacci
     ./run.sh
     ```
 
     以上命令运行后的效果如下：
 
-    ```bash
-    Input a number (1-45): ? 40
+    ```shell
+    Input a number (n = 1-45): ? 40
 
     fibonacci(40) = 102334155
 
     elapsed time: 4531 ms.
     ```
 
+3. 附：`JDK 1.8` 的安装方法：
+
+    ```shell
+    sudo apt-get install openjdk-8-jdk
+    ```
+
 ## C# 版 Fibonacci Test / C# version: Fibonacci Test
 
-由于 `C#` 中找不到有效的开启纯解释执行模式的方法，我们只能在 `Mono` 中测试，`Mono` 支持纯解释器模式。
+由于 Visual Studio 的 `C#` 中找不到有效的关闭 `JIT`，开启纯解释执行模式的方法。纯解释器模式只有 `C#` 的克隆版 `Mono` 才支持，但 `Mono` 我只在 `Linux` 下安装过，`Windows` 下没尝试过。
 
-`Mono` 在 `Linux` 下测试：
+如何在 `Linux` 下的 `Mono` 测试 Fibonacci（`Mono` 的安装方法请自行百度）：
 
 ```bash
-cd .\csharp\Fibonacci
-run.sh
+cd ./csharp/Fibonacci
+./run.sh
 ```
 
 `run.sh` 文件的内容如下：
