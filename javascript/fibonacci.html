@@ -11,7 +11,7 @@ function fibonacci(n) {
 }
 
 function run_fib() {
-    var num_ctl = document.getElementsByName("n")[0];
+    var num_ctl = document.getElementById("num");
     var num = num_ctl.value;
     if (num === undefined || (typeof num === "string" && num === "")) {
         alert("n 必须是数字，不能为空或字符串！");
@@ -19,9 +19,9 @@ function run_fib() {
     }
     var n = parseInt(num, 10);
 
-    var fib_n_ctl = document.getElementsByName("fib_n")[0];
-    var elapsed_time_ctl = document.getElementsByName("elapsed_time")[0];
-    var last_time_ctl = document.getElementsByName("last_time")[0];
+    var fib_n_ctl = document.getElementById("fib_n");
+    var elapsed_time_ctl = document.getElementById("elapsed_time");
+    var last_time_ctl = document.getElementById("last_time");
 
     var startTime, endTime, elaspedTime;
     startTime = new Date().getTime();
@@ -41,17 +41,17 @@ function run_fib() {
     elapsed_time_ctl.value = elaspedTime;
     last_time_ctl.value = new Date().toString();
 
-    var run_btn = document.getElementsByName("run_btn")[0];
-    run_btn.value = "开始结算"
+    var run_btn = document.getElementById("run_btn");
+    run_btn.value = "开始计算"
     run_btn.enabled = "true";
 
-    var run_result_div = document.getElementsByName("run_result")[0];
+    var run_result_div = document.getElementById("run_result");
     run_result_div.style.display = "block";
     return true;
 }
 
 function test_fib() {
-    var num_ctl = document.getElementsByName("n")[0];
+    var num_ctl = document.getElementById("num");
     var num = num_ctl.value;
     if (num === undefined || (typeof num === "string" && num === "")) {
         alert("n 必须是数字，不能为空或字符串！");
@@ -60,27 +60,27 @@ function test_fib() {
     var n = parseInt(num, 10);
     num_ctl.value = n.toString();
 
-    var run_btn = document.getElementsByName("run_btn")[0];
+    var run_btn = document.getElementById("run_btn");
     run_btn.value = "计算中..."
-    run_btn.enabled = "false";
+    run_btn.disabled = true;
 
-    var fib_n_ctl = document.getElementsByName("fib_n")[0];
-    var elapsed_time_ctl = document.getElementsByName("elapsed_time")[0];
-    var last_time_ctl = document.getElementsByName("last_time")[0];
+    var fib_n_ctl = document.getElementById("fib_n");
+    var elapsed_time_ctl = document.getElementById("elapsed_time");
+    var last_time_ctl = document.getElementById("last_time");
 
     fib_n_ctl.value = "";
     elapsed_time_ctl.value = "";
     last_time_ctl.value = "";
 
-    fib_n_ctl.enabled = "false";
-    elapsed_time_ctl.enabled = "false";
-    last_time_ctl.enabled = "false";
+    fib_n_ctl.disabled = true;
+    elapsed_time_ctl.disabled = true;
+    last_time_ctl.disabled = true;
 
     fib_n_ctl.style.visibility = "hidden";
     elapsed_time_ctl.style.visibility = "hidden";
     last_time_ctl.style.visibility = "hidden";
 
-    var run_result_div = document.getElementsByName("run_result")[0];
+    var run_result_div = document.getElementById("run_result");
     run_result_div.style.display = "none";
 
     if (true) {
@@ -94,16 +94,16 @@ function test_fib() {
         elapsed_time_ctl.style.visibility = "visible";
         last_time_ctl.style.visibility = "visible";
 
-        fib_n_ctl.enabled = "true";
-        elapsed_time_ctl.enabled = "true";
-        last_time_ctl.enabled = "true";
+        fib_n_ctl.disabled = false;
+        elapsed_time_ctl.disabled = false;
+        last_time_ctl.disabled = false;
 
         fib_n_ctl.value = fib_n;
         elapsed_time_ctl.value = elaspedTime;
         last_time_ctl.value = new Date().toString();
 
-        run_btn.value = "开始结算"
-        run_btn.enabled = "true";
+        run_btn.value = "开始计算"
+        run_btn.disabled = false;
     } else {
         last_time_ctl.value = new Date().toString();
         setTimeout(run_fib(), 500);
@@ -113,25 +113,25 @@ function test_fib() {
     return true;
 }
 
-function reset_ui() {
-    var run_btn = document.getElementsByName("run_btn")[0];
-    var run_result_div = document.getElementsByName("run_result")[0];
-    var fib_n_ctl = document.getElementsByName("fib_n")[0];
-    var elapsed_time_ctl = document.getElementsByName("elapsed_time")[0];
-    var last_time_ctl = document.getElementsByName("last_time")[0];
+function reset_result() {
+    var run_btn = document.getElementById("run_btn");
+    var run_result_div = document.getElementById("run_result");
+    var fib_n_ctl = document.getElementById("fib_n");
+    var elapsed_time_ctl = document.getElementById("elapsed_time");
+    var last_time_ctl = document.getElementById("last_time");
 
     run_result_div.style.display = "block";
 
-    run_btn.value = "开始结算"
-    run_btn.enabled = "true";
+    run_btn.value = "开始计算"
+    run_btn.disabled = false;
 
     fib_n_ctl.value = "";
     elapsed_time_ctl.value = "";
     last_time_ctl.value = "";
 
-    fib_n_ctl.enabled = "false";
-    elapsed_time_ctl.enabled = "false";
-    last_time_ctl.enabled = "false";
+    fib_n_ctl.disabled = false;
+    elapsed_time_ctl.disabled = false;
+    last_time_ctl.disabled = false;
 
     fib_n_ctl.style.visibility = "visible";
     elapsed_time_ctl.style.visibility = "visible";
@@ -140,12 +140,12 @@ function reset_ui() {
 </script>
 </header>
 <body>
-<p><br />n = ? <input name="n" type="number" value="40" size="6" maxlength="8"></p>
-<div name="run_result">
-<p>fibonacci(n): <input name="fib_n" type="string" value="" size="16" maxlength="20"></p>
-<p>耗时：<input name="elapsed_time" type="string" value="" size="12" maxlength="16"> 毫秒</p>
-<p>时间戳：<input name="last_time" type="string" value="" size="50" maxlength="56"></p>
+<p><br />n = ? <input id="num" type="number" value="40" size="6" maxlength="8"></p>
+<div id="run_result">
+<p>fibonacci(n): <input id="fib_n" type="string" value="" size="16" maxlength="20"></p>
+<p>耗时：<input id="elapsed_time" type="string" value="" size="12" maxlength="16"> 毫秒</p>
+<p>时间戳：<input id="last_time" type="string" value="" size="50" maxlength="56"></p>
 </div>
-<p><br />&nbsp;| &nbsp;<input name="run_btn" type="button" onclick="test_fib()" value="开始计算"> &nbsp; | &nbsp;<input name="reset_btn" type="button" onclick="reset_ui()" value="重置结果">&nbsp; | &nbsp;</p>
+<p><br />&nbsp;| &nbsp;<input id="run_btn" type="button" onclick="test_fib();" value="开始计算"> &nbsp; | &nbsp;<input id="reset_btn" type="button" onclick="reset_result();" value="重置结果">&nbsp; | &nbsp;</p>
 </body>
 </html>
