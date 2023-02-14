@@ -11,11 +11,15 @@
 #include <stdint.h>
 #include <assert.h>
 
+///////////////////////////////////////////////////
+// namespace jlang::CharInfo
+///////////////////////////////////////////////////
+
 namespace jlang {
 namespace CharInfo {
 
     // Use in mask[256]
-    enum {
+    enum Masks {
         Null               = 0x0001,   // '\0'
         WhiteSpace         = 0x0002,   // ' ', \t, \v, \f
         NewLine            = 0x0004,   // \r, \n
@@ -30,6 +34,7 @@ namespace CharInfo {
         IdentifierFirst    = Alphabet | UnderLine,           // [A-Z], [a-z], and [_]
         IdentifierBody     = IdentifierFirst | Digital,      // [A-Z], [a-z], [0-9] and [_]
         Identifier         = IdentifierFirst | Digital,      // [A-Z], [a-z], [0-9] and [_]
+        ReservedKeyword    = Alphabet | UnderLine,           // [A-Z], [a-z], and [_]
 
         IncludeEndOf       = Null | NewLine | IncludeQuote, // '\0', '\n', '\r', ", >
 
@@ -185,7 +190,7 @@ namespace CharInfo {
         /* 0xF0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }; // mask[256]
 
-    enum {
+    enum EscapeMasks {
         OctEscapeChar  = 254,
         NonAscii       = 255,
         AdvancedEscape = OctEscapeChar
@@ -364,8 +369,8 @@ namespace CharInfo {
                    NonAscii, NonAscii, NonAscii, NonAscii
     }; // escape_chars[256]
 
-    enum {
-        UnescapeError = 255,
+    enum UnescapeMasks {
+        UnescapeError   = 255,
         OctUnescapeChar = 253,
         HexUnescapeChar = 254,
         AdvancedUnescape = OctUnescapeChar
@@ -544,7 +549,7 @@ namespace CharInfo {
                    UnescapeError, UnescapeError, UnescapeError, UnescapeError
     }; // unescape_chars[256]
 
-    enum {
+    enum HexMasks {
         InvalidHex = 255
     };
 
@@ -722,7 +727,7 @@ namespace CharInfo {
     }; // hex_value[256]
 
     // Use in ext_mask[256]
-    enum {
+    enum ExtMasks {
         Null2              = 0x0001,   // '\0'
         NewLine2           = 0x0002,   // '\n', '\r'
         WhiteSpace2        = 0,
@@ -736,7 +741,7 @@ namespace CharInfo {
         InvalidPath        = 0x0040,   // Include: [ : ? " * : < > | ]
         Operator2          = 0x0080,   // Include: ! % & * + - : < = > ? ^ | ~
 
-        MaskLast2
+        ExtMaskLast
     };
 
     static const uint8_t ext_mask[256] = {
@@ -939,6 +944,11 @@ namespace CharInfo {
         return ((CharInfo::mask[ch] & CharInfo::Digital) != 0);
     }
 
+    // Starting with numbers: "[0-9]", or ".[0-9]"
+    static inline bool isNumber(unsigned char ch, unsigned char next) {
+        return (CharInfo::isDigital(ch) || (ch == '.' && CharInfo::isDigital(next)));
+    }
+
     static inline bool IsHexChar(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::HexChar) != 0);
     }
@@ -961,6 +971,10 @@ namespace CharInfo {
 
     static inline bool IsIdentifier(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::Identifier) != 0);
+    }
+
+    static inline bool isReservedKeyword(unsigned char ch) {
+        return ((CharInfo::mask[ch] & CharInfo::ReservedKeyword) != 0);
     }
 
     static inline bool IsIncludeEndOf(unsigned char ch) {
