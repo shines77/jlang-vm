@@ -31,8 +31,9 @@ namespace jlang {
 
 struct SeekType {
     enum Type {
-        Begin = 0,
-        End = 1
+        Begin,
+        End,
+        Current
     };
 };
 

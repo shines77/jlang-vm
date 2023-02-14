@@ -25,7 +25,7 @@
 using namespace jlang;
 
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
- || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__) 
+ || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
 #define JLANG_SCRIPT_BASE_DIR       "..\\..\\..\\scripts\\"
 #else
 #define JLANG_SCRIPT_BASE_DIR       "./scripts/"
@@ -177,7 +177,7 @@ void test_Interpreter(const std::string & name)
     vmReturn<> retVal;
     retVal.setDataType(vmReturn<>::Basic);
     retVal.setValue(n);
-    
+
     int ec = interpreter.create();
 
     sw.start();
@@ -224,7 +224,7 @@ void test_Interpreter_inline(const std::string & name)
     vmReturn<> retVal;
     retVal.setDataType(vmReturn<>::Basic);
     retVal.setValue(n);
-    
+
     int ec = interpreter.create();
 
     sw.start();

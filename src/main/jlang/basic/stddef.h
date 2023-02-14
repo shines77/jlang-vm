@@ -236,6 +236,8 @@
     #define JM_EXPORTED_METHOD
 #endif
 
+#define JLANG_TO_STRING(str)    #str
+
 #define STD_IOS_RIGHT(width, var) \
     std::right << std::setw(width) << (var)
 

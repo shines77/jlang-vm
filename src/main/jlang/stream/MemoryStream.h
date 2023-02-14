@@ -16,6 +16,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <cstring>
+
 namespace jlang {
 
 ///////////////////////////////////////////////////
@@ -66,11 +68,11 @@ public:
         assert(!this->is_overflow());
         if (this->current_) {
             if (this->current_ + size <= this->tail_) {
-                ::memcpy(this->current_, buf, size);
+                std::memcpy(this->current_, buf, size);
                 this->current_ += size;
             }
             else {
-                ::memcpy(this->current_, buf, this->tail_ - this->current_);
+                std::memcpy(this->current_, buf, this->tail_ - this->current_);
                 this->current_ =this->tail_;
             }
         }
@@ -80,6 +82,7 @@ public:
 private:
     // NonCopyable
     MemoryStream(const MemoryStream & src) = delete;
+    MemoryStream(MemoryStream && src) = delete;
     MemoryStream & operator = (const MemoryStream & rhs) {
         return *this;
     }

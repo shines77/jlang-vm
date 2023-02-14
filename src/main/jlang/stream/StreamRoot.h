@@ -81,16 +81,13 @@ public:
     const char * head() const { return this->head_; }
     const char * tail() const { return this->tail_; }
 
-    const char * chead() const { return this->head_; }
-    const char * ctail() const { return this->tail_; }
+    void set_head(char * value) { this->head_ = value; }
+    void set_tail(char * value) { this->tail_ = value; }
 
     char * begin() { return this->head(); }
     char * end() { return this->tail(); }
     const char * begin() const { return this->head(); }
     const char * end() const { return this->tail(); }
-
-    const char * cbegin() const { return this->chead(); }
-    const char * cend() const { return this->ctail(); }
 
     char * current() { return this->current_; }
     const char * current() const { return this->current_; }
