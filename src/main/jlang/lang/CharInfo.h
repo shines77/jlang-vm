@@ -29,7 +29,7 @@ namespace CharInfo {
         HexChar            = 0x0040,   // [0-9] and ([a-f] or [A-F])
         IncludeQuote       = 0x0080,   // " >
         Operator           = 0,        // Include: ! % & * + - : < = > ? ^ | ~
-        
+
         WhiteSpaces        = WhiteSpace | NewLine,           // ' ', \t, \v, \f and \r, \n
         IdentifierFirst    = Alphabet | UnderLine,           // [A-Z], [a-z], and [_]
         IdentifierBody     = IdentifierFirst | Digital,      // [A-Z], [a-z], [0-9] and [_]
@@ -93,7 +93,7 @@ namespace CharInfo {
             /* '-' 2D */ Operator,
             /* '.' 2E */ Operator,
             /* '/' 2F */ 0,
-        /* 0x30 */  
+        /* 0x30 */
             /* '0' 30 */ Digital | HexChar,
             /* '1' 31 */ Digital | HexChar,
             /* '2' 32 */ Digital | HexChar,
@@ -126,7 +126,7 @@ namespace CharInfo {
             /* 'L' 4C */ Alphabet,
             /* 'M' 4D */ Alphabet,
             /* 'N' 4E */ Alphabet,
-            /* 'O' 4F */ Alphabet,            
+            /* 'O' 4F */ Alphabet,
         /* 50 */
             /* 'P' 50 */ Alphabet,
             /* 'Q' 51 */ Alphabet,
@@ -248,7 +248,7 @@ namespace CharInfo {
             /* '-' 2D */ 0,
             /* '.' 2E */ 0,
             /* '/' 2F */ 0,
-        /* 0x30 */  
+        /* 0x30 */
             /* '0' 30 */ 0,
             /* '1' 31 */ 0,
             /* '2' 32 */ 0,
@@ -281,7 +281,7 @@ namespace CharInfo {
             /* 'L' 4C */ 0,
             /* 'M' 4D */ 0,
             /* 'N' 4E */ 0,
-            /* 'O' 4F */ 0,            
+            /* 'O' 4F */ 0,
         /* 50 */
             /* 'P' 50 */ 0,
             /* 'Q' 51 */ 0,
@@ -428,7 +428,7 @@ namespace CharInfo {
             /* '-' 2D */ UnescapeError,
             /* '.' 2E */ UnescapeError,
             /* '/' 2F */ UnescapeError,
-        /* 0x30 */  
+        /* 0x30 */
             /* '0' 30 */ OctUnescapeChar,
             /* '1' 31 */ OctUnescapeChar,
             /* '2' 32 */ OctUnescapeChar,
@@ -461,7 +461,7 @@ namespace CharInfo {
             /* 'L' 4C */ UnescapeError,
             /* 'M' 4D */ UnescapeError,
             /* 'N' 4E */ UnescapeError,
-            /* 'O' 4F */ UnescapeError,            
+            /* 'O' 4F */ UnescapeError,
         /* 50 */
             /* 'P' 50 */ UnescapeError,
             /* 'Q' 51 */ UnescapeError,
@@ -605,7 +605,7 @@ namespace CharInfo {
             /* '-' 2D */ InvalidHex,
             /* '.' 2E */ InvalidHex,
             /* '/' 2F */ InvalidHex,
-        /* 0x30 */  
+        /* 0x30 */
             /* '0' 30 */ 0,
             /* '1' 31 */ 1,
             /* '2' 32 */ 2,
@@ -638,7 +638,7 @@ namespace CharInfo {
             /* 'L' 4C */ InvalidHex,
             /* 'M' 4D */ InvalidHex,
             /* 'N' 4E */ InvalidHex,
-            /* 'O' 4F */ InvalidHex,            
+            /* 'O' 4F */ InvalidHex,
         /* 50 */
             /* 'P' 50 */ InvalidHex,
             /* 'Q' 51 */ InvalidHex,
@@ -796,7 +796,7 @@ namespace CharInfo {
             /* '-' 2D */ Operator2,
             /* '.' 2E */ Operator2,
             /* '/' 2F */ 0,
-        /* 0x30 */  
+        /* 0x30 */
             /* '0' 30 */ Digital2 | HexChar2,
             /* '1' 31 */ Digital2 | HexChar2,
             /* '2' 32 */ Digital2 | HexChar2,
@@ -829,7 +829,7 @@ namespace CharInfo {
             /* 'L' 4C */ UpperCase,
             /* 'M' 4D */ UpperCase,
             /* 'N' 4E */ UpperCase,
-            /* 'O' 4F */ UpperCase,            
+            /* 'O' 4F */ UpperCase,
         /* 50 */
             /* 'P' 50 */ UpperCase,
             /* 'Q' 51 */ UpperCase,
@@ -920,15 +920,15 @@ namespace CharInfo {
     };
 
     /* CharInfo::mask[256] */
-    static inline bool IsWhiteSpace(unsigned char ch) {
+    static inline bool isWhiteSpace(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::WhiteSpace) != 0);
     }
 
-    static inline bool IsWhiteSpaces(unsigned char ch) {
+    static inline bool isWhiteSpaces(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::WhiteSpaces) != 0);
     }
 
-    static inline bool IsNewLine(unsigned char ch) {
+    static inline bool isNewLine(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::NewLine) != 0);
     }
 
@@ -936,11 +936,11 @@ namespace CharInfo {
         return ((CharInfo::mask[ch] & CharInfo::Alphabet) != 0);
     }
 
-    static inline bool IsUnderLine(unsigned char ch) {
+    static inline bool isUnderLine(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::UnderLine) != 0);
     }
 
-    static inline bool IsDigital(unsigned char ch) {
+    static inline bool isDigital(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::Digital) != 0);
     }
 
@@ -949,27 +949,27 @@ namespace CharInfo {
         return (CharInfo::isDigital(ch) || (ch == '.' && CharInfo::isDigital(next)));
     }
 
-    static inline bool IsHexChar(unsigned char ch) {
+    static inline bool isHexChar(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::HexChar) != 0);
     }
 
-    static inline bool IsInvalidPath(unsigned char ch) {
+    static inline bool isInvalidPath(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::InvalidPath) != 0);
     }
 
-    static inline bool IsOperator(unsigned char ch) {
+    static inline bool isOperator(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::Operator) != 0);
     }
 
-    static inline bool IsIdentifierFirst(unsigned char ch) {
+    static inline bool isIdentifierFirst(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::IdentifierFirst) != 0);
     }
 
-    static inline bool IsIdentifierBody(unsigned char ch) {
+    static inline bool isIdentifierBody(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::IdentifierBody) != 0);
     }
 
-    static inline bool IsIdentifier(unsigned char ch) {
+    static inline bool isIdentifier(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::Identifier) != 0);
     }
 
@@ -977,20 +977,20 @@ namespace CharInfo {
         return ((CharInfo::mask[ch] & CharInfo::ReservedKeyword) != 0);
     }
 
-    static inline bool IsIncludeEndOf(unsigned char ch) {
+    static inline bool isIncludeEndOf(unsigned char ch) {
         return ((CharInfo::mask[ch] & CharInfo::IncludeEndOf) != 0);
     }
 
     /* CharInfo::ext_mask[256] */
-    static inline bool IsUpperCase(unsigned char ch) {
+    static inline bool isUpperCase(unsigned char ch) {
         return ((CharInfo::ext_mask[ch] & CharInfo::UpperCase) != 0);
     }
 
-    static inline bool IsLowerCase(unsigned char ch) {
+    static inline bool isLowerCase(unsigned char ch) {
         return ((CharInfo::ext_mask[ch] & CharInfo::LowerCase) != 0);
     }
 
-    static inline bool IsDelimiter(unsigned char ch) {
+    static inline bool isDelimiter(unsigned char ch) {
         return ((CharInfo::ext_mask[ch] & CharInfo::Delimiter) != 0);
     }
 
@@ -999,7 +999,7 @@ namespace CharInfo {
         return (CharInfo::escape_chars[ch] != 0);
     }
 
-    static inline bool IsAdvancedEscape(unsigned char ch) {
+    static inline bool isAdvancedEscape(unsigned char ch) {
         return (CharInfo::escape_chars[ch] >= CharInfo::AdvancedEscape);
     }
 
@@ -1012,7 +1012,7 @@ namespace CharInfo {
         return (CharInfo::unescape_chars[ch] != CharInfo::UnescapeError);
     }
 
-    static inline bool IsAdvancedUnescape(unsigned char ch) {
+    static inline bool isAdvancedUnescape(unsigned char ch) {
         return (CharInfo::unescape_chars[ch] >= CharInfo::AdvancedUnescape);
     }
 
@@ -1021,7 +1021,7 @@ namespace CharInfo {
     }
 
     /* HexValue */
-    static inline bool IsHexChars(unsigned char ch) {
+    static inline bool isHexChars(unsigned char ch) {
         return (CharInfo::hex_value[ch] != CharInfo::InvalidHex);
     }
 
