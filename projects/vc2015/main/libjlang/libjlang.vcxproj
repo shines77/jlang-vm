@@ -74,6 +74,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\support\HashAlgorithm.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StopWatch.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StringUtils.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\system\Console.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\system\System.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\test\Assert.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\vm\ArgsDefine.h" />

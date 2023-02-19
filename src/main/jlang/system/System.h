@@ -24,7 +24,7 @@
 namespace jlang {
 namespace System {
 
-static void Sleep(unsigned int millisec)
+static void sleep(unsigned int millisec)
 {
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
  || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
@@ -37,7 +37,7 @@ static void Sleep(unsigned int millisec)
 #endif
 }
 
-static void uSleep(unsigned int usec)
+static void usleep(unsigned int usec)
 {
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
  || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)
@@ -51,7 +51,7 @@ static void uSleep(unsigned int usec)
 #endif
 }
 
-static void Pause()
+static void pause()
 {
 #if defined(_WIN32) || defined(WIN32) || defined(OS_WINDOWS) || defined(_WINDOWS_) \
  || defined(_WINDOWS) || defined(WINDOWS) || defined(__WINDOWS__)

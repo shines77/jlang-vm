@@ -229,6 +229,9 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\support\HashAlgorithm.h">
       <Filter>src\support</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\system\Console.h">
+      <Filter>src\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jlang\lang\Global.cpp">

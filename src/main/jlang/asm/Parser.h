@@ -1325,7 +1325,7 @@ Parse_Exit:
             chars = ch;
         }
         else {
-            bool isAdvancedEscape = CharInfo::IsAdvancedEscape(ch);
+            bool isAdvancedEscape = CharInfo::isAdvancedEscape(ch);
             if (!isAdvancedEscape) {
                 chars = '\\';
                 chars.push_back(CharInfo::GetEscapeChar(ch));
@@ -1355,7 +1355,7 @@ Parse_Exit:
         int skip = 0;
         bool canUnescape = CharInfo::CanUnescape(ch);
         if (canUnescape) {
-            bool isAdvencadUnescape = CharInfo::IsAdvancedUnescape(ch);
+            bool isAdvencadUnescape = CharInfo::isAdvancedUnescape(ch);
             if (!isAdvencadUnescape) {
                 ch = CharInfo::GetUnescapeChar(ch);
                 skip = 1;
@@ -1389,12 +1389,12 @@ Parse_Exit:
                     if ((stream.remain() >= 3)) {
                         // The first hexadecimal number
                         unsigned char ch1 = stream.getu(1);
-                        if (CharInfo::IsHexChars(ch1)) {
+                        if (CharInfo::isHexChars(ch1)) {
                             ch1 = CharInfo::GetHexValue(ch1);
 
                             // The second hexadecimal number
                             unsigned char ch2 = stream.getu(2);
-                            if (CharInfo::IsHexChars(ch2)) {
+                            if (CharInfo::isHexChars(ch2)) {
                                 ch2 = CharInfo::GetHexValue(ch2);
 
                                 ch = ch1 * 16 + ch2;

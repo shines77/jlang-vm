@@ -8,15 +8,44 @@
 
 #include "jlang/basic/stddef.h"
 
-#include "jimic/system/getchar.h"
-#include "jimic/system/console.h"
-
 #include <stdio.h>
 #include <stdarg.h>
 
 #ifdef _MSC_VER
 #include <conio.h>
 #endif // _MSC_VER
+
+namespace jlang {
+
+void cpu_warmup(int delayTime)
+{
+#if defined(NDEBUG)
+    double startTime, stopTime;
+    double delayTimeLimit = (double)delayTime / 1000.0;
+    volatile int sum = 0;
+
+    printf("CPU warm-up begin ...\n");
+    fflush(stdout);
+    startTime = StopWatch::timestamp();
+    double elapsedTime;
+    do {
+        for (int i = 0; i < 500; ++i) {
+            sum += i;
+            for (int j = 5000; j >= 0; --j) {
+                sum -= j;
+            }
+        }
+        stopTime = StopWatch::timestamp();
+        elapsedTime = stopTime - startTime;
+    } while (elapsedTime < delayTimeLimit);
+
+    printf("sum = %u, time: %0.3f ms\n", sum, elapsedTime * 1000.0);
+    printf("CPU warm-up end   ... \n\n");
+    fflush(stdout);
+#endif // !_DEBUG
+}
+
+} // namespace jlang
 
 namespace jlang {
 namespace Console {
@@ -44,11 +73,11 @@ static int ReadKey(bool enabledCpuWarmup = false, bool displayTips = true,
     if (displayTips) {
         printf("Press any key to continue ...");
 
-        keyCode = jimi_getch();
+        keyCode = getchar();
         printf("\n");
     }
     else {
-        keyCode = jimi_getch();
+        keyCode = getchar();
         if (echoInput) {
             if (keyCode != EOF)
                 printf("%c", (char)keyCode);
@@ -63,7 +92,8 @@ static int ReadKey(bool enabledCpuWarmup = false, bool displayTips = true,
 
     // After call jimi_getch(), warm up the CPU again, at least 500 ms.
     if (enabledCpuWarmup) {
-        jimi_cpu_warmup(500);
+        // Run the code in a loop for a while, to warm up the CPU.
+        cpu_warmup(500);
     }
     return keyCode;
 }

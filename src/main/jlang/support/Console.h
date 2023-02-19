@@ -27,10 +27,10 @@
 namespace jlang {
 
 struct LogLevel {
-    static const int Unknown = 0;
-    static const int Trace = 1;
-    static const int Info = 2;
-    static const int Debug = 3;
+    static const int Unknown = 0;    
+    static const int Debug = 1;
+    static const int Trace = 2;
+    static const int Info = 3;
     static const int Warn = 4;
     static const int Error = 5;
     static const int Fatal = 6;
@@ -39,32 +39,33 @@ struct LogLevel {
 
 static const char * sLevelName[] = {
     "Unknown",
+    "Debug",
     "Trace",
     "Info",
-    "Debug",
     "Warn",
     "Error",
     "Fatal",
 };
 
 static const char * sLevelPrefix[] = {
-    "[Unknown]: ",
+    "[Unknown]:",
+    "[Debug]: ",
     "[Trace]: ",
     "[Info]:  ",
-    "[Debug]: ",
     "[Warn]:  ",
     "[Error]: ",
     "[Fatal]: ",
 };
 
-class Console {
+#if 1
+class ConsoleBase {
 protected:
     StreamRoot & stream_;
     int level_;
 
 public:
-    Console(StreamRoot & stream) : stream_(stream), level_(LogLevel::Info) {}
-    virtual ~Console() {}
+    ConsoleBase(StreamRoot & stream) : stream_(stream), level_(LogLevel::Info) {}
+    virtual ~ConsoleBase() {}
 
     int getLevel() const { return this->level_; }
 
@@ -117,7 +118,7 @@ public:
 
     void output(int level, const char * fmt, ...) {
         va_list args;
-        if (level <= this->level_) {
+        if (level >= this->level_) {
             va_start(args, fmt);
             if (level <= LogLevel::Max)
                 this->print(sLevelPrefix[level]);
@@ -130,7 +131,7 @@ public:
 
     void outputln(int level, const char * fmt, ...) {
         va_list args;
-        if (level <= this->level_) {
+        if (level >= this->level_) {
             va_start(args, fmt);
             if (level <= LogLevel::Max)
                 this->print(sLevelPrefix[level]);
@@ -143,19 +144,17 @@ public:
         }
     }
 
-    void trace(const char * fmt, ...) {
-#if USE_DEBUG_PRINT
-        va_list args;
-        va_start(args, fmt);
-        this->outputln(LogLevel::Trace, fmt, args);
-        va_end(args);
-#endif
-    }
-
     void debug(const char * fmt, ...) {
         va_list args;
         va_start(args, fmt);
         this->outputln(LogLevel::Debug, fmt, args);
+        va_end(args);
+    }
+
+    void trace(const char * fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        this->outputln(LogLevel::Trace, fmt, args);
         va_end(args);
     }
 
@@ -166,24 +165,24 @@ public:
         va_end(args);
     }
 
-    void error(const char * fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        this->outputln(LogLevel::Error, fmt, args);
-        va_end(args);
-    }
-
     void warning(const char * fmt, ...) {
         va_list args;
         va_start(args, fmt);
         this->outputln(LogLevel::Warn, fmt, args);
         va_end(args);
     }
+
+    void error(const char * fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        this->outputln(LogLevel::Error, fmt, args);
+        va_end(args);
+    }
 };
 
-class StdConsole : public Console {
+class StdConsole : public ConsoleBase {
 public:
-    StdConsole() : Console(*(new StreamRoot())) {}
+    StdConsole() : ConsoleBase(*(new StreamRoot())) {}
 
     virtual ~StdConsole() {
         this->stream_.destroy();
@@ -192,6 +191,7 @@ public:
 };
 
 static StdConsole console;
+#endif
 
 } // namespace jlang
 

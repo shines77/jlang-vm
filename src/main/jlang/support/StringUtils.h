@@ -31,7 +31,7 @@ bool isEmpty(const std::string & str) {
 static inline
 unsigned char toLowerChar(unsigned char ch)
 {
-    if (CharInfo::IsUpperCase(ch)) {
+    if (CharInfo::isUpperCase(ch)) {
         ch += ('a' - 'A');
     }
     return ch;
@@ -40,7 +40,7 @@ unsigned char toLowerChar(unsigned char ch)
 static inline
 unsigned char toUpperChar(unsigned char ch)
 {
-    if (CharInfo::IsLowerCase(ch)) {
+    if (CharInfo::isLowerCase(ch)) {
         ch -= ('a' - 'A');
     }
     return ch;

@@ -24,7 +24,7 @@ struct Char : public NonCopyable {
 
     static inline bool isWhiteSpace(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsWhiteSpace(ch);
+        return CharInfo::isWhiteSpace(ch);
 #else
         if (ch == ' ' || ch == '\t' || ch == '\v' || ch == '\f')
             return true;
@@ -35,7 +35,7 @@ struct Char : public NonCopyable {
 
     static inline bool isWhiteSpaces(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsWhiteSpaces(ch);
+        return CharInfo::isWhiteSpaces(ch);
 #else
         if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f')
             return true;
@@ -46,7 +46,7 @@ struct Char : public NonCopyable {
 
     static inline bool isNewLine(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsNewLine(ch);
+        return CharInfo::isNewLine(ch);
 #else
         if (ch == '\n' || ch == '\r')
             return true;
@@ -58,7 +58,7 @@ struct Char : public NonCopyable {
     // Identifier first letter: not include any numbers, parse priority order is: 'abc_DEF'.
     static inline bool isIdentifierFirst(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsIdentifierFirst(ch);
+        return CharInfo::isIdentifierFirst(ch);
 #else
         if ((ch >= 'a' && ch <= 'z') || (ch == '_') || (ch >= 'A' && ch <= 'Z'))
             return true;
@@ -70,7 +70,7 @@ struct Char : public NonCopyable {
     // Identifier body: include numbers, parse priority order is: 'abc_789DEF'.
     static inline bool isIdentifierBody(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsIdentifierBody(ch);
+        return CharInfo::isIdentifierBody(ch);
 #else
         return ((ch >= 'a' && ch <= 'z') || (ch == '_') ||
                 (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z'));
@@ -79,7 +79,7 @@ struct Char : public NonCopyable {
 
     static inline bool isDigital(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsDigital(ch);
+        return CharInfo::isDigital(ch);
 #else
         return (ch >= '0' && ch <= '9');
 #endif
@@ -95,7 +95,7 @@ struct Char : public NonCopyable {
 
     static inline bool isLowerAlphabet(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsLowerCase(ch);
+        return CharInfo::isLowerCase(ch);
 #else
         return ((ch >= 'a' && ch <= 'z'));
 #endif
@@ -103,7 +103,7 @@ struct Char : public NonCopyable {
 
     static inline bool isUpperAlphabet(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsUpperCase(ch);
+        return CharInfo::isUpperCase(ch);
 #else
         return (ch >= 'A' && ch <= 'Z');
 #endif
@@ -111,7 +111,7 @@ struct Char : public NonCopyable {
 
     static inline bool isOperator(unsigned char ch) {
 #if USE_CHARINFO_MASK
-        return CharInfo::IsOperator(ch);
+        return CharInfo::isOperator(ch);
 #else
         switch (ch) {
             case '!': case '%': case '&': case '*': case '+': 
