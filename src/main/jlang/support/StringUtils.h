@@ -13,7 +13,9 @@
 #include <memory.h>
 #include <string.h>
 #include <assert.h>
+
 #include <string>
+#include <cstring>
 
 namespace jlang {
 namespace StringUtils {
@@ -66,65 +68,72 @@ std::string toUpperCase(const std::string & str) {
 
 template <bool windows_style = true>
 static inline
-size_t next_line_pos(const char * content, size_t length) {
-    size_t pos = length;
+size_t get_next_line_pos(const char * content, size_t length) {
     assert(content != nullptr);
-    char * cur = (char *)content;
-    const char * end = content + length;
-    while (cur != end) {
-        // For ppc or arm, added signed keyword.
-        signed char c = (signed char)*cur;
+    size_t offset;
+    // For ppc or arm, added signed keyword.
+    signed char * cur = (signed char *)content;
+    const signed char * end = (signed char *)content + length;
+
+    // For efficiency, the '\0' character is not scanned.
+    while (cur < end) {
         if (windows_style) {
-            // windows_style
-            if (likely(c != '\n')) {
-                if (likely(c != '\r')) {
+            // Windows style
+            if (likely(*cur != '\r')) {
+                if (likely(*cur != '\n')) {
                     cur++;
                 }
                 else {
-                    // Skip '\r'
-                    cur++;
-                    c = (signed char)*cur;
-                    if (unlikely(c == '\n')) {
-                        // Get new line sign
-                        assert(cur >= content);
-                        pos = (size_t)(cur - content - 1);
-                        break;
-                    }
+                    // The new line char
+                    break;
                 }
             }
             else {
-                // Get new line sign
-                assert(cur >= content);
-                pos = (size_t)(cur - content);
+                // The new line char
                 break;
             }
         }
         else {
-            // non windows_style
-            if (likely(c != '\n')) {
+            // Non windows style
+            if (likely(*cur != '\n')) {
                 cur++;
             }
             else {
-                // Get new line sign
-                assert(cur >= content);
-                pos = (size_t)(cur - content);
+                // The new line char         
                 break;
             }
         }
     }
-    return pos;
+    assert(cur >= content);
+    size_t offset = (size_t)((const char * )cur - content);
+    return offset;
 }
 
 template <bool windows_style = true>
 static inline
-int next_line(char * line, size_t size, const char * content, size_t length) {
-    assert(line != nullptr);
+size_t read_a_line(char * line_buf, size_t buf_size, const char * content, size_t length) {
+    assert(buf != nullptr);
     assert(content != nullptr);
-    size_t max_size = jstd::minimum(size, length);
-    size_t line_size = next_line_pos<windows_style>(content, max_size);
-    assert(line_size > 0);
-    ::memcpy(line, content, line_size);
-    return (int)line_size;
+    buf_size -= (buf_size != 0);
+    size_t max_len = jstd::Min(buf_size, length);
+    size_t line_size = get_next_line_pos<windows_style>(content, max_len);
+    if (line_size > 0) {
+        std::memcpy(line_buf, content, line_size);
+    }
+    line_buf[line_size] = '\0';
+    return line_size;
+}
+
+template <bool windows_style = true>
+static inline
+size_t read_a_line(std::string & line, const char * content, size_t length) {
+    assert(content != nullptr);
+    size_t line_size = get_next_line_pos<windows_style>(content, length);
+    if (line_size > 0) {
+        line.append(content, line_size);
+    }
+    line.push_back('\0');
+    return line_size;
 }
 
 static inline
@@ -137,12 +146,12 @@ intptr_t sub_str(char * text, size_t size, const char * target, size_t length) {
     errno_t err = ::strncpy_s(text, size, target, length);
     if (err == 0 || err == STRUNCATE) {
         text[length] = '\0';
-        copy_size = (intptr_t)jstd::minimum(size - 1, length);
+        copy_size = (intptr_t)jstd::Min(size - 1, length);
     }
 #else
-    intptr_t copy_size = (intptr_t)jstd::minimum(size - 1, length);
+    intptr_t copy_size = (intptr_t)jstd::Min(size - 1, length);
     if (likely(copy_size > 0)) {
-        ::strncpy(text, target, copy_size);
+        std::strncpy(text, target, copy_size);
         *(text + copy_size) = '\0';
     }
     else {
@@ -153,9 +162,9 @@ intptr_t sub_str(char * text, size_t size, const char * target, size_t length) {
 }
 
 static inline
-intptr_t sub_str(char * text, size_t size, const char * first, const char * last) {
+intptr_t sub_str(char * text, size_t length, const char * first, const char * last) {
     assert(last >= first);
-    return StringUtils::sub_str(text, size, first, last - first);
+    return StringUtils::sub_str(text, length, first, last - first);
 }
 
 template <size_t N>

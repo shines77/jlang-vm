@@ -13,28 +13,28 @@ namespace jstd {
 template <typename T>
 static inline
 typename std::enable_if<std::is_integral<T>::value, T>::type
-minimum(T a, T b) {
+Min(T a, T b) {
     return (a <= b) ? a : b;
 }
 
 template <typename T>
 static inline
 typename std::enable_if<!std::is_integral<T>::value, T>::type
-minimum(T & a, T & b) {
+Min(T & a, T & b) {
     return (a <= b) ? a : b;
 }
 
 template <typename T>
 static inline
 typename std::enable_if<std::is_integral<T>::value, T>::type
-maximum(T a, T b) {
+Max(T a, T b) {
     return (a >= b) ? a : b;
 }
 
 template <typename T>
 static inline
 typename std::enable_if<!std::is_integral<T>::value, T>::type
-maximum(T & a, T & b) {
+Max(T & a, T & b) {
     return (a >= b) ? a : b;
 }
 
