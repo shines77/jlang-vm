@@ -125,7 +125,7 @@ public:
         __COMPILER_BARRIER();
     }
 
-    static time_stamp_t getBaseTime() {
+    static time_point_t getBaseTime() {
         static time_point_t s_base_time = impl_type::now();
         return s_base_time;
     }
@@ -291,7 +291,7 @@ public:
         }
     }
 
-    static time_stamp_t getBaseTime() {
+    static time_point_t getBaseTime() {
         static time_point_t s_base_time = impl_type::now();
         return s_base_time;
     }

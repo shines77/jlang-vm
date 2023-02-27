@@ -16,7 +16,7 @@
 #include <memory>
 #include <atomic>
 
-#include "jlang/support/Console.h"
+#include "jlang/system/Console.h"
 
 //////////////////////////////////////////////////////////////
 
@@ -66,7 +66,7 @@
         break;                                      \
     default:                                        \
         assert(false);                              \
-        console.trace("%08X:  jmp \t"               \
+        Console::trace("%08X:  jmp \t"               \
                       "Error: Unknown jump type. jumpType = %u\n", \
                       offset, (uint32_t)jumpType);  \
         break;                                      \
@@ -91,7 +91,7 @@
         break;                                      \
     default:                                        \
         assert(false);                              \
-        console.trace("%08X:  jmp \t"               \
+        Console::trace("%08X:  jmp \t"               \
                       "Error: Unknown jump type. jumpType = %u\n", \
                       offset, (uint32_t)jumpType);  \
         break;                                      \
@@ -2305,7 +2305,7 @@ public:
             return (v1 >= v2);
 
         default:
-            console.trace("Error: Unknown condition jump code. condType = %u\n",
+            Console::trace("Error: Unknown condition jump code. condType = %u\n",
                           (uint32_t)condType);
             return false;
         }

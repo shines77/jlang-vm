@@ -414,13 +414,13 @@ public:
     }
 
     iterator find(const char * keyword, size_t capacity, size_t length) {
-        length = jstd::minimum(length, capacity);
+        length = jstd::Min(length, capacity);
         return keywordMapping_.find(std::string(keyword, length));
     }
 
     template <size_t N>
     iterator find(char (&keyword)[N], size_t length) {
-        length = jstd::minimum(length, N);
+        length = jstd::Min(length, N);
         return keywordMapping_.find(std::string(keyword, length));
     }
 

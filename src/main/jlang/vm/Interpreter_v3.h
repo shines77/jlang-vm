@@ -26,7 +26,7 @@
 #include "jlang/vm/ArgsDefine.h"
 #include "jlang/vm/Interpreter.h"
 #include "jlang/lang/Error.h"
-#include "jlang/support/Console.h"
+#include "jlang/system/Console.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -1142,7 +1142,7 @@ public:
     // error inst.
     //
     JM_FORCEINLINE void op_error(vmImagePtr & ip) {
-        console.trace("%08X:  error", getIpOffset(ip));
+        Console::trace("%08X:  error", getIpOffset(ip));
         ip.next();
     }
 
@@ -1154,7 +1154,7 @@ public:
         int32_t value = fp.getArgValueUInt32(index);
         sp.writeInt32(value);
 
-        console.trace("%08X:  push args[%d]  (0x%08X, int32)",
+        Console::trace("%08X:  push args[%d]  (0x%08X, int32)",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
     }
@@ -1165,7 +1165,7 @@ public:
     JM_FORCEINLINE void op_push_i32(vmImagePtr & ip, vmStackPtr & sp) {
         int32_t value = ip.getValue<0, int32_t>();
         sp.writeInt32(value);
-        console.trace("%08X:  push_i32 0x%08X (int32)", getIpOffset(ip), value);
+        Console::trace("%08X:  push_i32 0x%08X (int32)", getIpOffset(ip), value);
         ip.next(1 + sizeof(int32_t));
     }
 
@@ -1175,7 +1175,7 @@ public:
     JM_FORCEINLINE void op_push_i64(vmImagePtr & ip, vmStackPtr & sp) {
         int64_t value = ip.getValue<0, int64_t>();
         sp.writeInt64(value);
-        console.trace("%08X:  push_i64 0x%016X (int64)", getIpOffset(ip), value);
+        Console::trace("%08X:  push_i64 0x%016X (int64)", getIpOffset(ip), value);
         ip.next(1 + sizeof(int64_t));
     }
 
@@ -1185,7 +1185,7 @@ public:
     JM_FORCEINLINE void op_push_i32_0(vmImagePtr & ip, vmStackPtr & sp) {
         int32_t value = 0;
         sp.writeInt32(value);
-        console.trace("%08X:  push_i32_0 (int32)", getIpOffset(ip));
+        Console::trace("%08X:  push_i32_0 (int32)", getIpOffset(ip));
         ip.next();
     }
 
@@ -1195,7 +1195,7 @@ public:
     JM_FORCEINLINE void op_push_i64_0(vmImagePtr & ip, vmStackPtr & sp) {
         int64_t value = 0;
         sp.writeInt64(value);
-        console.trace("%08X:  push_i64_0 (int64)", getIpOffset(ip));
+        Console::trace("%08X:  push_i64_0 (int64)", getIpOffset(ip));
         ip.next();
     }
 
@@ -1205,7 +1205,7 @@ public:
     JM_FORCEINLINE void op_pop(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backUInt32();
         uint32_t value = sp.getUInt32();
-        console.trace("%08X:  pop  (0x%08X)", getIpOffset(ip), value);
+        Console::trace("%08X:  pop  (0x%08X)", getIpOffset(ip), value);
         ip.next();
     }
 
@@ -1215,7 +1215,7 @@ public:
     JM_FORCEINLINE void op_pop_i32(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt32();
         int32_t value = sp.getInt32();
-        console.trace("%08X:  pop_i32  (0x%08X)", getIpOffset(ip), value);
+        Console::trace("%08X:  pop_i32  (0x%08X)", getIpOffset(ip), value);
         ip.next();
     }
 
@@ -1225,7 +1225,7 @@ public:
     JM_FORCEINLINE void op_pop_i64(vmImagePtr & ip, vmStackPtr & sp) {
         sp.backInt64();
         int64_t value = sp.getInt64();
-        console.trace("%08X:  pop_i64  (0x%016X)", getIpOffset(ip), value);
+        Console::trace("%08X:  pop_i64  (0x%016X)", getIpOffset(ip), value);
         ip.next();
     }
 
@@ -1236,7 +1236,7 @@ public:
         uint8_t localSize = ip.getValue<0, uint8_t>();
         sp.next(localSize);
 
-        console.trace("%08X:  add_sp %u", getIpOffset(ip), (uint32_t)localSize);
+        Console::trace("%08X:  add_sp %u", getIpOffset(ip), (uint32_t)localSize);
         ip.next(1 + sizeof(uint8_t));
     }
 
@@ -1245,7 +1245,7 @@ public:
     //
     JM_FORCEINLINE void op_add_sp_4(vmImagePtr & ip, vmStackPtr & sp) {
         sp.next(sizeof(uint32_t));
-        console.trace("%08X:  add_sp_4", getIpOffset(ip));
+        Console::trace("%08X:  add_sp_4", getIpOffset(ip));
         ip.next();
     }
 
@@ -1255,7 +1255,7 @@ public:
     JM_FORCEINLINE void op_load_eax(vmImagePtr & ip, vmStackPtr & sp, Register & regs) {
         uint32_t value = ip.getValue<0, uint32_t>();
         regs.eax.u32 = value;
-        console.trace("%08X:  load eax, 0x%08X", getIpOffset(ip), value);
+        Console::trace("%08X:  load eax, 0x%08X", getIpOffset(ip), value);
         ip.next(1 + sizeof(uint32_t));
     }
 
@@ -1266,7 +1266,7 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = ip.getValue<0, uint32_t, uint32_t, 2>();
         fp.putArgValueUInt32(index, value);
-        console.trace("%08X:  load args[%d], 0x%08X",
+        Console::trace("%08X:  load args[%d], 0x%08X",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
     }
@@ -1275,7 +1275,7 @@ public:
     // move arg0, arg1
     //
     JM_FORCEINLINE void op_move(vmImagePtr & ip, vmStackPtr & sp) {
-        console.trace("%08X:  move args[%d], args[%d]", getIpOffset(ip), 0, 1);
+        Console::trace("%08X:  move args[%d], args[%d]", getIpOffset(ip), 0, 1);
         ip.next();
     }
 
@@ -1283,7 +1283,7 @@ public:
     // move eax, arg1
     //
     JM_FORCEINLINE void op_move_to_eax(vmImagePtr & ip, vmStackPtr & sp) {
-        console.trace("%08X:  move eax, args[%d]", getIpOffset(ip), 0);
+        Console::trace("%08X:  move eax, args[%d]", getIpOffset(ip), 0);
         ip.next();
     }
 
@@ -1294,13 +1294,13 @@ public:
         int8_t index = ip.getValue<0, int8_t>();
         uint32_t value = regs.eax.u32;
         fp.putArgValueUInt32(index, value);
-        console.trace("%08X:  copy args[%d], eax = (0x%08X)",
+        Console::trace("%08X:  copy args[%d], eax = (0x%08X)",
                       getIpOffset(ip), getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
     }
 
     JM_FORCEINLINE void op_cmp(vmImagePtr & ip, vmStackPtr & sp) {
-        console.trace("%08X:  cmp", getIpOffset(ip));
+        Console::trace("%08X:  cmp", getIpOffset(ip));
         ip.next();
     }
 
@@ -1315,7 +1315,7 @@ public:
         int32_t value2 = fp.getArgValueInt32(index2);
         ip.next(1 + sizeof(int8_t) * 2);
 
-        console.trace("%08X:  cmp  args[%d], args[%d] - (%d, %d) (int32)",
+        Console::trace("%08X:  cmp  args[%d], args[%d] - (%d, %d) (int32)",
                       offset, getArgIndex(index1), getArgIndex(index2),
                       value1, value2);
 
@@ -1323,9 +1323,9 @@ public:
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
         if (likely(!condition))
-            console.trace("%08X:  cmp  condition [false]", offset);
+            Console::trace("%08X:  cmp  condition [false]", offset);
         else
-            console.trace("%08X:  cmp  condition [true]", offset);
+            Console::trace("%08X:  cmp  condition [true]", offset);
         return condition;
     }
 
@@ -1340,7 +1340,7 @@ public:
         uint32_t value2 = fp.getArgValueUInt32(index2);
         ip.next(1 + sizeof(int8_t) * 2);
 
-        console.trace("%08X:  cmp  args[%d], args[%d] - (%u, %u) (uint32)",
+        Console::trace("%08X:  cmp  args[%d], args[%d] - (%u, %u) (uint32)",
                       offset, getArgIndex(index1), getArgIndex(index2),
                       value1, value2);
 
@@ -1348,9 +1348,9 @@ public:
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
         if (likely(!condition))
-            console.trace("%08X:  cmp  condition [false]", offset);
+            Console::trace("%08X:  cmp  condition [false]", offset);
         else
-            console.trace("%08X:  cmp  condition [true]", offset);
+            Console::trace("%08X:  cmp  condition [true]", offset);
         return condition;
     }
 
@@ -1364,16 +1364,16 @@ public:
         int32_t value2 = ip.getValue<0, int32_t, int32_t, 2>();
         ip.next(1 + sizeof(int8_t) + sizeof(int32_t));
 
-        console.trace("%08X:  cmp  args[%d], 0x%08X (int32)",
+        Console::trace("%08X:  cmp  args[%d], 0x%08X (int32)",
                       offset, getArgIndex(index), value2);
 
         unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
         if (likely(!condition))
-            console.trace("%08X:  cmp  condition [false]", offset);
+            Console::trace("%08X:  cmp  condition [false]", offset);
         else
-            console.trace("%08X:  cmp  condition [true]", offset);
+            Console::trace("%08X:  cmp  condition [true]", offset);
         return condition;
     }
 
@@ -1387,21 +1387,21 @@ public:
         uint32_t value2 = ip.getValue<0, uint32_t, uint32_t, 2>();
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
 
-        console.trace("%08X:  cmp  args[%d], 0x%08X (uint32)",
+        Console::trace("%08X:  cmp  args[%d], 0x%08X (uint32)",
                       offset, getArgIndex(index), value2);
 
         unsigned char jmpType = ip.getUInt8();
         bool condition = this_type::getCondition(value1, value2, jmpType);
         flags.u32.low = (uint32_t)condition;
         if (likely(!condition))
-            console.trace("%08X:  cmp  condition [false]", offset);
+            Console::trace("%08X:  cmp  condition [false]", offset);
         else
-            console.trace("%08X:  cmp  condition [true]", offset);
+            Console::trace("%08X:  cmp  condition [true]", offset);
         return condition;
     }
 
     JM_FORCEINLINE void op_jl(vmImagePtr & ip) {
-        console.trace("%08X:  jl\n", getIpOffset(ip));
+        Console::trace("%08X:  jl\n", getIpOffset(ip));
         ip.next();
     }
 
@@ -1414,12 +1414,12 @@ public:
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int8_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
-            console.trace("%08X:  jl   0x%08X (near)", offset, jmpEntry);
+            Console::trace("%08X:  jl   0x%08X (near)", offset, jmpEntry);
             return false;
         }
         else {
             ip.next(1L + sizeof(int8_t) + jmpOffset);
-            console.trace("%08X:  jl   0x%08X (near)\n", offset, getIpOffset(ip));
+            Console::trace("%08X:  jl   0x%08X (near)\n", offset, getIpOffset(ip));
             return true;
         }
     }
@@ -1433,12 +1433,12 @@ public:
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int16_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
-            console.trace("%08X:  jl   0x%08X (short)", offset, jmpEntry);
+            Console::trace("%08X:  jl   0x%08X (short)", offset, jmpEntry);
             return false;
         }
         else {
             ip.next(1L + sizeof(int16_t) + jmpOffset);
-            console.trace("%08X:  jl   0x%08X (short)\n", offset, getIpOffset(ip));
+            Console::trace("%08X:  jl   0x%08X (short)\n", offset, getIpOffset(ip));
             return true;
         }
     }
@@ -1452,12 +1452,12 @@ public:
         if (likely(flags.u32.low != (uint32_t)true)) {
             ip.next(1 + sizeof(int32_t));
             uint32_t jmpEntry = getIpOffset(ip) + jmpOffset;
-            console.trace("%08X:  jl   0x%08X (long)", offset, jmpEntry);
+            Console::trace("%08X:  jl   0x%08X (long)", offset, jmpEntry);
             return false;
         }
         else {
             ip.next(1L + sizeof(int8_t) + jmpOffset);
-            console.trace("%08X:  jl   0x%08X (long)\n", offset, getIpOffset(ip));
+            Console::trace("%08X:  jl   0x%08X (long)\n", offset, getIpOffset(ip));
             return true;
         }
     }
@@ -1469,7 +1469,7 @@ public:
         uint32_t offset = getIpOffset(ip);
         uint32_t jmpEntry = ip.getValue<0, uint32_t>();
         ip.set(image_.getStart() + jmpEntry);
-        console.trace("%08X:  jmp  0x%08X (ptr32)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  jmp  0x%08X (ptr32)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1479,7 +1479,7 @@ public:
         uint32_t offset = getIpOffset(ip);
         int8_t jmpOffset = ip.getValue<0, int8_t>();
         ip.next(1L + sizeof(int8_t) + jmpOffset);
-        console.trace("%08X:  jmp  0x%08X (near)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  jmp  0x%08X (near)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1489,7 +1489,7 @@ public:
         uint32_t offset = getIpOffset(ip);
         int16_t jmpOffset = ip.getValue<0, int16_t>();
         ip.next(1L + sizeof(int16_t) + jmpOffset);
-        console.trace("%08X:  jmp  0x%08X (short)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  jmp  0x%08X (short)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1499,7 +1499,7 @@ public:
         uint32_t offset = getIpOffset(ip);
         int32_t jmpOffset = ip.getValue<0, int32_t>();
         ip.next(1L + sizeof(int32_t) + jmpOffset);
-        console.trace("%08X:  jmp  0x%08X (long)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  jmp  0x%08X (long)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1517,7 +1517,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (ptr32)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (ptr32)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1535,7 +1535,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (near)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (near)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1553,7 +1553,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (short)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (short)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1571,7 +1571,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (long)\n",
+        Console::trace("%08X:  call 0x%08X (long)\n",
                       offset, getIpOffset(ip));
     }
 
@@ -1584,11 +1584,11 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret  0x%08X\n", offset, getIpOffset(ip));
+            Console::trace("%08X:  ret  0x%08X\n", offset, getIpOffset(ip));
             return false;
         }
         else {
-            console.trace("%08X:  ret  (done)\n", offset);
+            Console::trace("%08X:  ret  (done)\n", offset);
             return true;
         }
     }
@@ -1603,12 +1603,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_n_sm [%u] 0x%08X\n",
+            Console::trace("%08X:  ret_n_sm [%u] 0x%08X\n",
                           offset, (uint32_t)localSize, getIpOffset(ip));
             return false;
         }
         else {
-            console.trace("%08X:  ret_n_sm [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n_sm [%u] (done)\n", offset, (uint32_t)localSize);
             return true;
         }
     }
@@ -1623,12 +1623,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_n [%u] 0x%08X\n",
+            Console::trace("%08X:  ret_n [%u] 0x%08X\n",
                           offset, (uint32_t)localSize, getIpOffset(ip));
             return false;
         }
         else {
-            console.trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
             return true;
         }
     }
@@ -1646,12 +1646,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n",
+            Console::trace("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n",
                           offset, getIpOffset(ip), value);
             return false;
         }
         else {
-            console.trace("%08X:  ret_eax (done) (eax = 0x%08X)\n", offset, value);
+            Console::trace("%08X:  ret_eax (done) (eax = 0x%08X)\n", offset, value);
             return true;
         }
     }
@@ -1670,12 +1670,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_eax_n [%u] 0x%08X (eax = 0x%08X)\n",
+            Console::trace("%08X:  ret_eax_n [%u] 0x%08X (eax = 0x%08X)\n",
                           offset, (uint32_t)localSize, getIpOffset(ip), value);
             return false;
         }
         else {
-            console.trace("%08X:  ret_eax_n [%u] (eax = 0x%08X) (done)\n",
+            Console::trace("%08X:  ret_eax_n [%u] (eax = 0x%08X) (done)\n",
                           offset, (uint32_t)localSize, value);
             return true;
         }
@@ -1697,7 +1697,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (near)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (near)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1716,7 +1716,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (short)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (short)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1735,7 +1735,7 @@ public:
         assert(CHECK_ADDR_ALIGNMENT(newIP));
         ip.set(newIP);
 
-        console.trace("%08X:  call 0x%08X (long)\n", offset, getIpOffset(ip));
+        Console::trace("%08X:  call 0x%08X (long)\n", offset, getIpOffset(ip));
     }
 
     //
@@ -1750,11 +1750,11 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret  0x%08X\n", offset, getIpOffset(ip));
+            Console::trace("%08X:  ret  0x%08X\n", offset, getIpOffset(ip));
             done = false;
         }
         else {
-            console.trace("%08X:  ret  (done)\n", offset);
+            Console::trace("%08X:  ret  (done)\n", offset);
             done = true;
         }
 
@@ -1774,12 +1774,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_n [%u] 0x%08X\n",
+            Console::trace("%08X:  ret_n [%u] 0x%08X\n",
                           offset, (uint32_t)localSize, getIpOffset(ip));
             done = false;
         }
         else {
-            console.trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
             done = true;
         }
 
@@ -1800,12 +1800,12 @@ public:
         ip.set(returnIP);
 
         if (returnIP != nullptr) {
-            console.trace("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n",
+            Console::trace("%08X:  ret_eax 0x%08X (eax = 0x%08X)\n",
                           offset, getIpOffset(ip), value);
             done = false;
         }
         else {
-            console.trace("%08X:  ret_eax (done) (eax = 0x%08X)\n", offset, value);
+            Console::trace("%08X:  ret_eax (done) (eax = 0x%08X)\n", offset, value);
             done = true;
         }
 
@@ -1816,7 +1816,7 @@ public:
     // nop
     //
     JM_FORCEINLINE void op_nop(vmImagePtr & ip) {
-        console.trace("%08X:  nop", getIpOffset(ip));
+        Console::trace("%08X:  nop", getIpOffset(ip));
         ip.next();
     }
 
@@ -1825,7 +1825,7 @@ public:
     //
     JM_FORCEINLINE void op_nop_n(vmImagePtr & ip) {
         uint8_t skip_n = ip.getValue<0, uint8_t>();
-        console.trace("%08X:  nop_n %u", getIpOffset(ip), (uint32_t)skip_n);
+        Console::trace("%08X:  nop_n %u", getIpOffset(ip), (uint32_t)skip_n);
         ip.next(1 + sizeof(uint8_t) + skip_n);
     }
 
@@ -1839,7 +1839,7 @@ public:
         value++;
         fp.putArgValueUInt32(index, value);
 
-        console.trace("%08X:  inc  arg[%d]  (0x%08X)",
+        Console::trace("%08X:  inc  arg[%d]  (0x%08X)",
                       offset, getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
     }
@@ -1854,7 +1854,7 @@ public:
         value--;
         fp.putArgValueUInt32(index, value);
 
-        console.trace("%08X:  dec  args[%d]  (0x%08X)",
+        Console::trace("%08X:  dec  args[%d]  (0x%08X)",
                       offset, getArgIndex(index), value);
         ip.next(1 + sizeof(int8_t));
     }
@@ -1872,7 +1872,7 @@ public:
         uint32_t newValue = value1 + value2;
         fp.putArgValueUInt32(index1, newValue);
 
-        console.trace("%08X:  add  args[%d], args[%d] = (0x%08X)",
+        Console::trace("%08X:  add  args[%d], args[%d] = (0x%08X)",
                       offset, getArgIndex(index1), getArgIndex(index2),
                       newValue);
         ip.next(1 + sizeof(int8_t) * 2);
@@ -1890,7 +1890,7 @@ public:
         uint32_t newValue = value1 + value2;
         fp.putArgValueUInt32(index, newValue);
 
-        console.trace("%08X:  add  args[%d], 0x%08X = (0x%08X)",
+        Console::trace("%08X:  add  args[%d], 0x%08X = (0x%08X)",
                       offset, getArgIndex(index), value2, newValue);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
     }
@@ -1906,7 +1906,7 @@ public:
         uint32_t newValue = regs.eax.u32 + value;
         regs.eax.u32 = newValue;
 
-        console.trace("%08X:  add  eax, args[%d] = (0x%08X)",
+        Console::trace("%08X:  add  eax, args[%d] = (0x%08X)",
                       offset, getArgIndex(index), newValue);
         ip.next(1 + sizeof(int8_t));
     }
@@ -1921,7 +1921,7 @@ public:
         uint32_t newValue = regs.eax.u32 + value;
         regs.eax.u32 = newValue;
 
-        console.trace("%08X:  add  eax, 0x%08X = (0x%08X)",
+        Console::trace("%08X:  add  eax, 0x%08X = (0x%08X)",
                       offset, value, newValue);
         ip.next(1 + sizeof(uint32_t));
     }
@@ -1938,7 +1938,7 @@ public:
         uint32_t newValue = value1 - value2;
         fp.putArgValueUInt32(index1, newValue);
 
-        console.trace("%08X:  sub  args[%d], args[%d] = (0x%08X)",
+        Console::trace("%08X:  sub  args[%d], args[%d] = (0x%08X)",
                       offset, getArgIndex(index1), getArgIndex(index2),
                       newValue);
         ip.next(1 + sizeof(int8_t) * 2);
@@ -1956,7 +1956,7 @@ public:
         uint32_t newValue = value1 - value2;
         fp.putArgValueUInt32(index, newValue);
 
-        console.trace("%08X:  sub  args[%d], 0x%08X = (0x%08X)",
+        Console::trace("%08X:  sub  args[%d], 0x%08X = (0x%08X)",
                       offset, getArgIndex(index), value2, newValue);
         ip.next(1 + sizeof(int8_t) + sizeof(uint32_t));
     }
@@ -1971,7 +1971,7 @@ public:
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;
 
-        console.trace("%08X:  sub  eax, args[%d] = (0x%08X)",
+        Console::trace("%08X:  sub  eax, args[%d] = (0x%08X)",
                       offset, getArgIndex(index), newValue);
         ip.next(1 + sizeof(int8_t));
     }
@@ -1986,7 +1986,7 @@ public:
         uint32_t newValue = regs.eax.u32 - value;
         regs.eax.u32 = newValue;
 
-        console.trace("%08X:  sub  eax, 0x%08X = (0x%08X)",
+        Console::trace("%08X:  sub  eax, 0x%08X = (0x%08X)",
                       offset, value, newValue);
         ip.next(1 + sizeof(uint32_t));
     }
@@ -1995,7 +1995,7 @@ public:
     // Exit the program
     //
     JM_FORCEINLINE void op_exit(vmImagePtr & ip, return_type & retValue) {
-        console.trace("%08X:  end\n", getIpOffset(ip));
+        Console::trace("%08X:  end\n", getIpOffset(ip));
         ip.next();
     }
 
@@ -2003,7 +2003,7 @@ public:
     // Unknown opcode.
     //
     JM_FORCEINLINE void op_unknown(vmImagePtr & ip, unsigned char opcode) {
-        console.trace("%08X:  Error: Unknown opcode: %u", getIpOffset(ip), (uint32_t)opcode);
+        Console::trace("%08X:  Error: Unknown opcode: %u", getIpOffset(ip), (uint32_t)opcode);
         ip.next();
     }
 
@@ -2316,7 +2316,7 @@ fibonacci_ret_00:
                         break;
                     }
                     else {
-                        console.trace("Error: Unknown error.");
+                        Console::trace("Error: Unknown error.");
                     }
                     goto Execute_Finished;
                 }

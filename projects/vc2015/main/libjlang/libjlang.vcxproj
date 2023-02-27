@@ -57,6 +57,7 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Comparatorable.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\ErrorDef.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\Global.h" />
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Logger.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\lang\NonCopyable.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\FileStringStream.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\IInputStream.h" />
@@ -70,7 +71,6 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StreamRoot.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringScanner.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\stream\StringStream.h" />
-    <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\HashAlgorithm.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StopWatch.h" />
     <ClInclude Include="..\..\..\..\src\main\jlang\support\StringUtils.h" />

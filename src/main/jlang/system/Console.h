@@ -7,6 +7,8 @@
 #endif
 
 #include "jlang/basic/stddef.h"
+#include "jlang/lang/Logger.h"
+#include "jlang/support/StopWatch.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -50,24 +52,57 @@ void cpu_warmup(int delayTime)
 namespace jlang {
 namespace Console {
 
-static void Write(const char *fmt, ...) {
-    va_list arg_list;
-    va_start(arg_list, fmt);
-    vprintf(fmt, arg_list);
-    va_end(arg_list);
+static jlang::ConsoleLogger<false> & getConsoleLogger()
+{
+    static jlang::ConsoleLogger<false> s_consoleLogger;
+    return s_consoleLogger;
 }
 
-static void WriteLine(const char *fmt = NULL, ...) {
-    va_list arg_list;
+static void print(const char * fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    getConsoleLogger().print_args(fmt, args);
+    va_end(args);
+}
+
+static void print_ln(const char * fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    getConsoleLogger().print_args_ln(fmt, args);
+    va_end(args);
+}
+
+static void trace(const char * fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    getConsoleLogger().trace_args(fmt, args);
+    va_end(args);
+}
+
+static void write(const char * fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    getConsoleLogger().print_args(fmt, args);
+    va_end(args);
+}
+
+static void writeLine(const char * fmt = NULL, ...)
+{
     if (fmt != NULL) {
-        va_start(arg_list, fmt);
-        vprintf(fmt, arg_list);
-        va_end(arg_list);
+        va_list args;
+        va_start(args, fmt);
+        getConsoleLogger().print_args_ln(fmt, args);
+        va_end(args);
+    } else {
+        getConsoleLogger().new_line();
     }
-    printf("\n");
 }
 
-static int ReadKey(bool enabledCpuWarmup = false, bool displayTips = true,
+static int readKey(bool enabledCpuWarmup = false, bool displayTips = true,
                    bool echoInput = false, bool newLine = false) {
     int keyCode;
     if (displayTips) {
@@ -98,15 +133,9 @@ static int ReadKey(bool enabledCpuWarmup = false, bool displayTips = true,
     return keyCode;
 }
 
-static int ReadKeyLine(bool enabledCpuWarmup = false, bool displayTips = true,
+static int readKeyLine(bool enabledCpuWarmup = false, bool displayTips = true,
                        bool echoInput = false) {
-    return ReadKey(false, displayTips, echoInput, true);
-}
-
-static int Read() {
-    int keyCode = 0;
-    // TODO: Read the inputs.
-    return keyCode;
+    return readKey(false, displayTips, echoInput, true);
 }
 
 } // namespace Console

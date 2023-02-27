@@ -154,9 +154,6 @@
     <ClInclude Include="..\..\..\..\src\main\jlang\fs\FileUtils.h">
       <Filter>src\fs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\main\jlang\support\Console.h">
-      <Filter>src\support</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\asm\IdentInfo.h">
       <Filter>src\asm</Filter>
     </ClInclude>
@@ -231,6 +228,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\main\jlang\system\Console.h">
       <Filter>src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\main\jlang\lang\Logger.h">
+      <Filter>src\lang</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

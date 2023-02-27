@@ -67,10 +67,10 @@ public:
         return true;
     }
 
-    std::string nextLine() const {
+    std::string readLine() const {
         std::string line;
         line.reserve(stream_.remain() + 1);
-        int line_size = stream_.next_line((char *)line.c_str(), line.size());
+        size_t line_size = stream_.read_line((char *)line.c_str(), line.size());
         return line;
     }
 

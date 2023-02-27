@@ -78,7 +78,7 @@ public:
     template <typename U>
     void copy(const U & src) {
         static_assert(kCapacity > 0, "Capacity must be greater than 0.");
-        size_type copySize = jstd::minimum(kCapacity - 1, src.size());
+        size_type copySize = jstd::Min(kCapacity - 1, src.size());
         ::memcpy(this->data_, src.data(), copySize);
         this->data_[copySize] = static_cast<char_type>('\0');
         this->size_ = src.size();

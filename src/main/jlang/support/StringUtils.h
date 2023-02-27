@@ -105,7 +105,7 @@ size_t get_next_line_pos(const char * content, size_t length) {
         }
     }
     assert(cur >= content);
-    size_t offset = (size_t)((const char * )cur - content);
+    offset = (size_t)((const char * )cur - content);
     return offset;
 }
 

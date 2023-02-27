@@ -8,7 +8,7 @@
 
 #include "jlang/vm/Interpreter.h"
 #include "jlang/lang/Error.h"
-#include "jlang/support/Console.h"
+#include "jlang/system/Console.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -434,7 +434,7 @@ public:
                 switch (opcode) {
                 case OpCode::error:
                     frame_.next();
-                    console.trace("%08X:  error", offset);
+                    Console::trace("%08X:  error", offset);
                     break;
 
                 case OpCode::push:
@@ -449,18 +449,18 @@ public:
                             if (vmReg::isValidRegister(reg)) {
                                 basic_type value = stack_.push_reg(reg);
                                 if (regType >= vmRegType::r64) {
-                                    console.trace("%08X:  push [reg]  - (%u, %u), value = 0x%016X",
+                                    Console::trace("%08X:  push [reg]  - (%u, %u), value = 0x%016X",
                                                   offset, regType, regIndex, (uint64_t)value);
                                 }
                                 else {
-                                    console.trace("%08X:  push [reg]  - (%u, %u), value = 0x%08X",
+                                    Console::trace("%08X:  push [reg]  - (%u, %u), value = 0x%08X",
                                                   offset, regType, regIndex,
                                                   (uint32_t)(value & 0xFFFFFFFFUL));
                                 }
                                 frame_.next();
                             }
                             else {
-                                console.trace("%08X:  push [reg]  - regType: %u, regIndex: %u.\n"
+                                Console::trace("%08X:  push [reg]  - regType: %u, regIndex: %u.\n"
                                               "Error: Unknown push register.\n",
                                               offset, regType, regIndex);
                                 frame_.next();
@@ -469,7 +469,7 @@ public:
                         else if (type == vmDataType::Data) {
                             uint32_t data = frame_.getUInt32();
                             bool success = stack_.push_uint32(data);
-                            console.trace("%08X:  push [data] - data = %u", offset, data);
+                            Console::trace("%08X:  push [data] - data = %u", offset, data);
                             frame_.nextUInt32();
                         }
                         else if (type >= vmDataType::Int8 && type <= vmDataType::UInt64) {
@@ -494,7 +494,7 @@ public:
                                 {
                                     int32_t data = frame_.getInt32();
                                     bool success = stack_.push_int32(data);
-                                    console.trace("%08X:  push [int32] - value = 0x%08X", offset, data);
+                                    Console::trace("%08X:  push [int32] - value = 0x%08X", offset, data);
                                     frame_.nextInt32();
                                     break;
                                 }
@@ -502,7 +502,7 @@ public:
                                 {
                                     uint32_t data = frame_.getUInt32();
                                     bool success = stack_.push_uint32(data);
-                                    console.trace("%08X:  push [uint32] - value = 0x%08X", offset, data);
+                                    Console::trace("%08X:  push [uint32] - value = 0x%08X", offset, data);
                                     frame_.nextUInt32();
                                     break;
                                 }
@@ -510,7 +510,7 @@ public:
                                 {
                                     int64_t data = frame_.getInt64();
                                     bool success = stack_.push_int64(data);
-                                    console.trace("%08X:  push [int64] - value = 0x%08X%08X", offset,
+                                    Console::trace("%08X:  push [int64] - value = 0x%08X%08X", offset,
                                                 (uint32_t)(data >> 32), (uint32_t)(data && 0xFFFFFFFFL));
                                     frame_.nextInt64();
                                     break;
@@ -519,7 +519,7 @@ public:
                                 {
                                     uint64_t data = frame_.getUInt64();
                                     bool success = stack_.push_uint64(data);
-                                    console.trace("%08X:  push [uint64] - value = 0x%08X%08X", offset,
+                                    Console::trace("%08X:  push [uint64] - value = 0x%08X%08X", offset,
                                                   (uint32_t)(data >> 32), (uint32_t)(data && 0xFFFFFFFFL));
                                     frame_.nextUInt64();
                                     break;
@@ -541,19 +541,19 @@ public:
                             if (vmReg::isValidRegister(reg)) {
                                 basic_type value = stack_.pop_reg(reg);
                                 if (vmReg::getType(reg) >= vmRegType::r64) {
-                                    console.trace("%08X:  pop  [reg] - (%u, %u), value = 0x%016X",
+                                    Console::trace("%08X:  pop  [reg] - (%u, %u), value = 0x%016X",
                                                   offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                                   (uint64_t)value);
                                 }
                                 else {
-                                    console.trace("%08X:  pop  [reg] - (%u, %u), value = 0x%08X",
+                                    Console::trace("%08X:  pop  [reg] - (%u, %u), value = 0x%08X",
                                                   offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                                   (uint32_t)(value & 0xFFFFFFFFUL));
                                 }
                                 frame_.next();
                             }
                             else {
-                                console.trace("%08X:  pop  [reg] - regType: %u, regIndex: %u"
+                                Console::trace("%08X:  pop  [reg] - regType: %u, regIndex: %u"
                                               "Error: Unknown pop register.\n\n",
                                               offset, vmReg::getType(reg), vmReg::getIndex(reg));
                                 frame_.next();
@@ -563,19 +563,19 @@ public:
                             // pop int32
                             int32_t value;
                             bool success = stack_.pop_int32(value);
-                            console.trace("%08X:  pop  [int32] - value = 0x%08X",
+                            Console::trace("%08X:  pop  [int32] - value = 0x%08X",
                                           offset, value);
                         }
                         else if (type == vmDataType::Int64 || type == vmDataType::UInt64) {
                             // pop int64
                             int64_t value;
                             bool success = stack_.pop_int64(value);
-                            console.trace("%08X:  pop  [int64] - value = 0x%016X",
+                            Console::trace("%08X:  pop  [int64] - value = 0x%016X",
                                           offset, value);
                         }
                         else {
                             // Error
-                            console.trace("%08X:  pop  - type: %u\n"
+                            Console::trace("%08X:  pop  - type: %u\n"
                                           "Error: Unknown pop type.\n",
                                           offset, type);
                         }
@@ -589,12 +589,12 @@ public:
                         frame_.next();
                         uintptr_t value = frame_.loadRegValue(reg);
                         if (vmReg::getType(reg) >= vmRegType::r64) {
-                            console.trace("%08X:  load [reg] - (%u, %u), value = 0x%016X",
+                            Console::trace("%08X:  load [reg] - (%u, %u), value = 0x%016X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint64_t)value);
                         }
                         else {
-                            console.trace("%08X:  load [reg] - (%u, %u), value = 0x%08X",
+                            Console::trace("%08X:  load [reg] - (%u, %u), value = 0x%08X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint32_t)(value & 0xFFFFFFFFUL));
                         }
@@ -610,12 +610,12 @@ public:
                         frame_.next();
                         uintptr_t value = frame_.moveRegValue(reg1, reg2);
                         if (vmReg::getType(reg1) >= vmRegType::r64) {
-                            console.trace("%08X:  move [reg] - (%u, %u), value = 0x%016X",
+                            Console::trace("%08X:  move [reg] - (%u, %u), value = 0x%016X",
                                           offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                           (uint64_t)value);
                         }
                         else {
-                            console.trace("%08X:  move [reg] - (%u, %u), value = 0x%08X",
+                            Console::trace("%08X:  move [reg] - (%u, %u), value = 0x%08X",
                                           offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                           (uint32_t)(value & 0xFFFFFFFFUL));
                         }
@@ -625,7 +625,7 @@ public:
                 case OpCode::store:
                     {
                         frame_.next();
-                        console.trace("%08X:  store\n", offset);
+                        Console::trace("%08X:  store\n", offset);
                         break;
                     }
 
@@ -646,7 +646,7 @@ public:
                             assert(verifyRegById(reg1, dataType));
                             frame_.next();
 
-                            console.trace("%08X:  cmp  [reg], [reg] (%u - %u)",
+                            Console::trace("%08X:  cmp  [reg], [reg] (%u - %u)",
                                           offset, reg1, reg2);
 
                             // Condition jump code: jz, jnz, je, jne, jg, jge, jl, jle.
@@ -656,7 +656,7 @@ public:
 
                             bool condition = frame_.condCmp_rr(reg1, reg2, dataType, condJmp);
                             if (!condition) {
-                                console.trace("%08X:  jmp  condition [false, opcode = %u]",
+                                Console::trace("%08X:  jmp  condition [false, opcode = %u]",
                                               frame_.getFPOffset(), (uint32_t)condJmp);
                                 frame_.next();
                                 unsigned char jumpType = frame_.get();
@@ -665,7 +665,7 @@ public:
                                 SKIP_JMP_TYPE(offset, frame_, jumpType);
                             }
                             else {
-                                console.trace("%08X:  jmp  condition [true, opcode = %u]",
+                                Console::trace("%08X:  jmp  condition [true, opcode = %u]",
                                               frame_.getFPOffset(), (uint32_t)condJmp);
                                 opcode = condJmp;
                                 offset = frame_.getFPOffset();
@@ -687,15 +687,15 @@ public:
 #if defined(WIN64) || defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) \
  || defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__)
                             if (dataType == vmDataType::Int64 || dataType == vmDataType::UInt64) {
-                                console.trace("%08X:  cmp  [reg], [imm] (%u - 0x%016X)",
+                                Console::trace("%08X:  cmp  [reg], [imm] (%u - 0x%016X)",
                                               offset, reg, value.uval);
                             }
                             else {
-                                console.trace("%08X:  cmp  [reg], [imm] (%u - 0x%08X)",
+                                Console::trace("%08X:  cmp  [reg], [imm] (%u - 0x%08X)",
                                               offset, reg, value.u32.low);
                             }
 #else
-                            console.trace("%08X:  cmp  [reg], [imm] (%u - 0x%08X)",
+                            Console::trace("%08X:  cmp  [reg], [imm] (%u - 0x%08X)",
                                           offset, reg, value.uval);
 #endif
                             // Condition jump code: jz, jnz, je, jne, jg, jge, jl, jle.
@@ -705,7 +705,7 @@ public:
 
                             bool condition = frame_.condCmp_ri(reg, value.uval, dataType, condJmp);
                             if (!condition) {
-                                console.trace("%08X:  jmp  condition [false, opcode = %u]",
+                                Console::trace("%08X:  jmp  condition [false, opcode = %u]",
                                               frame_.getFPOffset(), (uint32_t)condJmp);
                                 frame_.next();
                                 unsigned char jumpType = frame_.get();
@@ -714,7 +714,7 @@ public:
                                 SKIP_JMP_TYPE(offset, frame_, jumpType);
                             }
                             else {
-                                console.trace("%08X:  jmp  condition [true, opcode = %u]",
+                                Console::trace("%08X:  jmp  condition [true, opcode = %u]",
                                               frame_.getFPOffset(), (uint32_t)condJmp);
                                 opcode = condJmp;
                                 offset = frame_.getFPOffset();
@@ -740,7 +740,7 @@ JMP_START:
                                 // Get 16 byte (-32768 -- 32767) address offset.
                                 int8_t offset = frame_.getInt8();
                                 frame_.jumpNear(jmp_fp, offset);
-                                console.trace("%08X:  jmp  0x%08X (near)",
+                                Console::trace("%08X:  jmp  0x%08X (near)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -749,7 +749,7 @@ JMP_START:
                                 // Get 16 byte (-32768 -- 32767) address offset.
                                 int16_t offset = frame_.getInt16();
                                 frame_.jumpShort(jmp_fp, offset);
-                                console.trace("%08X:  jmp  0x%08X (short)",
+                                Console::trace("%08X:  jmp  0x%08X (short)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -758,7 +758,7 @@ JMP_START:
                                 // Get 32 byte (-2147483648 -- 2147483647) address offset.
                                 int32_t offset = frame_.getInt32();
                                 frame_.jumpLong(jmp_fp, offset);
-                                console.trace("%08X:  jmp  0x%08X (long)",
+                                Console::trace("%08X:  jmp  0x%08X (long)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -767,7 +767,7 @@ JMP_START:
                                 // Get 32 byte absolute address.
                                 uint32_t jumpAddr = frame_.getUInt32();
                                 frame_.jumpPtr32(jmp_fp, jumpAddr);
-                                console.trace("%08X:  jmp  0x%08X (Ptr32)",
+                                Console::trace("%08X:  jmp  0x%08X (Ptr32)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -778,7 +778,7 @@ JMP_START:
                                 // Get 64 byte absolute address.
                                 uint64_t jumpAddr = frame_.getUInt64();
                                 frame_.jumpPtr64(jmp_fp, jumpAddr);
-                                console.trace("%08X:  jmp  0x%08X (Ptr64)",
+                                Console::trace("%08X:  jmp  0x%08X (Ptr64)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -786,13 +786,13 @@ JMP_START:
                         default:
                             {
                                 // Unknown jump type
-                                console.trace("%08X:  jmp\t"
+                                Console::trace("%08X:  jmp\t"
                                               "Error: Unknown jump type. jumpType = %u",
                                               offset, (uint32_t)jumpType);
                                 break;
                             }
                         }
-                        console.trace("\n");
+                        Console::trace("\n");
                         break;
                     }
 
@@ -808,7 +808,7 @@ JMP_START:
                                 // Get 16 byte (-32768 -- 32767) address offset.
                                 int16_t callOffset = frame_.getInt16();
                                 frame_.callShort(call_fp, 2 + sizeof(int16_t), callOffset);
-                                console.trace("%08X:  call 0x%08X (short)",
+                                Console::trace("%08X:  call 0x%08X (short)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -817,7 +817,7 @@ JMP_START:
                                 // Get 32 byte (-2147483648 -- 2147483647) address offset.
                                 int32_t callOffset = frame_.getInt32();
                                 frame_.callLong(call_fp, 2 + sizeof(int32_t), callOffset);
-                                console.trace("%08X:  call 0x%08X (long)",
+                                Console::trace("%08X:  call 0x%08X (long)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -826,7 +826,7 @@ JMP_START:
                                 // Get 32 byte absolute address.
                                 uint32_t callEntry = frame_.getUInt32();
                                 frame_.callPtr32(call_fp, 2 + sizeof(uint32_t), callEntry);
-                                console.trace("%08X:  call 0x%08X (Ptr32)",
+                                Console::trace("%08X:  call 0x%08X (Ptr32)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -837,7 +837,7 @@ JMP_START:
                                 // Get 64 byte absolute address.
                                 uint64_t callEntry = frame_.getUInt64();
                                 frame_.callPtr64(call_fp, 2 + sizeof(uint64_t), callEntry);
-                                console.trace("%08X:  call 0x%08X (Ptr64)",
+                                Console::trace("%08X:  call 0x%08X (Ptr64)",
                                               offset, frame_.getFPOffset());
                                 break;
                             }
@@ -845,13 +845,13 @@ JMP_START:
                         default:
                             {
                                 // Unknown call type
-                                console.trace("%08X:  call\t"
+                                Console::trace("%08X:  call\t"
                                               "Error: Unknown call type. callType = %u",
                                               offset, (uint32_t)callType);
                                 break;
                             }
                         }
-                        console.trace("\n");
+                        Console::trace("\n");
                         break;
                     }
 
@@ -860,10 +860,10 @@ JMP_START:
                         frame_.next();
                         unsigned char * returnFP = frame_.callReturn();
                         if (returnFP != nullptr) {
-                            console.trace("%08X:  ret  0x%08X\n", offset, frame_.getFPOffset());
+                            Console::trace("%08X:  ret  0x%08X\n", offset, frame_.getFPOffset());
                         }
                         else {
-                            console.trace("%08X:  ret  (done)\n", offset);
+                            Console::trace("%08X:  ret  (done)\n", offset);
                             retValue.setDataType(return_type::Basic);
                             retValue.setValue(frame_.getRegValue32(vmRegId::eax));
                             goto Execute_Finished;
@@ -878,12 +878,12 @@ JMP_START:
                         frame_.next();
                         uintptr_t value = frame_.incRegValue(reg);
                         if (vmReg::getType(reg) >= vmRegType::r64) {
-                            console.trace("%08X:  inc  [reg] - (%u, %u), value = 0x%016X",
+                            Console::trace("%08X:  inc  [reg] - (%u, %u), value = 0x%016X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint64_t)value);
                         }
                         else {
-                            console.trace("%08X:  inc  [reg] - (%u, %u), value = 0x%08X",
+                            Console::trace("%08X:  inc  [reg] - (%u, %u), value = 0x%08X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint32_t)(value & 0xFFFFFFFFUL));
                         }
@@ -897,12 +897,12 @@ JMP_START:
                         frame_.next();
                         uintptr_t value = frame_.decRegValue(reg);
                         if (vmReg::getType(reg) >= vmRegType::r64) {
-                            console.trace("%08X:  dec  [reg] - (%u, %u), value = 0x%016X",
+                            Console::trace("%08X:  dec  [reg] - (%u, %u), value = 0x%016X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint64_t)value);
                         }
                         else {
-                            console.trace("%08X:  dec  [reg] - (%u, %u), value = 0x%08X",
+                            Console::trace("%08X:  dec  [reg] - (%u, %u), value = 0x%08X",
                                           offset, vmReg::getType(reg), vmReg::getIndex(reg),
                                           (uint32_t)(value & 0xFFFFFFFFUL));
                         }
@@ -921,12 +921,12 @@ JMP_START:
                             frame_.next();
                             uintptr_t value = frame_.addRegValue(reg1, reg2);
                             if (vmReg::getType(reg1) >= vmRegType::r64) {
-                                console.trace("%08X:  add  [reg, reg] - (%u, %u), value = 0x%016X",
+                                Console::trace("%08X:  add  [reg, reg] - (%u, %u), value = 0x%016X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint64_t)value);
                             }
                             else {
-                                console.trace("%08X:  add  [reg, reg] - (%u, %u), value = 0x%08X",
+                                Console::trace("%08X:  add  [reg, reg] - (%u, %u), value = 0x%08X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint32_t)(value & 0xFFFFFFFFUL));
                             }
@@ -942,12 +942,12 @@ JMP_START:
 
                             uintptr_t newValue = frame_.addRegValue_ri(reg, value.uval);
                             if (vmReg::getType(reg) >= vmRegType::r64) {
-                                console.trace("%08X:  add  [reg, imm] - (%u), value = 0x%016X",
+                                Console::trace("%08X:  add  [reg, imm] - (%u), value = 0x%016X",
                                               offset, vmReg::getIndex(reg),
                                               newValue);
                             }
                             else {
-                                console.trace("%08X:  add  [reg, imm] - (%u), value = 0x%08X",
+                                Console::trace("%08X:  add  [reg, imm] - (%u), value = 0x%08X",
                                               offset, vmReg::getIndex(reg),
                                               (uint32_t)(newValue & 0xFFFFFFFFUL));
                             }
@@ -970,12 +970,12 @@ JMP_START:
                             frame_.next();
                             uintptr_t value = frame_.subRegValue(reg1, reg2);
                             if (vmReg::getType(reg1) >= vmRegType::r64) {
-                                console.trace("%08X:  sub  [reg, reg] - (%u, %u), value = 0x%016X",
+                                Console::trace("%08X:  sub  [reg, reg] - (%u, %u), value = 0x%016X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint64_t)value);
                             }
                             else {
-                                console.trace("%08X:  sub  [reg, reg] - (%u, %u), value = 0x%08X",
+                                Console::trace("%08X:  sub  [reg, reg] - (%u, %u), value = 0x%08X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint32_t)(value & 0xFFFFFFFFUL));
                             }
@@ -991,12 +991,12 @@ JMP_START:
 
                             uintptr_t newValue = frame_.subRegValue_ri(reg, value.uval);
                             if (vmReg::getType(reg) >= vmRegType::r64) {
-                                console.trace("%08X:  sub  [reg, imm] - (%u), value = 0x%016X",
+                                Console::trace("%08X:  sub  [reg, imm] - (%u), value = 0x%016X",
                                               offset, vmReg::getIndex(reg),
                                               newValue);
                             }
                             else {
-                                console.trace("%08X:  sub  [reg, imm] - (%u), value = 0x%08X",
+                                Console::trace("%08X:  sub  [reg, imm] - (%u), value = 0x%08X",
                                               offset, vmReg::getIndex(reg),
                                               (uint32_t)(newValue & 0xFFFFFFFFUL));
                             }
@@ -1019,12 +1019,12 @@ JMP_START:
                             frame_.next();
                             uintptr_t value = frame_.mulRegValue(reg1, reg2);
                             if (vmReg::getType(reg1) >= vmRegType::r64) {
-                                console.trace("%08X:  mul  [reg, reg] - (%u, %u), value = 0x%016X",
+                                Console::trace("%08X:  mul  [reg, reg] - (%u, %u), value = 0x%016X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint64_t)value);
                             }
                             else {
-                                console.trace("%08X:  mul  [reg, reg] - (%u, %u), value = 0x%08X",
+                                Console::trace("%08X:  mul  [reg, reg] - (%u, %u), value = 0x%08X",
                                               offset, vmReg::getIndex(reg1), vmReg::getIndex(reg2),
                                               (uint32_t)(value & 0xFFFFFFFFUL));
                             }
@@ -1040,12 +1040,12 @@ JMP_START:
 
                 case OpCode::nop:
                     frame_.next();
-                    console.trace("%08X:  nop\n", offset);
+                    Console::trace("%08X:  nop\n", offset);
                     break;
 
                 case OpCode::exit:
                     frame_.next();
-                    console.trace("%08X:  end\n\n", offset);
+                    Console::trace("%08X:  end\n\n", offset);
                     retValue.setDataType(return_type::Basic);
                     retValue.setValue(frame_.getRegValue32(vmRegId::eax));
                     goto Execute_Finished;

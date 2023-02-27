@@ -9,7 +9,6 @@
 #include "jlang/basic/stddef.h"
 #include "jlang/lang/Char.h"
 #include "jlang/stream/StringStream.h"
-#include "jlang/support/Console.h"
 
 #include <stddef.h>
 #include <stdint.h>

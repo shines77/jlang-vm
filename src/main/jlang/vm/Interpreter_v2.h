@@ -25,7 +25,7 @@
 #include "jlang/vm/Interpreter.h"
 #include "jlang/vm/Interpreter_v3.h"
 #include "jlang/lang/Error.h"
-#include "jlang/support/Console.h"
+#include "jlang/system/Console.h"
 
 #include <stdint.h>
 #include <stddef.h>

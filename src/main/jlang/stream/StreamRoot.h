@@ -345,15 +345,15 @@ public:
         }
     }
 
-    int next_line(char * buf, size_t size) const {
-        int line_size = StringUtils::next_line(buf, size, this->current_, this->remain());
+    size_t read_line(char * buf, size_t size) const {
+        size_t line_size = StringUtils::read_a_line(buf, size, this->current_, this->remain());
         return line_size;
     }
 
-    std::string next_line() const {
+    std::string read_line() const {
         std::string line;
         line.reserve(this->remain() + 1);
-        int line_size = this->next_line((char *)line.c_str(), line.size());
+        size_t line_size = StringUtils::read_a_line(line, this->current_, this->remain());
         return line;
     }
 };
