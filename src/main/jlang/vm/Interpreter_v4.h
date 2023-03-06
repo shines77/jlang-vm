@@ -943,7 +943,7 @@ public:
         ip.set(returnIP);
 
         if (returnIP == nullptr) {
-            Console::trace("%08X:  ret_n_sm [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n_sm [%u] (done)", offset, (uint32_t)localSize);
         }
         else {
             Console::trace("%08X:  ret_n_sm [%u] 0x%08X",
@@ -963,7 +963,7 @@ public:
         ip.set(returnIP);
 
         if (returnIP == nullptr) {
-            Console::trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n [%u] (done)", offset, (uint32_t)localSize);
         }
         else {
             Console::trace("%08X:  ret_n [%u] 0x%08X",
@@ -1140,7 +1140,7 @@ public:
             done = false;
         }
         else {
-            Console::trace("%08X:  ret_n [%u] (done)\n", offset, (uint32_t)localSize);
+            Console::trace("%08X:  ret_n [%u] (done)", offset, (uint32_t)localSize);
             done = true;
         }
 

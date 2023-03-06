@@ -461,7 +461,7 @@ public:
                             }
                             else {
                                 Console::trace("%08X:  push [reg]  - regType: %u, regIndex: %u.\n"
-                                              "Error: Unknown push register.\n",
+                                              "Error: Unknown push register.",
                                               offset, regType, regIndex);
                                 frame_.next();
                             }
@@ -553,8 +553,8 @@ public:
                                 frame_.next();
                             }
                             else {
-                                Console::trace("%08X:  pop  [reg] - regType: %u, regIndex: %u"
-                                              "Error: Unknown pop register.\n\n",
+                                Console::trace("%08X:  pop  [reg] - regType: %u, regIndex: %u\n"
+                                              "Error: Unknown pop register.",
                                               offset, vmReg::getType(reg), vmReg::getIndex(reg));
                                 frame_.next();
                             }
@@ -576,7 +576,7 @@ public:
                         else {
                             // Error
                             Console::trace("%08X:  pop  - type: %u\n"
-                                          "Error: Unknown pop type.\n",
+                                          "Error: Unknown pop type.",
                                           offset, type);
                         }
                         break;
@@ -625,7 +625,7 @@ public:
                 case OpCode::store:
                     {
                         frame_.next();
-                        Console::trace("%08X:  store\n", offset);
+                        Console::trace("%08X:  store", offset);
                         break;
                     }
 
@@ -860,10 +860,10 @@ JMP_START:
                         frame_.next();
                         unsigned char * returnFP = frame_.callReturn();
                         if (returnFP != nullptr) {
-                            Console::trace("%08X:  ret  0x%08X\n", offset, frame_.getFPOffset());
+                            Console::trace("%08X:  ret  0x%08X", offset, frame_.getFPOffset());
                         }
                         else {
-                            Console::trace("%08X:  ret  (done)\n", offset);
+                            Console::trace("%08X:  ret  (done)", offset);
                             retValue.setDataType(return_type::Basic);
                             retValue.setValue(frame_.getRegValue32(vmRegId::eax));
                             goto Execute_Finished;
@@ -1040,12 +1040,12 @@ JMP_START:
 
                 case OpCode::nop:
                     frame_.next();
-                    Console::trace("%08X:  nop\n", offset);
+                    Console::trace("%08X:  nop", offset);
                     break;
 
                 case OpCode::exit:
                     frame_.next();
-                    Console::trace("%08X:  end\n\n", offset);
+                    Console::trace("%08X:  end", offset);
                     retValue.setDataType(return_type::Basic);
                     retValue.setValue(frame_.getRegValue32(vmRegId::eax));
                     goto Execute_Finished;
