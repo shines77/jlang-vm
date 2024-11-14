@@ -727,7 +727,7 @@ public:
     int64_t  readInt64()   { int64_t  value = getInt64();   nextInt64();   return value; }
     uint64_t readUInt64()  { uint64_t value = getUInt64();  nextUInt64();  return value; }
     void *   readPointer() { void *   value = getPointer(); nextPointer(); return value; }
-                                   
+
     template <typename U = void *>
     U readPointer() {
         U value = getPointer<U>();
@@ -2480,27 +2480,27 @@ public:
 
 #ifndef JLANG_VM_ARGS_DEFINE_H
 
-#undef __arg0 
-#undef __arg1 
-#undef __arg2 
-#undef __arg3 
-#undef __arg4 
-#undef __arg5 
-#undef __arg6 
-#undef __arg7 
-#undef __arg8 
-#undef __arg9 
+#undef __arg0
+#undef __arg1
+#undef __arg2
+#undef __arg3
+#undef __arg4
+#undef __arg5
+#undef __arg6
+#undef __arg7
+#undef __arg8
+#undef __arg9
 
-#undef __var0 
-#undef __var1 
-#undef __var2 
-#undef __var3 
-#undef __var4 
-#undef __var5 
-#undef __var6 
-#undef __var7 
-#undef __var8 
-#undef __var9 
+#undef __var0
+#undef __var1
+#undef __var2
+#undef __var3
+#undef __var4
+#undef __var5
+#undef __var6
+#undef __var7
+#undef __var8
+#undef __var9
 #undef __var10
 #undef __var11
 #undef __var12
