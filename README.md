@@ -2,11 +2,11 @@
 
 ## Introduction [English]
 
-A fast virtual machine written by C++.
+A virtual machine (virtual CPU) that is still under research and is faster than Java and C# virtual machines.
 
 ## 简介 [Chinese]
 
-这是一个仍处于研究中的 `C++` 编写的虚拟机 (虚拟 `CPU`)。
+这是一个仍处于研究中的比 Java、C# 虚拟机更快的虚拟机 (虚拟 `CPU`)。
 
 `Windows` 下的工程默认支持 `VS 2015` 及更高版本，如需创建比 `VS 2015` 更旧版本的 `Visual Studio` 工程，请自行使用 `CMake` 创建。代码已在 `Linux` 的 `GCC 4.8.4` 和 `GCC 6.4.0` 下测试并编译通过（2018年12月25日 更新）。
 
