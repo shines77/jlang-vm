@@ -20,12 +20,12 @@ A fast virtual machine written by C++.
 
 ## 优化思路 / Optimization approach
 
-上面的文章中有一个回答者 [方泽图](https://www.zhihu.com/people/fang-ze-tu) 的回答中提到 “`pipeline stall`” (流水线停滞) 的问题，启发了我。几乎所有的 `解释器` (interpreter) 都会使用 switch 语句来做 `指令` (op_code) 的分发 (dispatch)，这就会涉及 `间接跳转` (indirect branch)，就会造成分支难以预测 (branch prediction)，预测失败后会造成 `pipeline stall` (流水线停滞)，会清掉预测，重新解码，例如：分支预测惩罚是 13 个指令周期 (每个 CPU 不一样)。
+上面的帖子中有一个回答者 [方泽图](https://www.zhihu.com/people/fang-ze-tu) 的回答中提到 “`pipeline stall`” (流水线停滞) 的问题，启发了我。几乎所有的 `解释器` (interpreter) 都会使用 switch 语句来做 `指令` (op_code) 的分发 (dispatch)，这就会涉及 `间接跳转` (indirect branch)，会造成分支难以预测 (branch prediction)，预测失败后会造成 `pipeline stall` (流水线停滞)，会清掉预测，重新解码，例如：分支预测惩罚是 13 个指令周期 (每个 CPU 不一样)。
 
 优化的思路是：
 
 - 使用 register 关键字暗示编译器，尽量让 VM 虚拟机的寄存器内存隐射到物理 CPU 的寄存器上，32 位下的寄存器较少，64 位下的寄存器多一些，这个隐射不能保证 100% 成功，编译器会根据实际情况决定；
-- 尽量合并 `op_code` 的功能，变成 `宏指令`，减少跳转的次数。尽量让一个 `op_code` 执行更多的功能，比如以下指令：cmp eax, 0x04; jne xxxx; 可以合并为：cmp_jne eax, 0x04, xxxx ；（由于是实验性的，这个设想只实现了一部分，例如：ret_eax, 0x01; 给 eax 复制并返回；ret_n 0x08; 返回并退栈 8 个字节。）
+- 尽量合并 `op_code` 的功能，变成 `宏指令`，减少跳转的次数。尽量让一个 `op_code` 执行更多的功能，比如以下指令：cmp eax, 0x04; jne xxxx; 可以合并为：cmp_jne eax, 0x04, xxxx ；（由于是实验性的，这个设想只实现了一部分，例如：ret_eax, 0x01; 给 eax 赋值为1，并返回；ret_n 0x08; 返回并退栈 8 个字节。）
 - 对于较为常用的寄存器，不需要像硬件指令那样，在指令中的 bit 位中解析出是 eax 或 ebx，直接使用：move_to_eax, r0 或 move_to_eax, 0x05 这样的指令；
 - 所有 op_code_xxxx() 函数声明为 force_inline，减少不必要的跳转，但缺点是 switch 循环的代码会变大；
 
